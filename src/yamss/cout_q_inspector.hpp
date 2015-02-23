@@ -18,8 +18,8 @@ public:
   typedef structure<T> structure_type;
 
   cout_q_inspector()
-    : m_columns(1)
-    , m_line_end("\n")
+    : m_last(0)
+    , m_more()
   {
     // empty
   }
@@ -34,28 +34,17 @@ public:
   void
   initialize(const eom_type& a_eom, const structure_type& a_structure)
   {
-    size_type pos;
     size_type size = a_eom.get_size();
-    m_columns = 1 + std::min(size_type(5), size);
-    if (size >= m_columns)
+    if (size > 4)
     {
-      m_line_end = " ...\n";
+      m_last = 4;
+      m_more = ", ...";
     }
     else
     {
-      m_line_end = "\n";
+      m_last = size;
+      m_more = "";
     }
-    std::cout << "Time        ";
-    for (pos = 1; pos < m_columns; ++pos)
-    {
-      std::cout << boost::format("Mode %1%      ") % pos;
-    }
-    std::cout << m_line_end;
-    for (pos = 0; pos < m_columns; ++pos)
-    {
-      std::cout << "----------  ";
-    }
-    std::cout << m_line_end;
   }
 
   virtual
@@ -66,12 +55,16 @@ public:
     const value_type t = a_eom.get_time(0);
     const vector_type& q = a_eom.get_displacement(0);
 
-    std::cout << boost::format("%1$10.4E") % t;
-    for (pos = 0; pos < m_columns - 1; ++pos)
+    std::cout << boost::format("T = %1$10.4E   Q = { ") % t;
+    if (m_last > 0)
     {
-      std::cout << boost::format("  %1$+10.3E") % q(pos);
+      std::cout << boost::format("%1$+10.3E") % q(0);
     }
-    std::cout << m_line_end;
+    for (pos = 1; pos < m_last; ++pos)
+    {
+      std::cout << boost::format(", %1$+10.3E") % q(pos);
+    }
+    std::cout << m_more << " }" << std::endl;
   }
 
   virtual
@@ -84,8 +77,8 @@ private:
   typedef size_t size_type;
   typedef Eigen::Matrix<T, Eigen::Dynamic, 1> vector_type;
 
-  size_type m_columns;
-  std::string m_line_end;
+  size_type m_last;
+  std::string m_more;
 }; // cout_q_inspector<T> class
 
 } // yamss namespace
