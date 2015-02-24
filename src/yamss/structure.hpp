@@ -19,13 +19,13 @@ public:
   typedef const T& const_reference;
   typedef node<T> node_type;
   typedef load<T> load_type;
-  typedef Eigen::Matrix<T, Eigen::Dynamic, 1> vector_type;
+  typedef arma::Col<T> vector_type;
 
   structure(size_type a_number_of_modes)
     : m_number_of_modes(a_number_of_modes)
-    , m_active_dofs(dof_vector_type::Ones())
+    , m_active_dofs(6)
   {
-    // empty
+    m_active_dofs.ones();
   }
 
   void
@@ -192,7 +192,8 @@ public:
   {
     typedef typename nodes_type::const_iterator const_iterator;
 
-    vector_type f = vector_type::Zero(m_number_of_modes);
+    vector_type f(m_number_of_modes);
+    f.zeros();
     const_iterator node_iterator = m_nodes.begin();
     while (node_iterator != m_nodes.end())
     {
@@ -202,7 +203,6 @@ public:
     return f;
   }
 private:
-  typedef Eigen::Matrix<value_type, 6, 1> dof_vector_type;
   typedef boost::unordered_map<key_type, node_type> nodes_type;
   typedef boost::unordered_map<key_type, load_type> loads_type;
 
@@ -212,7 +212,7 @@ private:
   }
 
   size_type m_number_of_modes;
-  dof_vector_type m_active_dofs;
+  vector_type m_active_dofs;
   nodes_type m_nodes;
   loads_type m_loads;
 }; // structure<T> class

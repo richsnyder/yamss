@@ -1,7 +1,7 @@
 #ifndef YAMSS_ITERATE_HPP
 #define YAMSS_ITERATE_HPP
 
-#include <eigen3/Eigen/Dense>
+#include <armadillo>
 
 namespace yamss {
 
@@ -12,8 +12,8 @@ public:
   typedef T value_type;
   typedef size_t size_type;
   typedef const T& const_reference;
-  typedef Eigen::Matrix<T, Eigen::Dynamic, 1> vector_type;
-  typedef Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> matrix_type;
+  typedef arma::Col<T> vector_type;
+  typedef arma::Mat<T> matrix_type;
 
   iterate()
     : m_time(0)
@@ -29,12 +29,15 @@ public:
   iterate(size_type a_size)
     : m_time(0)
     , m_time_step(0)
-    , m_displacement(vector_type::Zero(a_size))
-    , m_velocity(vector_type::Zero(a_size))
-    , m_acceleration(vector_type::Zero(a_size))
-    , m_force(vector_type::Zero(a_size))
+    , m_displacement(a_size)
+    , m_velocity(a_size)
+    , m_acceleration(a_size)
+    , m_force(a_size)
   {
-    // empty
+    m_displacement.zeros();
+    m_velocity.zeros();
+    m_acceleration.zeros();
+    m_force.zeros();
   }
 
   iterate(const iterate& a_other)
@@ -137,9 +140,8 @@ public:
     m_time_step = a_time_step;
   }
 
-  template <typename Derived>
   void
-  set_displacement(const Eigen::MatrixBase<Derived>& a_displacement)
+  set_displacement(const vector_type& a_displacement)
   {
     m_displacement = a_displacement;
   }
@@ -150,9 +152,8 @@ public:
     m_displacement(a_pos) = a_value;
   }
 
-  template <typename Derived>
   void
-  set_velocity(const Eigen::MatrixBase<Derived>& a_velocity)
+  set_velocity(const vector_type& a_velocity)
   {
     m_velocity = a_velocity;
   }
@@ -163,9 +164,8 @@ public:
     m_velocity(a_pos) = a_value;
   }
 
-  template <typename Derived>
   void
-  set_acceleration(const Eigen::MatrixBase<Derived>& a_acceleration)
+  set_acceleration(const vector_type& a_acceleration)
   {
     m_acceleration = a_acceleration;
   }
@@ -176,9 +176,8 @@ public:
     m_acceleration(a_pos) = a_value;
   }
 
-  template <typename Derived>
   void
-  set_force(const Eigen::MatrixBase<Derived>& a_force)
+  set_force(const vector_type& a_force)
   {
     m_force = a_force;
   }

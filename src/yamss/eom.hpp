@@ -1,8 +1,8 @@
 #ifndef YAMSS_EOM_HPP
 #define YAMSS_EOM_HPP
 
-#include <eigen3/Eigen/Dense>
-#include <eigen3/Eigen/LU>
+#include <vector>
+#include <armadillo>
 #include "yamss/iterate.hpp"
 
 namespace yamss {
@@ -14,16 +14,18 @@ public:
   typedef T value_type;
   typedef size_t size_type;
   typedef const T& const_reference;
-  typedef Eigen::Matrix<T, Eigen::Dynamic, 1> vector_type;
-  typedef Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> matrix_type;
+  typedef arma::Col<T> vector_type;
+  typedef arma::Mat<T> matrix_type;
 
   eom(size_type a_dofs, size_type a_steps)
-    : m_mass(matrix_type::Identity(a_dofs, a_dofs))
-    , m_damping(matrix_type::Zero(a_dofs, a_dofs))
-    , m_stiffness(matrix_type::Identity(a_dofs, a_dofs))
-    , m_iterates(iterates_type::Constant(a_steps, iterate_type(a_dofs)))
+    : m_mass(a_dofs, a_dofs)
+    , m_damping(a_dofs, a_dofs)
+    , m_stiffness(a_dofs, a_dofs)
+    , m_iterates(a_steps, iterate_type(a_dofs))
   {
-    // empty
+    m_mass.eye();
+    m_damping.eye();
+    m_stiffness.eye();
   }
 
   eom(const eom& a_other)
@@ -53,7 +55,7 @@ public:
   size_type
   get_size() const
   {
-    return m_mass.rows();
+    return m_mass.n_rows;
   }
 
   const matrix_type&
@@ -77,42 +79,41 @@ public:
   const_reference
   get_time(size_type a_step) const
   {
-    return m_iterates(a_step).get_time();
+    return m_iterates[a_step].get_time();
   }
 
   const_reference
   get_time_step(size_type a_step) const
   {
-    return m_iterates(a_step).get_time_step();
+    return m_iterates[a_step].get_time_step();
   }
 
   const vector_type&
   get_displacement(size_type a_step) const
   {
-    return m_iterates(a_step).get_displacement();
+    return m_iterates[a_step].get_displacement();
   }
 
   const vector_type&
   get_velocity(size_type a_step) const
   {
-    return m_iterates(a_step).get_velocity();
+    return m_iterates[a_step].get_velocity();
   }
 
   const vector_type&
   get_acceleration(size_type a_step) const
   {
-    return m_iterates(a_step).get_acceleration();
+    return m_iterates[a_step].get_acceleration();
   }
 
   const vector_type&
   get_force(size_type a_step) const
   {
-    return m_iterates(a_step).get_force();
+    return m_iterates[a_step].get_force();
   }
 
-  template <typename Derived>
   void
-  set_mass(const Eigen::MatrixBase<Derived>& a_mass)
+  set_mass(const matrix_type& a_mass)
   {
     m_mass = a_mass;
   }
@@ -123,9 +124,8 @@ public:
     m_mass(a_row, a_col) = a_value;
   }
 
-  template <typename Derived>
   void
-  set_damping(const Eigen::MatrixBase<Derived>& a_damping)
+  set_damping(const matrix_type& a_damping)
   {
     m_damping = a_damping;
   }
@@ -136,9 +136,8 @@ public:
     m_damping(a_row, a_col) = a_value;
   }
 
-  template <typename Derived>
   void
-  set_stiffness(const Eigen::MatrixBase<Derived>& a_stiffness)
+  set_stiffness(const matrix_type& a_stiffness)
   {
     m_stiffness = a_stiffness;
   }
@@ -149,67 +148,64 @@ public:
     m_stiffness(a_row, a_col) = a_value;
   }
 
-  template <typename Derived>
   void
-  set_displacement(const Eigen::MatrixBase<Derived>& a_displacement)
+  set_displacement(const vector_type& a_displacement)
   {
-    m_iterates(0).set_displacement(a_displacement);
+    m_iterates[0].set_displacement(a_displacement);
   }
 
   void
   set_displacement(size_type a_dof, const_reference a_value)
   {
-    m_iterates(0).set_displacement(a_dof, a_value);
+    m_iterates[0].set_displacement(a_dof, a_value);
   }
 
-  template <typename Derived>
   void
-  set_velocity(const Eigen::MatrixBase<Derived>& a_velocity)
+  set_velocity(const vector_type& a_velocity)
   {
-    m_iterates(0).set_velocity(a_velocity);
+    m_iterates[0].set_velocity(a_velocity);
   }
 
   void
   set_velocity(size_type a_dof, const_reference a_value)
   {
-    m_iterates(0).set_velocity(a_dof, a_value);
+    m_iterates[0].set_velocity(a_dof, a_value);
   }
 
-  template <typename Derived>
   void
-  set_acceleration(const Eigen::MatrixBase<Derived>& a_acceleration)
+  set_acceleration(const vector_type& a_acceleration)
   {
-    m_iterates(0).set_acceleration(a_acceleration);
+    m_iterates[0].set_acceleration(a_acceleration);
   }
 
   void
   set_acceleration(size_type a_dof, const_reference a_value)
   {
-    m_iterates(0).set_acceleration(a_dof, a_value);
+    m_iterates[0].set_acceleration(a_dof, a_value);
   }
 
-  template <typename Derived>
   void
-  set_force(const Eigen::MatrixBase<Derived>& a_force)
+  set_force(const vector_type& a_force)
   {
-    m_iterates(0).set_force(a_force);
+    m_iterates[0].set_force(a_force);
   }
 
   void
   set_force(size_type a_dof, const_reference a_value)
   {
-    m_iterates(0).set_force(a_dof, a_value);
+    m_iterates[0].set_force(a_dof, a_value);
   }
 
   void
   compute_acceleration()
   {
-    typedef Eigen::PartialPivLU<matrix_type> solver_type;
-    vector_type rhs = m_iterates(0).get_force()
-        - m_damping * m_iterates(0).get_velocity()
-        - m_stiffness * m_iterates(0).get_displacement();
-    vector_type acceleration = solver_type(m_mass).solve(rhs);
-    m_iterates(0).set_acceleration(acceleration);
+    const iterate_type& iterate = m_iterates[0];
+    vector_type lhs;
+    vector_type rhs = iterate.get_force()
+        - m_damping * iterate.get_velocity()
+        - m_stiffness * iterate.get_displacement();
+    arma::solve(lhs, m_mass, rhs);
+    m_iterates[0].set_acceleration(lhs);
   }
 
   void
@@ -219,21 +215,21 @@ public:
     {
       for (size_type n = m_iterates.size() - 1; n > 0; --n)
       {
-        m_iterates(n) = m_iterates(n - 1);
+        m_iterates[n] = m_iterates[n - 1];
       }
     }
     if (m_iterates.size() > 0)
     {
-      m_iterates(0).set_time_step(a_time_step);
+      m_iterates[0].set_time_step(a_time_step);
     }
     if (m_iterates.size() > 1)
     {
-      m_iterates(0).set_time(m_iterates(1).get_time() + a_time_step);
+      m_iterates[0].set_time(m_iterates[1].get_time() + a_time_step);
     }
   }
 private:
   typedef iterate<T> iterate_type;
-  typedef Eigen::Matrix<iterate_type, Eigen::Dynamic, 1> iterates_type;
+  typedef std::vector<iterate_type> iterates_type;
 
   eom()
   {

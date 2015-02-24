@@ -1,7 +1,7 @@
 #ifndef YAMSS_EVALUATOR_HPP
 #define YAMSS_EVALUATOR_HPP
 
-#include <eigen3/Eigen/Dense>
+#include <armadillo>
 #include "yamss/node.hpp"
 
 namespace yamss {
@@ -12,7 +12,7 @@ class evaluator
 public:
   typedef T value_type;
   typedef node<T> node_type;
-  typedef Eigen::Matrix<T, Eigen::Dynamic, 1> vector_type;
+  typedef arma::Col<T> vector_type;
 
   virtual
   vector_type

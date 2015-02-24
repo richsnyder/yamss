@@ -3,19 +3,19 @@
 
 #include <iostream>
 #include <string>
+#include <armadillo>
 #include <boost/lexical_cast.hpp>
 #include <boost/tokenizer.hpp>
-#include <eigen3/Eigen/Dense>
 
 namespace yamss {
 
 template <typename T>
-Eigen::Matrix<T, Eigen::Dynamic, 1>
+arma::Col<T>
 vector_cast(const std::string& a_string)
 {
   typedef T value_type;
   typedef size_t size_type;
-  typedef Eigen::Matrix<T, Eigen::Dynamic, 1> vector_type;
+  typedef arma::Col<T> vector_type;
   typedef boost::char_separator<char> separator_type;
   typedef boost::tokenizer<separator_type> tokenizer_type;
 
@@ -29,24 +29,26 @@ vector_cast(const std::string& a_string)
     ++num_rows;
   }
 
+  vector_type vec(num_rows);
+  vec.zeros();
+
   size_type row = 0;
-  vector_type vector = vector_type::Zero(num_rows);
   for (it = tokens.begin(); it != tokens.end(); ++it)
   {
-    vector(row) = boost::lexical_cast<value_type>(*it);
+    vec(row) = boost::lexical_cast<value_type>(*it);
     ++row;
   }
 
-  return vector;
+  return vec;
 }
 
 template <typename T>
-Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>
+arma::Mat<T>
 matrix_cast(const std::string& a_string)
 {
   typedef T value_type;
   typedef size_t size_type;
-  typedef Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> matrix_type;
+  typedef arma::Mat<T> matrix_type;
   typedef boost::char_separator<char> separator_type;
   typedef boost::tokenizer<separator_type> tokenizer_type;
 
@@ -72,9 +74,11 @@ matrix_cast(const std::string& a_string)
   }
   num_cols = std::max(num_cols, cells_in_row);
 
+  matrix_type mat(num_rows, num_cols);
+  mat.zeros();
+
   size_type row = 0;
   size_type col = 0;
-  matrix_type matrix = matrix_type::Zero(num_rows, num_cols);
   for (it = tokens.begin(); it != tokens.end(); ++it)
   {
     if (*it == ";")
@@ -84,12 +88,12 @@ matrix_cast(const std::string& a_string)
     }
     else
     {
-      matrix(row, col) = boost::lexical_cast<value_type>(*it);
+      mat(row, col) = boost::lexical_cast<value_type>(*it);
       ++col;
     }
   }
 
-  return matrix;
+  return mat;
 }
 
 } // yamss namespace

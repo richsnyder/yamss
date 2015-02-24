@@ -1,7 +1,7 @@
 #ifndef YAMSS_NODE_HPP
 #define YAMSS_NODE_HPP
 
-#include <eigen3/Eigen/Dense>
+#include <armadillo>
 
 namespace yamss {
 
@@ -13,18 +13,18 @@ public:
   typedef size_t key_type;
   typedef size_t size_type;
   typedef const T& const_reference;
-  typedef Eigen::Matrix<T, Eigen::Dynamic, 1> vector_type;
-  typedef Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> matrix_type;
-  typedef Eigen::Matrix<T, 6, 1> dof_vector_type;
-  typedef Eigen::Matrix<T, Eigen::Dynamic, 6> dof_matrix_type;
+  typedef arma::Col<T> vector_type;
+  typedef arma::Mat<T> matrix_type;
 
   node(key_type a_key, size_type a_number_of_modes)
     : m_key(a_key)
-    , m_position(dof_vector_type::Zero())
-    , m_force(dof_vector_type::Zero())
-    , m_modes(dof_matrix_type::Zero(a_number_of_modes, 6))
+    , m_position(6)
+    , m_force(6)
+    , m_modes(a_number_of_modes, 6)
   {
-    // empty
+    m_position.zeros();
+    m_force.zeros();
+    m_modes.zeros();
   }
 
   node(const node& a_other)
@@ -57,7 +57,7 @@ public:
     return m_key;
   }
 
-  const dof_vector_type&
+  const vector_type&
   get_position() const
   {
     return m_position;
@@ -69,7 +69,7 @@ public:
     return m_position(a_dof);
   }
 
-  const dof_vector_type&
+  const vector_type&
   get_force() const
   {
     return m_force;
@@ -87,15 +87,14 @@ public:
     return m_modes(a_mode, a_dof);
   }
 
-  const dof_matrix_type&
+  const matrix_type&
   get_modes() const
   {
     return m_modes;
   }
 
-  template <typename Derived>
   void
-  set_position(const Eigen::MatrixBase<Derived>& a_position)
+  set_position(const vector_type& a_position)
   {
     m_position = a_position;
   }
@@ -106,9 +105,8 @@ public:
     m_position(a_dof) = a_value;
   }
 
-  template <typename Derived>
   void
-  set_force(const Eigen::MatrixBase<Derived>& a_force)
+  set_force(const vector_type& a_force)
   {
     m_force = a_force;
   }
@@ -119,9 +117,8 @@ public:
     m_force(a_dof) = a_value;
   }
 
-  template <typename Derived>
   void
-  set_mode(size_type a_mode, const Eigen::MatrixBase<Derived>& a_shape)
+  set_mode(size_type a_mode, const vector_type& a_shape)
   {
     m_modes.row(a_mode) = a_shape;
   }
@@ -135,12 +132,11 @@ public:
   void
   clear_force()
   {
-    m_force = dof_vector_type::Zero();
+    m_force.zeros();
   }
 
-  template <typename Derived>
   void
-  add_force(const Eigen::MatrixBase<Derived>& a_force)
+  add_force(const vector_type& a_force)
   {
     m_force += a_force;
   }
@@ -151,11 +147,10 @@ public:
     m_force(a_dof) += a_value;
   }
 
-  template <typename Derived>
   vector_type
-  get_generalized_force(const Eigen::MatrixBase<Derived>& a_active) const
+  get_generalized_force(const vector_type& a_active) const
   {
-    return m_modes * a_active.asDiagonal() * m_force;
+    return m_modes * arma::diagmat(a_active) * m_force;
   }
 private:
   node()
@@ -164,9 +159,9 @@ private:
   }
 
   key_type m_key;
-  dof_vector_type m_position;
-  dof_vector_type m_force;
-  dof_matrix_type m_modes;
+  vector_type m_position;
+  vector_type m_force;
+  matrix_type m_modes;
 }; // node<T> class
 
 } // yamss namespace

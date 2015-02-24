@@ -3,8 +3,9 @@
 
 #include <stdexcept>
 #include <string>
+#include <vector>
+#include <armadillo>
 #include <boost/format.hpp>
-#include <eigen3/Eigen/Dense>
 #include "yamss/evaluator.hpp"
 
 extern "C" {
@@ -21,11 +22,11 @@ class lua_evaluator : public evaluator<T>
 public:
   typedef T value_type;
   typedef node<T> node_type;
-  typedef Eigen::Matrix<T, Eigen::Dynamic, 1> vector_type;
+  typedef arma::Col<T> vector_type;
 
   lua_evaluator()
     : m_state(0)
-    , m_references(references_type::Constant(LUA_NOREF))
+    , m_references(6, LUA_NOREF)
     , m_expression_formatter("return %1%")
   {
     // empty
@@ -40,8 +41,8 @@ public:
   void
   clear_expression(int a_dof)
   {
-    luaL_unref(m_state, LUA_REGISTRYINDEX, m_references(a_dof));
-    m_references(a_dof) = LUA_NOREF;
+    luaL_unref(m_state, LUA_REGISTRYINDEX, m_references[a_dof]);
+    m_references[a_dof] = LUA_NOREF;
   }
 
   void
@@ -57,7 +58,7 @@ public:
       boost::format fmt("Could not save the expression [%1%]");
       throw std::runtime_error(boost::str(fmt % a_expression));
     }
-    m_references(a_dof) = luaL_ref(m_state, LUA_REGISTRYINDEX);
+    m_references[a_dof] = luaL_ref(m_state, LUA_REGISTRYINDEX);
   }
 
   virtual
@@ -66,12 +67,13 @@ public:
   {
     bootstrap();
     set_globals(a_time, a_node);
-    vector_type vec = vector_type::Zero(6);
+    vector_type vec(6);
+    vec.zeros();
     for (size_t n = 0; n < m_references.size(); ++n)
     {
-      if (m_references(n) != LUA_NOREF)
+      if (m_references[n] != LUA_NOREF)
       {
-        lua_rawgeti(m_state, LUA_REGISTRYINDEX, m_references(n));
+        lua_rawgeti(m_state, LUA_REGISTRYINDEX, m_references[n]);
         int code = lua_pcall(m_state, 0, 1, 0);
         if (code != LUA_OK)
         {
@@ -134,7 +136,7 @@ protected:
     lua_setglobal(m_state, "r");
   }
 private:
-  typedef Eigen::Matrix<int, 6, 1> references_type;
+  typedef std::vector<int> references_type;
 
   lua_State* m_state;
   references_type m_references;

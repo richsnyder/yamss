@@ -80,7 +80,7 @@ public:
   }
 protected:
   typedef size_t size_type;
-  typedef Eigen::Matrix<T, Eigen::Dynamic, 1> vector_type;
+  typedef arma::Col<T> vector_type;
 
   std::string
   as_string(const value_type& a_value)

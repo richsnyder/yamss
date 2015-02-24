@@ -2,8 +2,8 @@
 #define YAMSS_TECPLOT_MODES_INSPECTOR_HPP
 
 #include <fstream>
+#include <armadillo>
 #include <boost/format.hpp>
-#include <eigen3/Eigen/Dense>
 #include "yamss/inspector.hpp"
 
 namespace yamss {
@@ -106,7 +106,7 @@ public:
   }
 private:
   typedef size_t size_type;
-  typedef Eigen::Matrix<T, Eigen::Dynamic, 1> vector_type;
+  typedef arma::Col<T> vector_type;
 
   std::ofstream m_out;
   std::string m_filename;

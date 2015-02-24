@@ -1,7 +1,7 @@
 #ifndef YAMSS_NEWMARK_BETA_HPP
 #define YAMSS_NEWMARK_BETA_HPP
 
-#include <eigen3/Eigen/Dense>
+#include <armadillo>
 #include "yamss/integrator.hpp"
 
 namespace yamss {
@@ -38,8 +38,6 @@ public:
   void
   operator()(eom_type& a_eom)
   {
-    typedef Eigen::PartialPivLU<matrix_type> solver_type;
-
     const matrix_type& m = a_eom.get_mass();
     const matrix_type& c = a_eom.get_damping();
     const matrix_type& k = a_eom.get_stiffness();
@@ -65,7 +63,8 @@ public:
     matrix_type k_eff = k + a0 * m + a1 * c;
     vector_type f_eff = f + m * v + c * w;
 
-    vector_type u_new = solver_type(k_eff).solve(f_eff);
+    vector_type u_new;
+    arma::solve(u_new, k_eff, f_eff);
     vector_type ddu_new = a0 * (u_new - u) - a2 * du - a3 * ddu;
     vector_type du_new = du + a6 * ddu + a7 * ddu_new;
 
@@ -81,8 +80,8 @@ public:
     return 2;
   }
 private:
-  typedef Eigen::Matrix<T, Eigen::Dynamic, 1> vector_type;
-  typedef Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic> matrix_type;
+  typedef arma::Col<T> vector_type;
+  typedef arma::Mat<T> matrix_type;
 
   newmark_beta(const newmark_beta& a_other)
     : m_beta(a_other.m_beta)
