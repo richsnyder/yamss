@@ -1,21 +1,23 @@
+#include "yamss/clp.hpp"
 #include "yamss/xml_reader.hpp"
 
 int
 main(int argc, char* argv[])
 {
-  if (argc != 2)
-  {
-    std::cerr << "ERROR: One argument is required" << std::endl;
-    return 0;
-  }
-
   try
   {
     typedef double value_type;
+    typedef yamss::clp parser_type;
     typedef yamss::runner<value_type> runner_type;
     typedef boost::shared_ptr<runner_type> runner_pointer;
 
-    runner_pointer runner = yamss::read_xml<value_type>(argv[1]);
+    parser_type parser(argc, argv);
+    if (!parser.good())
+    {
+      return 0;
+    }
+
+    runner_pointer runner = yamss::read_xml<value_type>(parser.input());
     runner->initialize();
     runner->run();
     runner->finalize();
