@@ -120,19 +120,19 @@ protected:
   void
   set_globals(const value_type& a_time, const node_type& a_node)
   {
-    lua_pushnumber(m_state, a_time);
+    lua_pushnumber(m_state, std::real(a_time));
     lua_setglobal(m_state, "t");
-    lua_pushnumber(m_state, a_node.get_position(0));
+    lua_pushnumber(m_state, std::real(a_node.get_position(0)));
     lua_setglobal(m_state, "x");
-    lua_pushnumber(m_state, a_node.get_position(1));
+    lua_pushnumber(m_state, std::real(a_node.get_position(1)));
     lua_setglobal(m_state, "y");
-    lua_pushnumber(m_state, a_node.get_position(2));
+    lua_pushnumber(m_state, std::real(a_node.get_position(2)));
     lua_setglobal(m_state, "z");
-    lua_pushnumber(m_state, a_node.get_position(3));
+    lua_pushnumber(m_state, std::real(a_node.get_position(3)));
     lua_setglobal(m_state, "p");
-    lua_pushnumber(m_state, a_node.get_position(4));
+    lua_pushnumber(m_state, std::real(a_node.get_position(4)));
     lua_setglobal(m_state, "q");
-    lua_pushnumber(m_state, a_node.get_position(5));
+    lua_pushnumber(m_state, std::real(a_node.get_position(5)));
     lua_setglobal(m_state, "r");
   }
 private:

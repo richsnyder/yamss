@@ -36,6 +36,9 @@ clp::initialize()
     );
   m_visible_options.add_options()
     (
+      "complex,c",
+      "enable complex mode"
+    )(
       "help,h",
       "print this help message and exit"
     )(
@@ -46,6 +49,12 @@ clp::initialize()
       "print the version and exit"
     );
   m_positional.add("input", 1);
+}
+
+bool
+clp::complex_mode() const
+{
+  return m_variables_map.count("complex") == 1;
 }
 
 std::string

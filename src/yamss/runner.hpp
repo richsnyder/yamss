@@ -134,7 +134,7 @@ public:
   void
   run()
   {
-    while (m_eom->get_time(0) < m_final_time)
+    while (std::real(m_eom->get_time(0)) < std::real(m_final_time))
     {
       step();
     }

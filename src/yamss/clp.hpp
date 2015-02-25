@@ -16,6 +16,9 @@ public:
   bool
   good() const;
 
+  bool
+  complex_mode() const;
+
   std::string
   input() const;
 
