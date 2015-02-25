@@ -37,7 +37,7 @@ about::email()
 std::string
 about::legal()
 {
-  return description() + "\n" + copyright()
+  return description() + "\n\n" + copyright()
       + "\nUse, modification, and distribution is subject to the BSD License."
       + "\nSee the accompanying file LICENSE.md for the full license."
       + "\nTerms can also be found at http://creativecommons.org/licenses/BSD/.";

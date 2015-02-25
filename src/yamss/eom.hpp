@@ -211,20 +211,18 @@ public:
   void
   advance(const_reference a_time_step)
   {
-    if (m_iterates.size() > 1)
+    size_type steps = m_iterates.size();
+    if (steps > 1)
     {
-      for (size_type n = m_iterates.size() - 1; n > 0; --n)
+      for (size_type n = steps - 1; n > 0; --n)
       {
         m_iterates[n] = m_iterates[n - 1];
       }
     }
-    if (m_iterates.size() > 0)
+    if (steps > 0)
     {
       m_iterates[0].set_time_step(a_time_step);
-    }
-    if (m_iterates.size() > 1)
-    {
-      m_iterates[0].set_time(m_iterates[1].get_time() + a_time_step);
+      m_iterates[0].set_time(m_iterates[0].get_time() + a_time_step);
     }
   }
 private:
