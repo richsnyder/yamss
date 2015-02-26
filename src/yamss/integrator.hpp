@@ -2,6 +2,7 @@
 #define YAMSS_INTEGRATOR_HPP
 
 #include "yamss/eom.hpp"
+#include "yamss/structure.hpp"
 
 namespace yamss {
 
@@ -12,10 +13,11 @@ public:
   typedef T value_type;
   typedef size_t size_type;
   typedef eom<T> eom_type;
+  typedef structure<T> structure_type;
 
   virtual
   void
-  operator()(eom_type& a_eom) = 0;
+  operator()(eom_type& a_eom, structure_type& a_structure) = 0;
 
   virtual
   size_type

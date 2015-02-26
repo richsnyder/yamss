@@ -111,9 +111,7 @@ public:
   step()
   {
     m_eom->advance(m_time_step);
-    m_structure->apply_loads(m_eom->get_time(0));
-    m_eom->set_force(m_structure->get_generalized_force());
-    m_integrator->operator()(*m_eom);
+    m_integrator->operator()(*m_eom, *m_structure);
     std::for_each(
         m_inspectors.begin(),
         m_inspectors.end(),

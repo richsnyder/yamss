@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
+#include "yamss/generalized_alpha.hpp"
 #include "yamss/lua_evaluator.hpp"
 #include "yamss/matrix_cast.hpp"
 #include "yamss/newmark_beta.hpp"
@@ -134,8 +135,14 @@ protected:
     if (name == "newmark_beta")
     {
       m_integrator = boost::shared_ptr<typename runner_type::integrator_type>(
-            new newmark_beta<value_type>()
-          );
+          new newmark_beta<value_type>()
+        );
+    }
+    else if (name == "generalized_alpha")
+    {
+      m_integrator = boost::shared_ptr<typename runner_type::integrator_type>(
+          new generalized_alpha<value_type>()
+        );
     }
     else
     {

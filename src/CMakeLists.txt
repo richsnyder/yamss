@@ -11,6 +11,7 @@ SET(YAMSS_HEADERS
     yamss/cout_q_inspector.hpp
     yamss/eom.hpp
     yamss/evaluator.hpp
+    yamss/generalized_alpha.hpp
     yamss/inspector.hpp
     yamss/integrator.hpp
     yamss/iterate.hpp

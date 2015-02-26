@@ -199,13 +199,21 @@ public:
   void
   compute_acceleration()
   {
-    const iterate_type& iterate = m_iterates[0];
     vector_type lhs;
-    vector_type rhs = iterate.get_force()
-        - m_damping * iterate.get_velocity()
-        - m_stiffness * iterate.get_displacement();
+    vector_type rhs = m_iterates[0].get_force()
+        - m_damping * m_iterates[0].get_velocity()
+        - m_stiffness * m_iterates[0].get_displacement();
     arma::solve(lhs, m_mass, rhs);
     m_iterates[0].set_acceleration(lhs);
+  }
+
+  void
+  compute_force()
+  {
+    vector_type f = m_mass * m_iterates[0].get_acceleration()
+        + m_damping * m_iterates[0].get_velocity()
+        + m_stiffness * m_iterates[0].get_displacement();
+    m_iterates[0].set_force(f);
   }
 
   void
