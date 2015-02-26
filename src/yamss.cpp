@@ -1,6 +1,6 @@
 #include <complex>
 #include "yamss/clp.hpp"
-#include "yamss/xml_reader.hpp"
+#include "yamss/input_reader.hpp"
 
 int
 main(int argc, char* argv[])
@@ -18,7 +18,7 @@ main(int argc, char* argv[])
       typedef std::complex<double> value_type;
       typedef yamss::runner<value_type> runner_type;
       typedef boost::shared_ptr<runner_type> runner_pointer;
-      runner_pointer runner = yamss::read_xml<value_type>(parser.input());
+      runner_pointer runner = yamss::read_input<value_type>(parser.input());
       runner->initialize();
       runner->run();
       runner->finalize();
@@ -28,7 +28,7 @@ main(int argc, char* argv[])
       typedef double value_type;
       typedef yamss::runner<value_type> runner_type;
       typedef boost::shared_ptr<runner_type> runner_pointer;
-      runner_pointer runner = yamss::read_xml<value_type>(parser.input());
+      runner_pointer runner = yamss::read_input<value_type>(parser.input());
       runner->initialize();
       runner->run();
       runner->finalize();

@@ -12,6 +12,7 @@ SET(YAMSS_HEADERS
     yamss/eom.hpp
     yamss/evaluator.hpp
     yamss/generalized_alpha.hpp
+    yamss/input_reader.hpp
     yamss/inspector.hpp
     yamss/integrator.hpp
     yamss/iterate.hpp
@@ -27,7 +28,6 @@ SET(YAMSS_HEADERS
     yamss/tecplot_modes_inspector.hpp
     yamss/tecplot_q_inspector.hpp
     yamss/xml_inspector.hpp
-    yamss/xml_reader.hpp
 )
 SET(YAMSS_CONFIG_HEADERS
     yamss/version.hpp
