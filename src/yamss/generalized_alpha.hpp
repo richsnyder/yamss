@@ -17,24 +17,17 @@ public:
   typedef structure<T> structure_type;
 
   generalized_alpha()
-    : m_alpha_m(2.0 / 7.0)
-    , m_alpha_f(3.0 / 7.0)
-    , m_beta(1.0 / 49.0)
-    , m_gamma(9.0 / 14.0)
+    : m_alpha_m(0.0)
+    , m_alpha_f(0.0)
   {
-    // empty
+    compute_beta_and_gamma();
   }
 
-  generalized_alpha(const_reference a_alpha_m,
-                    const_reference a_alpha_f,
-                    const_reference a_beta,
-                    const_reference a_gamma)
-    : m_alpha_m(a_alpha_m)
-    , m_alpha_f(a_alpha_f)
-    , m_beta(a_beta)
-    , m_gamma(a_gamma)
+  generalized_alpha(const boost::property_tree::ptree& a_tree)
   {
-    // empty
+    m_alpha_m = a_tree.get<value_type>("alpha_m", 0.0);
+    m_alpha_f = a_tree.get<value_type>("alpha_f", 0.0);
+    compute_beta_and_gamma();
   }
 
   ~generalized_alpha()
@@ -99,6 +92,13 @@ public:
   stencil_size() const
   {
     return 2;
+  }
+protected:
+  void
+  compute_beta_and_gamma()
+  {
+    m_gamma = 0.5 - m_alpha_m + m_alpha_f;
+    m_beta = 0.0625 + 0.25 * m_gamma * (1.0 + m_gamma);
   }
 private:
   typedef arma::Col<T> vector_type;

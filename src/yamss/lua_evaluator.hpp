@@ -32,6 +32,38 @@ public:
     // empty
   }
 
+  lua_evaluator(const boost::property_tree::ptree& a_tree)
+    : m_state(0)
+    , m_references(6, LUA_NOREF)
+    , m_expression_formatter("return %1%")
+  {
+    boost::optional<std::string> eq;
+    if ((eq = a_tree.get_optional<std::string>("equations.x")))
+    {
+      set_expression(0, *eq);
+    }
+    if ((eq = a_tree.get_optional<std::string>("equations.y")))
+    {
+      set_expression(1, *eq);
+    }
+    if ((eq = a_tree.get_optional<std::string>("equations.z")))
+    {
+      set_expression(2, *eq);
+    }
+    if ((eq = a_tree.get_optional<std::string>("equations.p")))
+    {
+      set_expression(3, *eq);
+    }
+    if ((eq = a_tree.get_optional<std::string>("equations.q")))
+    {
+      set_expression(4, *eq);
+    }
+    if ((eq = a_tree.get_optional<std::string>("equations.r")))
+    {
+      set_expression(5, *eq);
+    }
+  }
+
   virtual
   ~lua_evaluator()
   {

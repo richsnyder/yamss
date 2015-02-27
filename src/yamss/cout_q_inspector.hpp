@@ -24,6 +24,13 @@ public:
     // empty
   }
 
+  cout_q_inspector(const boost::property_tree::ptree& a_tree)
+    : m_last(0)
+    , m_more()
+  {
+    // empty
+  }
+
   virtual
   ~cout_q_inspector()
   {

@@ -16,11 +16,17 @@ public:
   typedef eom<T> eom_type;
   typedef structure<T> structure_type;
 
-  tecplot_modes_inspector(const std::string& a_filename)
+  tecplot_modes_inspector()
     : m_out()
-    , m_filename(a_filename)
+    , m_filename("yamss.modes.dat")
   {
     // empty
+  }
+
+  tecplot_modes_inspector(const boost::property_tree::ptree& a_tree)
+    : m_out()
+  {
+    m_filename = a_tree.get<std::string>("filename", "yamss.modes.dat");
   }
 
   virtual

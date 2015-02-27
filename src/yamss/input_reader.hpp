@@ -3,7 +3,7 @@
 
 #include <stdexcept>
 #include <boost/format.hpp>
-#include <boost/optional.hpp>
+#include <boost/make_shared.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include "yamss/matrix_cast.hpp"
@@ -59,7 +59,6 @@ protected:
   typedef size_t size_type;
   typedef node<T> node_type;
   typedef load<T> load_type;
-  typedef lua_evaluator<T> evaluator_type;
   typedef typename runner_type::eom_type eom_type;
   typedef typename runner_type::integrator_type integrator_type;
   typedef typename runner_type::structure_type structure_type;
@@ -72,90 +71,110 @@ protected:
     m_document = document.get_child("yamss");
   }
 
+  template <typename Integrator>
+  void
+  assign_integrator(const boost::property_tree::ptree& a_tree)
+  {
+    namespace pt = boost::property_tree;
+
+    try
+    {
+      pt::ptree params = a_tree.get_child("solution.method.parameters");
+      m_integrator = boost::make_shared<Integrator>(params);
+    }
+    catch (pt::ptree_bad_path& e)
+    {
+      m_integrator = boost::make_shared<Integrator>();
+    }
+  }
+
   void
   create_integrator()
   {
-    using namespace boost::property_tree;
-    typedef boost::shared_ptr<integrator_type> integrator_ptr;
+    namespace pt = boost::property_tree;
 
-    std::string dft = "newmark_beta";
-    std::string name = m_document.get<std::string>("solution.method.type", dft);
-    ptree params = m_document.get_child("solution.method.parameters", ptree());
-    if (name == "newmark_beta")
+    std::string type_;
+    type_ = m_document.get<std::string>("solution.method.type", "newmark_beta");
+    if (type_ == "newmark_beta")
     {
-      m_integrator = integrator_ptr(new newmark_beta<value_type>());
+      assign_integrator<newmark_beta<T> >(m_document);
     }
-    else if (name == "generalized_alpha")
+    else if (type_ == "generalized_alpha")
     {
-      m_integrator = integrator_ptr(new generalized_alpha<value_type>());
+      assign_integrator<generalized_alpha<T> >(m_document);
     }
     else
     {
       boost::format fmt("The integration method %1% is not supported");
-      throw std::runtime_error(boost::str(fmt % name));
+      throw std::runtime_error(boost::str(fmt % type_));
     }
   }
 
   void
   create_structure_and_eom()
   {
-    using namespace boost::property_tree;
-    typedef boost::shared_ptr<eom_type> eom_ptr;
-    typedef boost::shared_ptr<structure_type> structure_ptr;
+    namespace pt = boost::property_tree;
 
-    ptree modes = m_document.get_child("modes", ptree());
-    int num_modes = modes.count("mode");
-    m_eom = eom_ptr(new eom_type(num_modes, m_integrator->stencil_size()));
-    m_structure = structure_ptr(new structure_type(num_modes));
+    size_type num_modes = 0;
+    size_type stencil_size = m_integrator->stencil_size();
+    try
+    {
+      num_modes = m_document.get_child("modes").count("mode");
+    }
+    catch (pt::ptree_bad_path& e)
+    {
+      // empty
+    }
+    m_eom = boost::make_shared<eom_type>(num_modes, stencil_size);
+    m_structure = boost::make_shared<structure_type>(num_modes);
   }
 
   void
   create_runner()
   {
-    typedef boost::shared_ptr<runner_type> runner_ptr;
-    m_runner = runner_ptr(new runner_type(m_eom, m_structure, m_integrator));
+    m_runner = boost::make_shared<runner_type>(m_eom, m_structure, m_integrator);
   }
 
   void
   process_structure()
   {
-    using namespace boost::property_tree;
-    typedef ptree::const_assoc_iterator const_iterator;
+    namespace pt = boost::property_tree;
+    typedef pt::ptree::const_assoc_iterator const_iterator;
     typedef std::pair<const_iterator, const_iterator> range_type;
 
+    const_iterator p;
     boost::optional<key_type> id;
     boost::optional<value_type> dof;
-    ptree nodes = m_document.get_child("structure.nodes", ptree());
-    range_type range = nodes.equal_range("node");
-    for (const_iterator p = range.first; p != range.second; ++p)
+    range_type range = m_document.get_child("structure.nodes").equal_range("node");
+    for (p = range.first; p != range.second; ++p)
     {
       id = p->second.get_optional<key_type>("id");
       if (id)
       {
-        node_type& new_node = m_structure->add_node(*id);
+        node_type& node_ = m_structure->add_node(*id);
         if ((dof = p->second.get_optional<value_type>("x")))
         {
-          new_node.set_position(0, *dof);
+          node_.set_position(0, *dof);
         }
         if ((dof = p->second.get_optional<value_type>("y")))
         {
-          new_node.set_position(1, *dof);
+          node_.set_position(1, *dof);
         }
         if ((dof = p->second.get_optional<value_type>("z")))
         {
-          new_node.set_position(2, *dof);
+          node_.set_position(2, *dof);
         }
         if ((dof = p->second.get_optional<value_type>("p")))
         {
-          new_node.set_position(3, *dof);
+          node_.set_position(3, *dof);
         }
         if ((dof = p->second.get_optional<value_type>("q")))
         {
-          new_node.set_position(4, *dof);
+          node_.set_position(4, *dof);
         }
         if ((dof = p->second.get_optional<value_type>("r")))
         {
-          new_node.set_position(5, *dof);
+          node_.set_position(5, *dof);
         }
       }
     }
@@ -164,50 +183,48 @@ protected:
   void
   process_modes()
   {
-    using namespace boost::property_tree;
-    typedef ptree::const_assoc_iterator const_iterator;
+    namespace pt = boost::property_tree;
+    typedef pt::ptree::const_assoc_iterator const_iterator;
     typedef std::pair<const_iterator, const_iterator> range_type;
 
+    const_iterator p;
+    const_iterator q;
     size_type mode = 0;
     boost::optional<key_type> id;
     boost::optional<value_type> dof;
-    ptree modes = m_document.get_child("modes", ptree());
-    ptree nodes;
-    range_type mode_range = modes.equal_range("mode");
-    range_type node_range;
-    for (const_iterator p = mode_range.first; p != mode_range.second; ++p)
+    range_type range = m_document.get_child("modes").equal_range("mode");
+    for (p = range.first; p != range.second; ++p)
     {
-      nodes = p->second.get_child("nodes");
-      node_range = nodes.equal_range("node");
-      for (const_iterator q = node_range.first; q != node_range.second; ++q)
+      range_type nrange = p->second.get_child("nodes").equal_range("node");
+      for (q = nrange.first; q != nrange.second; ++q)
       {
         id = q->second.get_optional<key_type>("id");
         if (id)
         {
-          node_type& old_node = m_structure->get_node(*id);
+          node_type& node_ = m_structure->get_node(*id);
           if ((dof = q->second.get_optional<value_type>("x")))
           {
-            old_node.set_mode(mode, 0, *dof);
+            node_.set_mode(mode, 0, *dof);
           }
           if ((dof = q->second.get_optional<value_type>("y")))
           {
-            old_node.set_mode(mode, 1, *dof);
+            node_.set_mode(mode, 1, *dof);
           }
           if ((dof = q->second.get_optional<value_type>("z")))
           {
-            old_node.set_mode(mode, 2, *dof);
+            node_.set_mode(mode, 2, *dof);
           }
           if ((dof = q->second.get_optional<value_type>("p")))
           {
-            old_node.set_mode(mode, 3, *dof);
+            node_.set_mode(mode, 3, *dof);
           }
           if ((dof = q->second.get_optional<value_type>("q")))
           {
-            old_node.set_mode(mode, 4, *dof);
+            node_.set_mode(mode, 4, *dof);
           }
           if ((dof = q->second.get_optional<value_type>("r")))
           {
-            old_node.set_mode(mode, 5, *dof);
+            node_.set_mode(mode, 5, *dof);
           }
         }
       }
@@ -218,66 +235,72 @@ protected:
   void
   process_eom()
   {
-    using namespace boost::property_tree;
+    std::string m = m_document.get<std::string>("eom.matrices.mass", "");
+    std::string c = m_document.get<std::string>("eom.matrices.damping", "");
+    std::string k = m_document.get<std::string>("eom.matrices.stiffness", "");
+    std::string u = m_document.get<std::string>("eom.initial_conditions.displacement", "");
+    std::string v = m_document.get<std::string>("eom.initial_conditions.velocity", "");
+    m_eom->set_mass(matrix_cast<value_type>(m));
+    m_eom->set_damping(matrix_cast<value_type>(c));
+    m_eom->set_stiffness(matrix_cast<value_type>(k));
+    m_eom->set_displacement(vector_cast<value_type>(u));
+    m_eom->set_velocity(vector_cast<value_type>(v));
+  }
 
-    ptree matrices = m_document.get_child("eom.matrices", ptree());
-    ptree initial = m_document.get_child("eom.initial_conditions", ptree());
-    m_eom->set_mass(matrix_cast<T>(matrices.get<std::string>("mass", "")));
-    m_eom->set_damping(matrix_cast<T>(matrices.get<std::string>("damping", "")));
-    m_eom->set_stiffness(matrix_cast<T>(matrices.get<std::string>("stiffness", "")));
-    m_eom->set_displacement(vector_cast<T>(initial.get<std::string>("displacement", "")));
-    m_eom->set_velocity(vector_cast<T>(initial.get<std::string>("velocity", "")));
+  template <typename Evaluator>
+  void
+  add_load(key_type& a_id, const boost::property_tree::ptree& a_tree)
+  {
+    namespace pt = boost::property_tree;
+    typedef pt::ptree::const_assoc_iterator const_iterator;
+    typedef std::pair<const_iterator, const_iterator> range_type;
+
+    const_iterator p;
+    boost::shared_ptr<evaluator<value_type> > ptr;
+    try
+    {
+      pt::ptree params = a_tree.get_child("parameters");
+      ptr = boost::make_shared<Evaluator>(params);
+    }
+    catch (pt::ptree_bad_path& e)
+    {
+      ptr = boost::make_shared<Evaluator>();
+    }
+    load_type& load_ = m_structure->add_load(a_id, ptr);
+    range_type range = a_tree.get_child("nodes").equal_range("id");
+    for (p = range.first; p != range.second; ++p)
+    {
+      load_.add_node(p->second.get_value<key_type>());
+    }
   }
 
   void
   process_loads()
   {
-    using namespace boost::property_tree;
-    typedef ptree::const_assoc_iterator const_iterator;
+    namespace pt = boost::property_tree;
+    typedef pt::ptree::const_assoc_iterator const_iterator;
     typedef std::pair<const_iterator, const_iterator> range_type;
 
+    const_iterator p;
+    const_iterator q;
     boost::optional<key_type> id;
-    boost::optional<std::string> dof;
-    ptree loads = m_document.get_child("loads", ptree());
-    ptree nodes;
-    range_type load_range = loads.equal_range("load");
-    range_type node_range;
-    for (const_iterator p = load_range.first; p != load_range.second; ++p)
+    boost::optional<std::string> type_;
+    boost::shared_ptr<evaluator<T> > evaluator_;
+    range_type range = m_document.get_child("loads").equal_range("load");
+    for (p = range.first; p != range.second; ++p)
     {
       id = p->second.get_optional<key_type>("id");
+      type_ = p->second.get<std::string>("type", "lua");
       if (id)
       {
-        boost::shared_ptr<evaluator_type> new_evaluator(new lua_evaluator<T>());
-        if ((dof = p->second.get_optional<std::string>("equations.x")))
+        if (*type_ == "lua")
         {
-          new_evaluator->set_expression(0, *dof);
+          add_load<lua_evaluator<T> >(*id, p->second);
         }
-        if ((dof = p->second.get_optional<std::string>("equations.y")))
+        else
         {
-          new_evaluator->set_expression(1, *dof);
-        }
-        if ((dof = p->second.get_optional<std::string>("equations.z")))
-        {
-          new_evaluator->set_expression(2, *dof);
-        }
-        if ((dof = p->second.get_optional<std::string>("equations.p")))
-        {
-          new_evaluator->set_expression(3, *dof);
-        }
-        if ((dof = p->second.get_optional<std::string>("equations.q")))
-        {
-          new_evaluator->set_expression(4, *dof);
-        }
-        if ((dof = p->second.get_optional<std::string>("equations.r")))
-        {
-          new_evaluator->set_expression(5, *dof);
-        }
-        load_type& new_load = m_structure->add_load(*id, new_evaluator);
-        nodes = p->second.get_child("nodes", ptree());
-        node_range = nodes.equal_range("id");
-        for (const_iterator q = node_range.first; q != node_range.second; ++q)
-        {
-          new_load.add_node(q->second.get_value<key_type>());
+          boost::format fmt("The load evaluator method %1% is not supported");
+          throw std::runtime_error(boost::str(fmt % *type_));
         }
       }
     }
@@ -286,63 +309,66 @@ protected:
   void
   process_solution()
   {
-    m_runner->set_time_step(m_document.get<value_type>("solution.time.step", 0.01));
-    m_runner->set_final_time(m_document.get<value_type>("solution.time.span", 1.0));
+    value_type t = m_document.get<value_type>("solution.time.span", 1.0);
+    value_type dt = m_document.get<value_type>("solution.time.step", 0.01);
+    m_runner->set_time_step(dt);
+    m_runner->set_final_time(t);
+  }
+
+  template <typename Output>
+  void
+  add_inspector(const boost::property_tree::ptree& a_tree)
+  {
+    namespace pt = boost::property_tree;
+
+    boost::shared_ptr<inspector<value_type> > ptr;
+    try
+    {
+      pt::ptree params = a_tree.get_child("parameters");
+      ptr = boost::make_shared<Output>(params);
+    }
+    catch (pt::ptree_bad_path& e)
+    {
+      ptr = boost::make_shared<Output>();
+    }
+    m_runner->add_inspector(ptr);
   }
 
   void
   process_output()
   {
-    using namespace boost::property_tree;
-    typedef ptree::const_assoc_iterator const_iterator;
+    namespace pt = boost::property_tree;
+    typedef inspector<value_type> inspector_type;
+    typedef pt::ptree::const_assoc_iterator const_iterator;
     typedef std::pair<const_iterator, const_iterator> range_type;
 
+    const_iterator p;
     std::string type_;
-    ptree outputs = m_document.get_child("outputs", ptree());
-    range_type range = outputs.equal_range("output");
-    for (const_iterator p = range.first; p != range.second; ++p)
+    boost::shared_ptr<inspector_type> ptr;
+    range_type range = m_document.get_child("outputs").equal_range("output");
+    for (p = range.first; p != range.second; ++p)
     {
-      type_ = p->second.get<std::string>("type", "-");
+      type_ = p->second.get<std::string>("type");
       if (type_ == "default")
       {
-        m_runner->add_inspector(
-            boost::shared_ptr<cout_q_inspector<T> >(
-                new cout_q_inspector<T>()
-              )
-          );
+        add_inspector<cout_q_inspector<T> >(p->second);
       }
       else if (type_ == "tecplot_modes")
       {
-        std::string filename = p->second.get<std::string>("parameters.filename");
-        m_runner->add_inspector(
-            boost::shared_ptr<tecplot_modes_inspector<T> >(
-                new tecplot_modes_inspector<T>(
-                    filename
-                  )
-              )
-          );
+        add_inspector<tecplot_modes_inspector<T> >(p->second);
       }
       else if (type_ == "tecplot_q")
       {
-        std::string filename = p->second.get<std::string>("parameters.filename");
-        m_runner->add_inspector(
-            boost::shared_ptr<tecplot_q_inspector<T> >(
-                new tecplot_q_inspector<T>(
-                    filename
-                  )
-              )
-          );
+        add_inspector<tecplot_q_inspector<T> >(p->second);
       }
       else if (type_ == "xml")
       {
-        std::string filename = p->second.get<std::string>("parameters.filename");
-        m_runner->add_inspector(
-            boost::shared_ptr<xml_inspector<T> >(
-                new xml_inspector<T>(
-                    filename
-                  )
-              )
-          );
+        add_inspector<xml_inspector<T> >(p->second);
+      }
+      else
+      {
+        boost::format fmt("The output method %1% is not supported");
+        throw std::runtime_error(boost::str(fmt % type_));
       }
     }
   }

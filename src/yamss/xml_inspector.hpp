@@ -18,13 +18,21 @@ public:
   typedef eom<T> eom_type;
   typedef structure<T> structure_type;
 
-  xml_inspector(const std::string& a_filename)
-    : m_filename(a_filename)
+  xml_inspector()
+    : m_filename("yamss.xml")
     , m_document()
     , m_root()
     , m_timesteps()
   {
     // empty
+  }
+
+  xml_inspector(const boost::property_tree::ptree& a_tree)
+    : m_document()
+    , m_root()
+    , m_timesteps()
+  {
+    m_filename = a_tree.get<std::string>("filename", "yamss.xml");
   }
 
   virtual

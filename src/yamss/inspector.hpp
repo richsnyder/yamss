@@ -1,6 +1,7 @@
 #ifndef YAMSS_INSPECTOR_HPP
 #define YAMSS_INSPECTOR_HPP
 
+#include <boost/property_tree/ptree.hpp>
 #include "yamss/eom.hpp"
 #include "yamss/structure.hpp"
 

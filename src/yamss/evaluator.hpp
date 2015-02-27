@@ -2,6 +2,7 @@
 #define YAMSS_EVALUATOR_HPP
 
 #include <armadillo>
+#include <boost/property_tree/ptree.hpp>
 #include "yamss/node.hpp"
 
 namespace yamss {

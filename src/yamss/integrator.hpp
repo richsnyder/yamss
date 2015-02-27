@@ -1,6 +1,7 @@
 #ifndef YAMSS_INTEGRATOR_HPP
 #define YAMSS_INTEGRATOR_HPP
 
+#include <boost/property_tree/ptree.hpp>
 #include "yamss/eom.hpp"
 #include "yamss/structure.hpp"
 

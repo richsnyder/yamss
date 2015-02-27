@@ -23,11 +23,10 @@ public:
     // empty
   }
 
-  newmark_beta(const_reference a_beta, const_reference a_gamma)
-    : m_beta(a_beta)
-    , m_gamma(a_gamma)
+  newmark_beta(const boost::property_tree::ptree& a_tree)
   {
-    // empty
+    m_beta = a_tree.get<value_type>("beta", 0.25);
+    m_gamma = a_tree.get<value_type>("gamma", 0.5);
   }
 
   ~newmark_beta()
