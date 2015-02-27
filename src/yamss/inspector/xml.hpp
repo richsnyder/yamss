@@ -57,6 +57,7 @@ public:
   {
     using namespace rapidxml;
 
+    size_type n = a_eom.get_step(0);
     const value_type& t = a_eom.get_time(0);
     const vector_type& q = a_eom.get_displacement(0);
     const vector_type& dq = a_eom.get_velocity(0);
@@ -64,6 +65,7 @@ public:
     const vector_type& f = a_eom.get_force(0);
 
     xml_node<>* xml_timestep = append_node(m_timesteps, "timestep");
+    append_attribute(xml_timestep, "iteration", as_string(n));
     append_attribute(xml_timestep, "time", as_string(t));
     xml_node<>* xml_modes = append_node(xml_timestep, "modes");
     xml_node<>* xml_q = append_node(xml_modes, "displacement");
@@ -90,6 +92,12 @@ public:
 protected:
   typedef size_t size_type;
   typedef arma::Col<T> vector_type;
+
+  std::string
+  as_string(size_type a_value)
+  {
+    return boost::str(boost::format("%1$10d") % a_value);
+  }
 
   std::string
   as_string(const value_type& a_value)

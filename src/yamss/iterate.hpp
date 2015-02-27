@@ -16,7 +16,8 @@ public:
   typedef arma::Mat<T> matrix_type;
 
   iterate()
-    : m_time(0)
+    : m_step(0)
+    , m_time(0)
     , m_time_step(0)
     , m_displacement()
     , m_velocity()
@@ -27,7 +28,8 @@ public:
   }
 
   iterate(size_type a_size)
-    : m_time(0)
+    : m_step(0)
+    , m_time(0)
     , m_time_step(0)
     , m_displacement(a_size)
     , m_velocity(a_size)
@@ -41,7 +43,8 @@ public:
   }
 
   iterate(const iterate& a_other)
-    : m_time(a_other.m_time)
+    : m_step(a_other.m_step)
+    , m_time(a_other.m_time)
     , m_time_step(a_other.m_time_step)
     , m_displacement(a_other.m_displacement)
     , m_velocity(a_other.m_velocity)
@@ -59,6 +62,7 @@ public:
   iterate&
   operator=(const iterate& a_other)
   {
+    m_step = a_other.m_step;
     m_time = a_other.m_time;
     m_time_step = a_other.m_time_step;
     m_displacement = a_other.m_displacement;
@@ -66,6 +70,12 @@ public:
     m_acceleration = a_other.m_acceleration;
     m_force = a_other.m_force;
     return *this;
+  }
+
+  size_type
+  get_step() const
+  {
+    return m_step;
   }
 
   const_reference
@@ -129,6 +139,18 @@ public:
   }
 
   void
+  increment_step()
+  {
+    m_step++;
+  }
+
+  void
+  set_step(size_type a_step)
+  {
+    m_step = a_step;
+  }
+
+  void
   set_time(const_reference a_time)
   {
     m_time = a_time;
@@ -188,6 +210,7 @@ public:
     m_force(a_pos) = a_value;
   }
 private:
+  size_type m_step;
   value_type m_time;
   value_type m_time_step;
   vector_type m_displacement;

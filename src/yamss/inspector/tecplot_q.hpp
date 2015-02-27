@@ -48,7 +48,7 @@ public:
       m_out.open(m_filename.c_str());
     }
     m_out << "TITLE = \"Modal Coordinates\"" << std::endl;
-    m_out << "VARIABLES = \"Time\"";
+    m_out << "VARIABLES = \"Iteration\", \"Time\"";
     for (size_type n = 0; n < a_eom.get_size(); ++n)
     {
       m_out << boost::format(" \"Mode %1%\"") % (n + 1);
@@ -60,11 +60,12 @@ public:
   void
   update(const eom_type& a_eom, const structure_type& a_structure)
   {
+    size_type n = a_eom.get_step(0);
     const value_type t = a_eom.get_time(0);
     const vector_type& q = a_eom.get_displacement(0);
 
-    m_out << boost::format("%1$16.9e") % t;
-    for (size_type n = 0; n < q.size(); ++n)
+    m_out << boost::format("%1$10d  %2$16.9e") % n % t;
+    for (n = 0; n < q.size(); ++n)
     {
       m_out << boost::format("  %1$16.9e") % q(n);
     }

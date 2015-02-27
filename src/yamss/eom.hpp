@@ -76,6 +76,12 @@ public:
     return m_stiffness;
   }
 
+  size_type
+  get_step(size_type a_step) const
+  {
+    return m_iterates[a_step].get_step();
+  }
+
   const_reference
   get_time(size_type a_step) const
   {
@@ -229,6 +235,7 @@ public:
     }
     if (steps > 0)
     {
+      m_iterates[0].increment_step();
       m_iterates[0].set_time_step(a_time_step);
       m_iterates[0].set_time(m_iterates[0].get_time() + a_time_step);
     }

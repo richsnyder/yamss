@@ -43,9 +43,9 @@ public:
   initialize(const eom_type& a_eom, const structure_type& a_structure)
   {
     size_type size = a_eom.get_size();
-    if (size > 4)
+    if (size > 3)
     {
-      m_last = 4;
+      m_last = 3;
       m_more = ", ...";
     }
     else
@@ -59,18 +59,18 @@ public:
   void
   update(const eom_type& a_eom, const structure_type& a_structure)
   {
-    size_type pos;
+    size_type n = a_eom.get_step(0);
     const value_type t = a_eom.get_time(0);
     const vector_type& q = a_eom.get_displacement(0);
 
-    std::cout << boost::format("T = %1$10.4E   Q = { ") % t;
+    std::cout << boost::format("N = %1$6d   T = %2$10.4E   Q = { ") % n % t;
     if (m_last > 0)
     {
       std::cout << boost::format("%1$+10.3E") % q(0);
     }
-    for (pos = 1; pos < m_last; ++pos)
+    for (n = 1; n < m_last; ++n)
     {
-      std::cout << boost::format(", %1$+10.3E") % q(pos);
+      std::cout << boost::format(", %1$+10.3E") % q(n);
     }
     std::cout << m_more << " }" << std::endl;
   }

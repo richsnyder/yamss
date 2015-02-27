@@ -48,7 +48,7 @@ public:
       m_out.open(m_filename.c_str());
     }
     m_out << "TITLE = \"Mode History\"" << std::endl;
-    m_out << "VARIABLES = \"Time\"";
+    m_out << "VARIABLES = \"Iteration\", \"Time\"";
     size_type n;
     size_type size = a_eom.get_size();
     for (n = 1; n <= size; ++n)
@@ -74,14 +74,14 @@ public:
   void
   update(const eom_type& a_eom, const structure_type& a_structure)
   {
+    size_type n = a_eom.get_step(0);
     const value_type t = a_eom.get_time(0);
     const vector_type& q = a_eom.get_displacement(0);
     const vector_type& dq = a_eom.get_velocity(0);
     const vector_type& ddq = a_eom.get_acceleration(0);
     const vector_type& f = a_eom.get_force(0);
 
-    m_out << boost::format("%1$16.9e") % t;
-    size_type n;
+    m_out << boost::format("%1$10d  %2$16.9e") % n % t;
     size_type size = a_eom.get_size();
     for (n = 0; n < size; ++n)
     {
