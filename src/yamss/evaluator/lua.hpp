@@ -39,27 +39,27 @@ public:
     , m_expression_formatter("return %1%")
   {
     boost::optional<std::string> eq;
-    if ((eq = a_tree.get_optional<std::string>("equations.x")))
+    if ((eq = a_tree.get_optional<std::string>("expressions.x")))
     {
       set_expression(0, *eq);
     }
-    if ((eq = a_tree.get_optional<std::string>("equations.y")))
+    if ((eq = a_tree.get_optional<std::string>("expressions.y")))
     {
       set_expression(1, *eq);
     }
-    if ((eq = a_tree.get_optional<std::string>("equations.z")))
+    if ((eq = a_tree.get_optional<std::string>("expressions.z")))
     {
       set_expression(2, *eq);
     }
-    if ((eq = a_tree.get_optional<std::string>("equations.p")))
+    if ((eq = a_tree.get_optional<std::string>("expressions.p")))
     {
       set_expression(3, *eq);
     }
-    if ((eq = a_tree.get_optional<std::string>("equations.q")))
+    if ((eq = a_tree.get_optional<std::string>("expressions.q")))
     {
       set_expression(4, *eq);
     }
-    if ((eq = a_tree.get_optional<std::string>("equations.r")))
+    if ((eq = a_tree.get_optional<std::string>("expressions.r")))
     {
       set_expression(5, *eq);
     }

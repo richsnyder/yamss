@@ -21,6 +21,7 @@ public:
   cout_q()
     : m_last(0)
     , m_more()
+    , m_stride(1)
   {
     // empty
   }
@@ -29,7 +30,7 @@ public:
     : m_last(0)
     , m_more()
   {
-    // empty
+    m_stride = a_tree.get<size_type>("stride", 1);
   }
 
   virtual
@@ -59,20 +60,22 @@ public:
   void
   update(const eom_type& a_eom, const structure_type& a_structure)
   {
-    size_type n = a_eom.get_step(0);
-    const value_type t = a_eom.get_time(0);
-    const vector_type& q = a_eom.get_displacement(0);
-
-    std::cout << boost::format("N = %1$6d   T = %2$10.4E   Q = { ") % n % t;
-    if (m_last > 0)
+    const size_type n = a_eom.get_step(0);
+    if (n % m_stride == 0)
     {
-      std::cout << boost::format("%1$+10.3E") % q(0);
+      const value_type t = a_eom.get_time(0);
+      const vector_type& q = a_eom.get_displacement(0);
+      std::cout << boost::format("N = %1$6d   T = %2$10.4E   Q = { ") % n % t;
+      if (m_last > 0)
+      {
+        std::cout << boost::format("%1$+10.3E") % q(0);
+      }
+      for (size_type i = 1; i < m_last; ++i)
+      {
+        std::cout << boost::format(", %1$+10.3E") % q(i);
+      }
+      std::cout << m_more << " }" << std::endl;
     }
-    for (n = 1; n < m_last; ++n)
-    {
-      std::cout << boost::format(", %1$+10.3E") % q(n);
-    }
-    std::cout << m_more << " }" << std::endl;
   }
 
   virtual
@@ -85,6 +88,7 @@ private:
   typedef size_t size_type;
   typedef arma::Col<T> vector_type;
 
+  size_type m_stride;
   size_type m_last;
   std::string m_more;
 }; // cout_q<T> class

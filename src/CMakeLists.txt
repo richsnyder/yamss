@@ -14,17 +14,15 @@ SET(YAMSS_HEADERS
     yamss/load.hpp
     yamss/matrix_cast.hpp
     yamss/node.hpp
-    yamss/rapidxml.hpp
-    yamss/rapidxml_print.hpp
     yamss/runner.hpp
     yamss/structure.hpp
     yamss/evaluator/evaluator.hpp
     yamss/evaluator/lua.hpp
     yamss/inspector/inspector.hpp
     yamss/inspector/cout_q.hpp
+    yamss/inspector/ptree.hpp
     yamss/inspector/tecplot_modes.hpp
     yamss/inspector/tecplot_q.hpp
-    yamss/inspector/xml.hpp
     yamss/integrator/integrator.hpp
     yamss/integrator/generalized_alpha.hpp
     yamss/integrator/newmark_beta.hpp
