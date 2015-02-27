@@ -8,9 +8,9 @@
 #include <boost/format.hpp>
 #include <boost/shared_ptr.hpp>
 #include "yamss/eom.hpp"
-#include "yamss/inspector.hpp"
-#include "yamss/integrator.hpp"
 #include "yamss/structure.hpp"
+#include "yamss/inspector/inspector.hpp"
+#include "yamss/integrator/integrator.hpp"
 
 namespace yamss {
 
@@ -22,8 +22,8 @@ public:
   typedef const T& const_reference;
   typedef eom<T> eom_type;
   typedef structure<T> structure_type;
-  typedef inspector<T> inspector_type;
-  typedef integrator<T> integrator_type;
+  typedef inspector::inspector<T> inspector_type;
+  typedef integrator::integrator<T> integrator_type;
   typedef boost::shared_ptr<eom_type> eom_pointer;
   typedef boost::shared_ptr<structure_type> structure_pointer;
   typedef boost::shared_ptr<inspector_type> inspector_pointer;

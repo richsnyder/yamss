@@ -1,30 +1,31 @@
-#ifndef YAMSS_COUT_Q_INSPECTOR_HPP
-#define YAMSS_COUT_Q_INSPECTOR_HPP
+#ifndef YAMSS_INSPECTOR_COUT_Q_HPP
+#define YAMSS_INSPECTOR_COUT_Q_HPP
 
 #include <algorithm>
 #include <iostream>
 #include <armadillo>
 #include <boost/format.hpp>
-#include "yamss/inspector.hpp"
+#include "yamss/inspector/inspector.hpp"
 
 namespace yamss {
+namespace inspector {
 
 template <typename T = double>
-class cout_q_inspector : public inspector<T>
+class cout_q : public inspector<T>
 {
 public:
   typedef T value_type;
   typedef eom<T> eom_type;
   typedef structure<T> structure_type;
 
-  cout_q_inspector()
+  cout_q()
     : m_last(0)
     , m_more()
   {
     // empty
   }
 
-  cout_q_inspector(const boost::property_tree::ptree& a_tree)
+  cout_q(const boost::property_tree::ptree& a_tree)
     : m_last(0)
     , m_more()
   {
@@ -32,7 +33,7 @@ public:
   }
 
   virtual
-  ~cout_q_inspector()
+  ~cout_q()
   {
     // empty
   }
@@ -86,8 +87,9 @@ private:
 
   size_type m_last;
   std::string m_more;
-}; // cout_q_inspector<T> class
+}; // cout_q<T> class
 
+} // inspector namespace
 } // yamss namespace
 
-#endif // YAMSS_COUT_Q_INSPECTOR_HPP
+#endif // YAMSS_INSPECTOR_COUT_Q_HPP

@@ -2,9 +2,10 @@
 #define YAMSS_GENERALIZED_ALPHA_HPP
 
 #include <armadillo>
-#include "yamss/integrator.hpp"
+#include "yamss/integrator/integrator.hpp"
 
 namespace yamss {
+namespace integrator {
 
 template <typename T = double>
 class generalized_alpha : public integrator<T>
@@ -129,6 +130,7 @@ private:
   value_type m_gamma;
 }; // generalized_alpha<T> class
 
+} // integrator namespace
 } // yamss namespace
 
 #endif // YAMSS_GENERALIZED_ALPHA_HPP

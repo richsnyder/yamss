@@ -5,7 +5,7 @@
 #include <armadillo>
 #include <boost/shared_ptr.hpp>
 #include <boost/unordered_set.hpp>
-#include "yamss/evaluator.hpp"
+#include "yamss/evaluator/evaluator.hpp"
 
 namespace yamss {
 
@@ -16,7 +16,7 @@ public:
   typedef T value_type;
   typedef size_t key_type;
   typedef node<T> node_type;
-  typedef evaluator<T> evaluator_type;
+  typedef evaluator::evaluator<T> evaluator_type;
   typedef boost::unordered_set<size_t> set_type;
   typedef arma::Col<T> vector_type;
   typedef typename set_type::const_iterator const_iterator;

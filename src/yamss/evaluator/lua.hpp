@@ -1,12 +1,12 @@
-#ifndef YAMSS_LUA_EVALUATOR_HPP
-#define YAMSS_LUA_EVALUATOR_HPP
+#ifndef YAMSS_EVALUATOR_LUA_HPP
+#define YAMSS_EVALUATOR_LUA_HPP
 
 #include <stdexcept>
 #include <string>
 #include <vector>
 #include <armadillo>
 #include <boost/format.hpp>
-#include "yamss/evaluator.hpp"
+#include "yamss/evaluator/evaluator.hpp"
 
 extern "C" {
 # include <lua.h>
@@ -15,16 +15,17 @@ extern "C" {
 }
 
 namespace yamss {
+namespace evaluator {
 
 template <typename T = double>
-class lua_evaluator : public evaluator<T>
+class lua : public evaluator<T>
 {
 public:
   typedef T value_type;
   typedef node<T> node_type;
   typedef arma::Col<T> vector_type;
 
-  lua_evaluator()
+  lua()
     : m_state(0)
     , m_references(6, LUA_NOREF)
     , m_expression_formatter("return %1%")
@@ -32,7 +33,7 @@ public:
     // empty
   }
 
-  lua_evaluator(const boost::property_tree::ptree& a_tree)
+  lua(const boost::property_tree::ptree& a_tree)
     : m_state(0)
     , m_references(6, LUA_NOREF)
     , m_expression_formatter("return %1%")
@@ -65,7 +66,7 @@ public:
   }
 
   virtual
-  ~lua_evaluator()
+  ~lua()
   {
     close();
   }
@@ -173,8 +174,9 @@ private:
   lua_State* m_state;
   references_type m_references;
   boost::format m_expression_formatter;
-}; // lua_evaluator<T> class
+}; // lua<T> class
 
+} // evaluator namespace
 } // yamss namespace
 
-#endif // YAMSS_LUA_EVALUATOR_HPP
+#endif // YAMSS_EVALUATOR_LUA_HPP

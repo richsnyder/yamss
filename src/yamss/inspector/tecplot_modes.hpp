@@ -1,36 +1,37 @@
-#ifndef YAMSS_TECPLOT_MODES_INSPECTOR_HPP
-#define YAMSS_TECPLOT_MODES_INSPECTOR_HPP
+#ifndef YAMSS_INSPECTOR_TECPLOT_MODES_HPP
+#define YAMSS_INSPECTOR_TECPLOT_MODES_HPP
 
 #include <fstream>
 #include <armadillo>
 #include <boost/format.hpp>
-#include "yamss/inspector.hpp"
+#include "yamss/inspector/inspector.hpp"
 
 namespace yamss {
+namespace inspector {
 
 template <typename T = double>
-class tecplot_modes_inspector : public inspector<T>
+class tecplot_modes : public inspector<T>
 {
 public:
   typedef T value_type;
   typedef eom<T> eom_type;
   typedef structure<T> structure_type;
 
-  tecplot_modes_inspector()
+  tecplot_modes()
     : m_out()
     , m_filename("yamss.modes.dat")
   {
     // empty
   }
 
-  tecplot_modes_inspector(const boost::property_tree::ptree& a_tree)
+  tecplot_modes(const boost::property_tree::ptree& a_tree)
     : m_out()
   {
     m_filename = a_tree.get<std::string>("filename", "yamss.modes.dat");
   }
 
   virtual
-  ~tecplot_modes_inspector()
+  ~tecplot_modes()
   {
     if (m_out.is_open())
     {
@@ -116,8 +117,9 @@ private:
 
   std::ofstream m_out;
   std::string m_filename;
-}; // tecplot_modes_inspector<T> class
+}; // tecplot_modes<T> class
 
+} // inspector namespace
 } // yamss namespace
 
-#endif // YAMSS_TECPLOT_MODES_INSPECTOR_HPP
+#endif // YAMSS_INSPECTOR_TECPLOT_MODES_HPP

@@ -2,9 +2,10 @@
 #define YAMSS_NEWMARK_BETA_HPP
 
 #include <armadillo>
-#include "yamss/integrator.hpp"
+#include "yamss/integrator/integrator.hpp"
 
 namespace yamss {
+namespace integrator {
 
 template <typename T = double>
 class newmark_beta : public integrator<T>
@@ -105,6 +106,7 @@ private:
   value_type m_gamma;
 }; // newmark_beta<T> class
 
+} // integrator namespace
 } // yamss namespace
 
 #endif // YAMSS_NEWMARK_BETA_HPP

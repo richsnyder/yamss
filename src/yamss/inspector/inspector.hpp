@@ -6,6 +6,7 @@
 #include "yamss/structure.hpp"
 
 namespace yamss {
+namespace inspector {
 
 template <typename T>
 class inspector
@@ -28,6 +29,7 @@ public:
   finalize(const eom_type& a_eom, const structure_type& a_structure) = 0;
 }; // inspector<Types> class
 
+} // inspector namespace
 } // yamss namespace
 
 #endif // YAMSS_INSPECTOR_HPP

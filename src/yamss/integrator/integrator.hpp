@@ -6,6 +6,7 @@
 #include "yamss/structure.hpp"
 
 namespace yamss {
+namespace integrator {
 
 template <typename T>
 class integrator
@@ -23,8 +24,9 @@ public:
   virtual
   size_type
   stencil_size() const = 0;
-}; // integrator<Types> class
+}; // integrator<T> class
 
+} // integrator namespace
 } // yamss namespace
 
 #endif // YAMSS_INTEGRATOR_HPP

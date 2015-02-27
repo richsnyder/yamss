@@ -1,36 +1,37 @@
-#ifndef YAMSS_TECPLOT_Q_INSPECTOR_HPP
-#define YAMSS_TECPLOT_Q_INSPECTOR_HPP
+#ifndef YAMSS_INSPECTOR_TECPLOT_Q_HPP
+#define YAMSS_INSPECTOR_TECPLOT_Q_HPP
 
 #include <fstream>
 #include <armadillo>
 #include <boost/format.hpp>
-#include "yamss/inspector.hpp"
+#include "yamss/inspector/inspector.hpp"
 
 namespace yamss {
+namespace inspector {
 
 template <typename T = double>
-class tecplot_q_inspector : public inspector<T>
+class tecplot_q : public inspector<T>
 {
 public:
   typedef T value_type;
   typedef eom<T> eom_type;
   typedef structure<T> structure_type;
 
-  tecplot_q_inspector()
+  tecplot_q()
     : m_out()
     , m_filename("yamss.q.dat")
   {
     // empty
   }
 
-  tecplot_q_inspector(const boost::property_tree::ptree& a_tree)
+  tecplot_q(const boost::property_tree::ptree& a_tree)
     : m_out()
   {
     m_filename = a_tree.get<std::string>("filename", "yamss.q.dat");
   }
 
   virtual
-  ~tecplot_q_inspector()
+  ~tecplot_q()
   {
     if (m_out.is_open())
     {
@@ -85,8 +86,9 @@ private:
 
   std::ofstream m_out;
   std::string m_filename;
-}; // tecplot_q_inspector<T> class
+}; // tecplot_q<T> class
 
+} // inspector namespace
 } // yamss namespace
 
-#endif // YAMSS_TECPLOT_Q_INSPECTOR_HPP
+#endif // YAMSS_INSPECTOR_TECPLOT_Q_HPP

@@ -6,6 +6,7 @@
 #include "yamss/node.hpp"
 
 namespace yamss {
+namespace evaluator {
 
 template <typename T>
 class evaluator
@@ -20,6 +21,7 @@ public:
   operator()(const value_type& a_time, const node_type& a_node) = 0;
 }; // evaluator<T> class
 
+} // evaluator namespace
 } // yamss namespace
 
 #endif // YAMSS_EVALUATOR_HPP

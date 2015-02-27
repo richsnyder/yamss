@@ -10,17 +10,17 @@
 #include "yamss/runner.hpp"
 
 // Evaluators
-#include "yamss/lua_evaluator.hpp"
+#include "yamss/evaluator/lua.hpp"
 
 // Inspectors
-#include "yamss/cout_q_inspector.hpp"
-#include "yamss/tecplot_modes_inspector.hpp"
-#include "yamss/tecplot_q_inspector.hpp"
-#include "yamss/xml_inspector.hpp"
+#include "yamss/inspector/cout_q.hpp"
+#include "yamss/inspector/tecplot_modes.hpp"
+#include "yamss/inspector/tecplot_q.hpp"
+#include "yamss/inspector/xml.hpp"
 
 // Integrators
-#include "yamss/generalized_alpha.hpp"
-#include "yamss/newmark_beta.hpp"
+#include "yamss/integrator/generalized_alpha.hpp"
+#include "yamss/integrator/newmark_beta.hpp"
 
 namespace yamss {
 
@@ -97,11 +97,11 @@ protected:
     type_ = m_document.get<std::string>("solution.method.type", "newmark_beta");
     if (type_ == "newmark_beta")
     {
-      assign_integrator<newmark_beta<T> >(m_document);
+      assign_integrator<integrator::newmark_beta<T> >(m_document);
     }
     else if (type_ == "generalized_alpha")
     {
-      assign_integrator<generalized_alpha<T> >(m_document);
+      assign_integrator<integrator::generalized_alpha<T> >(m_document);
     }
     else
     {
@@ -256,7 +256,7 @@ protected:
     typedef std::pair<const_iterator, const_iterator> range_type;
 
     const_iterator p;
-    boost::shared_ptr<evaluator<value_type> > ptr;
+    boost::shared_ptr<evaluator::evaluator<value_type> > ptr;
     try
     {
       pt::ptree params = a_tree.get_child("parameters");
@@ -285,7 +285,6 @@ protected:
     const_iterator q;
     boost::optional<key_type> id;
     boost::optional<std::string> type_;
-    boost::shared_ptr<evaluator<T> > evaluator_;
     range_type range = m_document.get_child("loads").equal_range("load");
     for (p = range.first; p != range.second; ++p)
     {
@@ -295,7 +294,7 @@ protected:
       {
         if (*type_ == "lua")
         {
-          add_load<lua_evaluator<T> >(*id, p->second);
+          add_load<evaluator::lua<T> >(*id, p->second);
         }
         else
         {
@@ -321,7 +320,7 @@ protected:
   {
     namespace pt = boost::property_tree;
 
-    boost::shared_ptr<inspector<value_type> > ptr;
+    boost::shared_ptr<inspector::inspector<value_type> > ptr;
     try
     {
       pt::ptree params = a_tree.get_child("parameters");
@@ -338,32 +337,30 @@ protected:
   process_output()
   {
     namespace pt = boost::property_tree;
-    typedef inspector<value_type> inspector_type;
     typedef pt::ptree::const_assoc_iterator const_iterator;
     typedef std::pair<const_iterator, const_iterator> range_type;
 
     const_iterator p;
     std::string type_;
-    boost::shared_ptr<inspector_type> ptr;
     range_type range = m_document.get_child("outputs").equal_range("output");
     for (p = range.first; p != range.second; ++p)
     {
       type_ = p->second.get<std::string>("type");
       if (type_ == "default")
       {
-        add_inspector<cout_q_inspector<T> >(p->second);
+        add_inspector<inspector::cout_q<T> >(p->second);
       }
       else if (type_ == "tecplot_modes")
       {
-        add_inspector<tecplot_modes_inspector<T> >(p->second);
+        add_inspector<inspector::tecplot_modes<T> >(p->second);
       }
       else if (type_ == "tecplot_q")
       {
-        add_inspector<tecplot_q_inspector<T> >(p->second);
+        add_inspector<inspector::tecplot_q<T> >(p->second);
       }
       else if (type_ == "xml")
       {
-        add_inspector<xml_inspector<T> >(p->second);
+        add_inspector<inspector::xml<T> >(p->second);
       }
       else
       {
@@ -374,8 +371,6 @@ protected:
   }
 private:
   boost::property_tree::ptree m_document;
-
-  int m_number_of_modes;
 
   boost::shared_ptr<eom_type> m_eom;
   boost::shared_ptr<structure_type> m_structure;

@@ -1,24 +1,25 @@
-#ifndef YAMSS_XML_INSPECTOR_HPP
-#define YAMSS_XML_INSPECTOR_HPP
+#ifndef YAMSS_INSPECTOR_XML_HPP
+#define YAMSS_INSPECTOR_XML_HPP
 
 #include <fstream>
 #include <iterator>
 #include <string>
 #include <boost/format.hpp>
-#include "yamss/inspector.hpp"
+#include "yamss/inspector/inspector.hpp"
 #include "yamss/rapidxml_print.hpp"
 
 namespace yamss {
+namespace inspector {
 
 template <typename T = double>
-class xml_inspector : public inspector<T>
+class xml : public inspector<T>
 {
 public:
   typedef T value_type;
   typedef eom<T> eom_type;
   typedef structure<T> structure_type;
 
-  xml_inspector()
+  xml()
     : m_filename("yamss.xml")
     , m_document()
     , m_root()
@@ -27,7 +28,7 @@ public:
     // empty
   }
 
-  xml_inspector(const boost::property_tree::ptree& a_tree)
+  xml(const boost::property_tree::ptree& a_tree)
     : m_document()
     , m_root()
     , m_timesteps()
@@ -36,7 +37,7 @@ public:
   }
 
   virtual
-  ~xml_inspector()
+  ~xml()
   {
     // empty
   }
@@ -162,8 +163,9 @@ protected:
   rapidxml::xml_document<> m_document;
   rapidxml::xml_node<>* m_root;
   rapidxml::xml_node<>* m_timesteps;
-}; // xml_inspector<T> class
+}; // xml<T> class
 
+} // inspector namespace
 } // yamss namespace
 
-#endif // YAMSS_XML_INSPECTOR_HPP
+#endif // YAMSS_INSPECTOR_XML_HPP

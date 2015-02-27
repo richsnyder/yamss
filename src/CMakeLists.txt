@@ -8,26 +8,26 @@ SET(YAMSS_SOURCES
 SET(YAMSS_HEADERS
     yamss/about.hpp
     yamss/clp.hpp
-    yamss/cout_q_inspector.hpp
     yamss/eom.hpp
-    yamss/evaluator.hpp
-    yamss/generalized_alpha.hpp
     yamss/input_reader.hpp
-    yamss/inspector.hpp
-    yamss/integrator.hpp
     yamss/iterate.hpp
     yamss/load.hpp
-    yamss/lua_evaluator.hpp
     yamss/matrix_cast.hpp
-    yamss/newmark_beta.hpp
     yamss/node.hpp
     yamss/rapidxml.hpp
     yamss/rapidxml_print.hpp
     yamss/runner.hpp
     yamss/structure.hpp
-    yamss/tecplot_modes_inspector.hpp
-    yamss/tecplot_q_inspector.hpp
-    yamss/xml_inspector.hpp
+    yamss/evaluator/evaluator.hpp
+    yamss/evaluator/lua.hpp
+    yamss/inspector/inspector.hpp
+    yamss/inspector/cout_q.hpp
+    yamss/inspector/tecplot_modes.hpp
+    yamss/inspector/tecplot_q.hpp
+    yamss/inspector/xml.hpp
+    yamss/integrator/integrator.hpp
+    yamss/integrator/generalized_alpha.hpp
+    yamss/integrator/newmark_beta.hpp
 )
 SET(YAMSS_CONFIG_HEADERS
     yamss/version.hpp
