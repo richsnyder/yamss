@@ -1,11 +1,15 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
 
-PROJECT(yamss LANGUAGES C CXX VERSION 2.4.4)
+PROJECT(yamss LANGUAGES C CXX VERSION 2.5.0)
 
 # Add custom modules to the module search path and mark them for installation.
 
 LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules)
-INSTALL(DIRECTORY cmake DESTINATION share FILES_MATCHING PATTERN "*.cmake")
+
+# Include CMake files.
+
+INCLUDE(Documentation)
+INCLUDE(Reporting)
 
 # Locate all of the required dependencies.
 
@@ -22,6 +26,11 @@ FIND_PACKAGE(Lua REQUIRED)
 INCLUDE_DIRECTORIES(${LUA_INCLUDE_DIR})
 LIST(APPEND EXTRA_LIBS ${LUA_LIBRARIES})
 
+# Report on the build configuration.
+
+CONFIGURATION_REPORT()
+
 # Add the project subdirectories.
 
 ADD_SUBDIRECTORY(src)
+ADD_SUBDIRECTORY(doc)

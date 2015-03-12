@@ -24,7 +24,7 @@ public:
     , m_iterates(a_steps, iterate_type(a_dofs))
   {
     m_mass.eye();
-    m_damping.eye();
+    m_damping.zeros();
     m_stiffness.eye();
   }
 

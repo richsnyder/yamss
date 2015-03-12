@@ -19,8 +19,8 @@ SET(YAMSS_HEADERS
     yamss/evaluator/evaluator.hpp
     yamss/evaluator/lua.hpp
     yamss/inspector/inspector.hpp
-    yamss/inspector/cout_q.hpp
     yamss/inspector/ptree.hpp
+    yamss/inspector/summary.hpp
     yamss/inspector/tecplot_modes.hpp
     yamss/inspector/tecplot_q.hpp
     yamss/integrator/integrator.hpp

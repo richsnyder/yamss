@@ -13,8 +13,8 @@
 #include "yamss/evaluator/lua.hpp"
 
 // Inspectors
-#include "yamss/inspector/cout_q.hpp"
 #include "yamss/inspector/ptree.hpp"
+#include "yamss/inspector/summary.hpp"
 #include "yamss/inspector/tecplot_modes.hpp"
 #include "yamss/inspector/tecplot_q.hpp"
 
@@ -235,16 +235,32 @@ protected:
   void
   process_eom()
   {
-    std::string m = m_document.get<std::string>("eom.matrices.mass", "");
-    std::string c = m_document.get<std::string>("eom.matrices.damping", "");
-    std::string k = m_document.get<std::string>("eom.matrices.stiffness", "");
-    std::string u = m_document.get<std::string>("eom.initial_conditions.displacement", "");
-    std::string v = m_document.get<std::string>("eom.initial_conditions.velocity", "");
-    m_eom->set_mass(matrix_cast<value_type>(m));
-    m_eom->set_damping(matrix_cast<value_type>(c));
-    m_eom->set_stiffness(matrix_cast<value_type>(k));
-    m_eom->set_displacement(vector_cast<value_type>(u));
-    m_eom->set_velocity(vector_cast<value_type>(v));
+    boost::optional<std::string> str;
+    boost::property_tree::ptree tree;
+
+    tree = m_document.get_child("eom.matrices");
+    if ((str = tree.get_optional<std::string>("mass")))
+    {
+      m_eom ->set_mass(matrix_cast<value_type>(*str));
+    }
+    if ((str = tree.get_optional<std::string>("damping")))
+    {
+      m_eom->set_damping(matrix_cast<value_type>(*str));
+    }
+    if ((str = tree.get_optional<std::string>("stiffness")))
+    {
+      m_eom->set_stiffness(matrix_cast<value_type>(*str));
+    }
+
+    tree = m_document.get_child("eom.initial_conditions");
+    if ((str = tree.get_optional<std::string>("displacement")))
+    {
+      m_eom->set_displacement(vector_cast<value_type>(*str));
+    }
+    if ((str = tree.get_optional<std::string>("velocity")))
+    {
+      m_eom->set_velocity(vector_cast<value_type>(*str));
+    }
   }
 
   template <typename Evaluator>
@@ -346,9 +362,9 @@ protected:
     for (p = range.first; p != range.second; ++p)
     {
       type_ = p->second.get<std::string>("type");
-      if (type_ == "default")
+      if (type_ == "summary")
       {
-        add_inspector<inspector::cout_q<T> >(p->second);
+        add_inspector<inspector::summary<T> >(p->second);
       }
       else if (type_ == "ptree")
       {

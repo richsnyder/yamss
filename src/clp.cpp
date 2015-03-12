@@ -123,7 +123,7 @@ clp::report(std::ostream& a_out) const
 void
 clp::usage(std::ostream& a_out) const
 {
-  a_out << "Usage: " << m_program_name << " [options] input" << std::endl;
+  a_out << "Usage: " << m_program_name << " [options] input-file" << std::endl;
   a_out << std::endl;
   a_out << m_visible_options;
 }
