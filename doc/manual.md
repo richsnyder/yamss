@@ -1,5 +1,25 @@
 % YAMSS User's Guide
 
+# Table of Contents
+
+* [Synopsis](#synopsis)
+* [Description](#description)
+* [Options](#options)
+* [Input File](#input-file)
+    - [Structure](#structure)
+    - [Modes](#modes)
+    - [Equations of Motion](#equations-of-motion)
+    - [Loads](#loads)
+        + [Lua Evaluator](#lua-evaluator)
+    - [Solution](#solution)
+        + [Newmark-$\beta$ Method](#newmark-beta-method)
+        + [Generalized-$\alpha$ Method](#generalized-alpha-method)
+    - [Outputs](#outputs)
+        + [Summary Filter](#summary-filter)
+        + [Property Tree Filter](#property-tree-filter)
+        + [Tecplot Filters](#tecplot-filters)
+* [Nomenclature](#nomenclature)
+
 # Synopsis
 
 yamss [*options*] [*input-file*]
@@ -491,9 +511,9 @@ each can be activated by including an `<output>` element within `<outputs>`.
 Any number of output filters can be active.
 
 The following input file fragment configures YAMSS to generate two types of
-output.  The `summary` filter writes summary information to a stream that is,
-in this case, the standard console.  The `tecplot_modes` filter generates a
-file that contains a history of the modal coordinates in Tecplot format.
+output.  The `summary` filter writes summary information to a stream and the
+`tecplot` filter generates a Tecplot data file that contains a history of the
+modal coordinates.
 
 ```xml
 <outputs>
@@ -504,30 +524,33 @@ file that contains a history of the modal coordinates in Tecplot format.
         </parameters>
     </output>
     <output>
-        <type>tecplot_q</type>
-        <parameters>
-            <filename>modes.dat</filename>
-        </parameters>
+        <type>tecplot</type>
+        <parameters />
     </output>
 </outputs>
 ```
 
 ### Summary Filter
 
-The summary filter outputs the iteration counter, the time, and the modal
-coordinates as the solution progresses.  It takes the following parameters:
+The summary filter outputs the iteration counter $n$, the time $t$, and a
+subset of the modal coordinates $\left\{q\right\}$ as the solution progresses.
+It takes the following parameters:
 
 * `filename` -- the output file name (type: string, default: "")
 * `stride` -- the number of iterations between output
               (type: $\mathbb{N}_1$, default: 1)
+* `limit` -- the maximum number of modes to include in the output
+             (type: $\mathbb{N}_1$, default: 3)
 
 If `filename` is empty, then output is directed to the standard console.
 
 ### Property Tree Filter
 
 The property tree filter generates a file containing a history of the
-iteration, time, and generalized displacements, velocities, accelerations, and
-forces.  It accepts the following parameters:
+iteration $n$, time $t$, generalized displacements $\left\{q\right\}$,
+generalized velocities $\left\{\dot{q}\right\}$, generalized accelerations
+$\left\{\ddot{q}\right\}$, and generalized forces $\left\{F\right\}$.  It
+accepts the following parameters:
 
 * `filename` -- the output file name (type: string, default: `yamss.xml`)
 * `stride` -- the number of iterations between output
@@ -537,18 +560,21 @@ This filter can write files in XML, JSON, and INFO formats.  The format depends
 on the filename extension: `.xml` for XML, `.json` for JSON, and `.info` for
 INFO.
 
-### Tecplot Filters
+### Tecplot Filter
 
-Two types of Tecplot filters are available: `tecplot_q` and `tecplot_modes`.
-The first outputs a history of the iteration, time, and modal coordinates.
-The second adds the velocities and accelerations and the generalized forces.
-Parameters for `tecplot_q` are
+The Tecplot filter outputs an ASCII Tecplot data file containing a history of
+the iteration $n$, time $t$, generalized displacements $\left\{q\right\}$,
+generalized velocities $\left\{\dot{q}\right\}$, generalized accelerations
+$\left\{\ddot{q}\right\}$, and generalized forces $\left\{F\right\}$.
+Parameters for the `tecplot` filter are:
 
-* `filename` -- the output file name (type: string, default: `yamss.q.dat`)
+* `filename` -- the output file name (type: string, default: `yamss.dat`)
+* `stride` -- the number of iterations between output
+              (type: $\mathbb{N}_1$, default: 1)
+* `brief` -- if present, do not include $\left\{\dot{q}\right\}$,
+             $\left\{\ddot{q}\right\}$, and $\left\{F\right\}$
 
-and parameters for `tecplot_modes` are
-
-* `filename` -- the output file name (type: string, default: `yamss.modes.dat`)
+If the `filename` is empty, then output is directed to the standard console.
 
 # Nomenclature
 

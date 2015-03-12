@@ -20,49 +20,41 @@ public:
   typedef structure<T> structure_type;
 
   summary()
-    : m_last(0)
-    , m_more()
+    : m_limit(3)
     , m_stride(1)
+    , m_filename()
+    , m_last(0)
+    , m_more()
+    , m_out(NULL)
   {
-    // empty
+    m_out = &std::cout;
   }
 
   summary(const boost::property_tree::ptree& a_tree)
     : m_last(0)
     , m_more()
+    , m_out(NULL)
   {
+    m_limit = a_tree.get<size_type>("limit", 3);
     m_stride = a_tree.get<size_type>("stride", 1);
     m_filename = a_tree.get<std::string>("filename", "");
-
-    if (m_filename.empty())
-    {
-      m_out = &std::cout;
-    }
-    else
-    {
-      std::ofstream* out = new std::ofstream(m_filename.c_str());
-      m_out = dynamic_cast<std::ostream*>(out);
-    }
   }
 
   virtual
   ~summary()
   {
-    if (!m_filename.empty())
-    {
-      dynamic_cast<std::ofstream*>(m_out)->close();
-      delete m_out;
-    }
+    close();
   }
 
   virtual
   void
   initialize(const eom_type& a_eom, const structure_type& a_structure)
   {
+    open();
     size_type size = a_eom.get_size();
-    if (size > 3)
+    if (size > m_limit)
     {
-      m_last = 3;
+      m_last = m_limit;
       m_more = ", ...";
     }
     else
@@ -98,15 +90,52 @@ public:
   void
   finalize(const eom_type& a_eom, const structure_type& a_structure)
   {
-    // empty
+    close();
+  }
+protected:
+  void
+  open()
+  {
+    if (m_out == NULL)
+    {
+      if (m_filename.empty())
+      {
+        m_out = &std::cout;
+      }
+      else
+      {
+        std::ofstream* out = new std::ofstream(m_filename.c_str());
+        m_out = dynamic_cast<std::ostream*>(out);
+      }
+    }
+  }
+
+  void
+  close()
+  {
+    if (m_out != NULL)
+    {
+      if (!m_filename.empty())
+      {
+        std::ofstream* out = dynamic_cast<std::ofstream*>(m_out);
+        if (out->is_open())
+        {
+          out->close();
+        }
+        delete m_out;
+      }
+      m_out = NULL;
+    }
   }
 private:
   typedef size_t size_type;
   typedef arma::Col<T> vector_type;
 
+  size_type m_limit;
   size_type m_stride;
-  size_type m_last;
   std::string m_filename;
+
+  size_type m_last;
   std::string m_more;
   std::ostream* m_out;
 }; // summary<T> class

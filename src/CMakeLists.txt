@@ -21,8 +21,7 @@ SET(YAMSS_HEADERS
     yamss/inspector/inspector.hpp
     yamss/inspector/ptree.hpp
     yamss/inspector/summary.hpp
-    yamss/inspector/tecplot_modes.hpp
-    yamss/inspector/tecplot_q.hpp
+    yamss/inspector/tecplot.hpp
     yamss/integrator/integrator.hpp
     yamss/integrator/generalized_alpha.hpp
     yamss/integrator/newmark_beta.hpp

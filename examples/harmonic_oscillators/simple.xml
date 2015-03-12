@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+
+<!-- --------------------------------------------------------------- -->
+<!--                                                                 -->
+<!-- Simple Harmonic Oscillator                                      -->
+<!--                                                                 -->
+<!-- q'' + q = 0                                                     -->
+<!--                                                                 -->
+<!-- q(0) = 1,   q'(0) = 0                                           -->
+<!--                                                                 -->
+<!-- Author: Rich Snyder                                             -->
+<!--                                                                 -->
+<!-- --------------------------------------------------------------- -->
+
+<yamss>
+
+  <structure>
+    <nodes>
+      <node><id>1</id></node>
+    </nodes>
+  </structure>
+
+  <modes>
+    <mode>
+      <nodes>
+        <node><id>1</id><x>1.0</x></node>
+      </nodes>
+    </mode>
+  </modes>
+
+  <eom>
+    <matrices />
+    <initial_conditions>
+      <displacement>1.0</displacement>
+    </initial_conditions>
+  </eom>
+
+  <loads />
+
+  <solution>
+    <time>
+      <span>25.13</span>
+    </time>
+  </solution>
+
+  <outputs>
+    <output>
+      <type>tecplot</type>
+      <parameters />
+    </output>
+  </outputs>
+
+</yamss>

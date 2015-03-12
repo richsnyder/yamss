@@ -15,8 +15,7 @@
 // Inspectors
 #include "yamss/inspector/ptree.hpp"
 #include "yamss/inspector/summary.hpp"
-#include "yamss/inspector/tecplot_modes.hpp"
-#include "yamss/inspector/tecplot_q.hpp"
+#include "yamss/inspector/tecplot.hpp"
 
 // Integrators
 #include "yamss/integrator/generalized_alpha.hpp"
@@ -370,13 +369,9 @@ protected:
       {
         add_inspector<inspector::ptree<T> >(p->second);
       }
-      else if (type_ == "tecplot_modes")
+      else if (type_ == "tecplot")
       {
-        add_inspector<inspector::tecplot_modes<T> >(p->second);
-      }
-      else if (type_ == "tecplot_q")
-      {
-        add_inspector<inspector::tecplot_q<T> >(p->second);
+        add_inspector<inspector::tecplot<T> >(p->second);
       }
       else
       {
