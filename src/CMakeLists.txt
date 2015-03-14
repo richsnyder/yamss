@@ -3,11 +3,13 @@
 SET(YAMSS_SOURCES
     about.cpp
     clp.cpp
+    element.cpp
     yamss.cpp
 )
 SET(YAMSS_HEADERS
     yamss/about.hpp
     yamss/clp.hpp
+    yamss/element.hpp
     yamss/eom.hpp
     yamss/input_reader.hpp
     yamss/iterate.hpp

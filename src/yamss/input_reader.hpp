@@ -40,7 +40,8 @@ public:
     create_integrator();
     create_structure_and_eom();
     create_runner();
-    process_structure();
+    process_nodes();
+    process_elements();
     process_modes();
     process_eom();
     process_loads();
@@ -58,6 +59,7 @@ protected:
   typedef size_t size_type;
   typedef node<T> node_type;
   typedef load<T> load_type;
+  typedef element element_type;
   typedef typename runner_type::eom_type eom_type;
   typedef typename runner_type::integrator_type integrator_type;
   typedef typename runner_type::structure_type structure_type;
@@ -131,11 +133,13 @@ protected:
   void
   create_runner()
   {
-    m_runner = boost::make_shared<runner_type>(m_eom, m_structure, m_integrator);
+    m_runner = boost::make_shared<runner_type>(m_eom,
+                                               m_structure,
+                                               m_integrator);
   }
 
   void
-  process_structure()
+  process_nodes()
   {
     namespace pt = boost::property_tree;
     typedef pt::ptree::const_assoc_iterator const_iterator;
@@ -175,6 +179,70 @@ protected:
         {
           node_.set_position(5, *dof);
         }
+      }
+    }
+  }
+
+  element::shape_type
+  get_shape(const std::string& a_keyword) const
+  {
+    element::shape_type shape;
+    if (a_keyword == "line")
+    {
+      shape = element::LINE;
+    }
+    else if (a_keyword == "tria")
+    {
+      shape = element::TRIANGLE;
+    }
+    else if (a_keyword == "quad")
+    {
+      shape = element::QUADRILATERAL;
+    }
+    else
+    {
+      boost::format fmt("The element type %1% is not supported");
+      throw std::runtime_error(boost::str(fmt % a_keyword));
+    }
+    return shape;
+  }
+
+  void
+  add_vertices(element_type& a_element,
+               const boost::property_tree::ptree& a_tree)
+  {
+    namespace pt = boost::property_tree;
+    typedef pt::ptree::const_assoc_iterator const_iterator;
+    typedef std::pair<const_iterator, const_iterator> range_type;
+
+    key_type id;
+    size_type pos;
+    const_iterator p;
+    range_type range = a_tree.equal_range("v");
+    for (p = range.first, pos = 0; p != range.second; ++p, ++pos)
+    {
+      id = p->second.get_value<key_type>();
+      a_element.set_vertex(pos, id);
+    }
+  }
+
+  void
+  process_elements()
+  {
+    namespace pt = boost::property_tree;
+
+    element::shape_type shape;
+    boost::optional<key_type> id;
+    pt::ptree::const_iterator p;
+    pt::ptree elements = m_document.get_child("structure.elements");
+    for (p = elements.begin(); p != elements.end(); ++p)
+    {
+      id = p->second.get_optional<key_type>("id");
+      if (id)
+      {
+        shape = get_shape(p->first);
+        element_type& element_ = m_structure->add_element(*id, shape);
+        add_vertices(element_, p->second);
       }
     }
   }

@@ -3,7 +3,9 @@
 
 #include <stdexcept>
 #include <boost/format.hpp>
+#include <boost/iterator/iterator_facade.hpp>
 #include <boost/unordered_map.hpp>
+#include "yamss/element.hpp"
 #include "yamss/load.hpp"
 #include "yamss/node.hpp"
 
@@ -19,6 +21,7 @@ public:
   typedef const T& const_reference;
   typedef node<T> node_type;
   typedef load<T> load_type;
+  typedef element element_type;
   typedef arma::Col<T> vector_type;
 
   structure(size_type a_number_of_modes)
@@ -202,9 +205,62 @@ public:
     }
     return f;
   }
+
+  element_type&
+  add_element(key_type a_key, element::shape_type a_shape)
+  {
+    typedef typename elements_type::iterator iterator;
+
+    std::pair<iterator, bool> result = m_elements.insert(std::make_pair(
+        a_key, element_type(a_key, a_shape)));
+    if (result.second)
+    {
+      return result.first->second;
+    }
+    else
+    {
+      boost::format fmt("Failed to add element %1% to the structure.");
+      throw std::runtime_error(boost::str(fmt % a_key));
+    }
+  }
+
+  element_type&
+  get_element(key_type a_key)
+  {
+    typedef typename elements_type::iterator iterator;
+
+    iterator result = m_elements.find(a_key);
+    if (result == m_elements.end())
+    {
+      boost::format fmt("Failed to find element %1% in the structure.");
+      throw std::runtime_error(boost::str(fmt % a_key));
+    }
+    else
+    {
+      return result->second;
+    }
+  }
+
+  const element_type&
+  get_element(key_type a_key) const
+  {
+    typedef typename elements_type::const_iterator const_iterator;
+
+    const_iterator result = m_elements.find(a_key);
+    if (result == m_elements.end())
+    {
+      boost::format fmt("Failed to find element %1% in the structure.");
+      throw std::runtime_error(boost::str(fmt % a_key));
+    }
+    else
+    {
+      return result->second;
+    }
+  }
 private:
   typedef boost::unordered_map<key_type, node_type> nodes_type;
   typedef boost::unordered_map<key_type, load_type> loads_type;
+  typedef boost::unordered_map<key_type, element_type> elements_type;
 
   structure()
   {
@@ -215,6 +271,7 @@ private:
   vector_type m_active_dofs;
   nodes_type m_nodes;
   loads_type m_loads;
+  elements_type m_elements;
 }; // structure<T> class
 
 } // yamss namespace

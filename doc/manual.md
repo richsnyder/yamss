@@ -7,6 +7,8 @@
 * [Options](#options)
 * [Input File](#input-file)
     - [Structure](#structure)
+        + [Nodes](#nodes)
+        + [Elements](#elements)
     - [Modes](#modes)
     - [Equations of Motion](#equations-of-motion)
     - [Loads](#loads)
@@ -133,8 +135,12 @@ are described in the following subsections.
 ## Structure
 
 The equations of motion are used to describe the motion of a structure, which
-is defined by a set of points called nodes.  Each node has the following
-properties:
+is defined by a set of points called nodes.  The nodes can be connected to
+form elements.
+
+### Nodes
+
+Each node has the following properties:
 
 * `id` -- identification number (type: $\mathbb{N}_0$, required)
 * `x` -- x-coordinate of the point (type: $\mathbb{R}$, default: 0)
@@ -142,15 +148,39 @@ properties:
 * `z` -- z-coordinate of the point (type: $\mathbb{R}$, default: 0)
 
 Two nodes must not share the same identification number.  While the numbers
-must be unique, they do not need to be sequential.
+must be unique, they do not need to be sequential.  The nodal coordinates are
+not used when integrating the equations of motion and are currently only used
+for visualization purposes.
 
-The nodal coordinates are not used when integrating the equations of motion
-and are currently only used for visualization purposes.
+### Elements
+
+Nodes can be connected to form elements.  Elements are currently only used for
+visualization purposes, so a structure need not contain any elements to be
+valid.  The following element types are supported:
+
+* `point` -- 0D point element, $n_v = 1$
+* `line` -- 1D line element, $n_v = 2$
+* `tria` -- 2D triangular element, $n_v = 3$
+* `quad` -- 2D quadrilateral element, $n_v = 4$ 
+
+In addition to its type, each element has an the following properties:
+
+* `id` -- identification number (type: $\mathbb{N}_0$, required)
+* `v` -- reference to a node (type: $\mathbb{N}_0$, required)
+
+As with the nodes, each element identification number should be unique amongst
+all of the elements, but need not be sequential.  There must be as many node
+references elements as vertices in the element.  
+
+### Example
 
 Within the XML file, the `<structure>` element contains a single `<nodes>`
-child element that itself contains any number of `<node>` elements.  The
+child element that itself contains any number of `<node>` elements.  There
+may also be an `<elements>` element that contains any number of children of
+the following types: `<point>`, `<line>`, `<tria>`, and `<quad>`.  The
 following XML fragment, for example, defines four nodes that form the corners
-of a unit square lying in the $z = 0$ plane.
+of a unit square lying in the $z = 0$ plane.  These nodes form the vertices of
+two triangular elements.
 
 ```xml
 <structure>
@@ -161,6 +191,10 @@ of a unit square lying in the $z = 0$ plane.
         <node><id>4</id><y>1.0</y></node>
         ...
     </nodes>
+    <elements>
+        <tria><id>1</id><v>1</v><v>2</v><v>3</v></tria>
+        <tria><id>2</id><v>3</v><v>4</v><v>1</v></tria>
+    </elements>
 </structure>
 ```
 
@@ -604,6 +638,9 @@ ${\left[M\right]}$
 
 $M$
 :   Number of mode shapes.
+
+$n_v$
+:   Number of vertices in an element.
 
 $N$
 :   Number of degrees of freedom.
