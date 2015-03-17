@@ -14,6 +14,7 @@ SET(YAMSS_HEADERS
     yamss/input_reader.hpp
     yamss/iterate.hpp
     yamss/load.hpp
+    yamss/map_values.hpp
     yamss/matrix_cast.hpp
     yamss/node.hpp
     yamss/runner.hpp
@@ -21,9 +22,10 @@ SET(YAMSS_HEADERS
     yamss/evaluator/evaluator.hpp
     yamss/evaluator/lua.hpp
     yamss/inspector/inspector.hpp
+    yamss/inspector/modes.hpp
+    yamss/inspector/motion.hpp
     yamss/inspector/ptree.hpp
     yamss/inspector/summary.hpp
-    yamss/inspector/tecplot.hpp
     yamss/integrator/integrator.hpp
     yamss/integrator/generalized_alpha.hpp
     yamss/integrator/newmark_beta.hpp

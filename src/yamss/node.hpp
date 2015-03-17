@@ -148,6 +148,12 @@ public:
   }
 
   vector_type
+  get_displaced_position(const vector_type& a_q) const
+  {
+    return m_position + m_modes.t() * a_q;
+  }
+
+  vector_type
   get_generalized_force(const vector_type& a_active) const
   {
     return m_modes * arma::diagmat(a_active) * m_force;

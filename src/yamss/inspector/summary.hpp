@@ -27,7 +27,7 @@ public:
     , m_more()
     , m_out(NULL)
   {
-    m_out = &std::cout;
+    // empty
   }
 
   summary(const boost::property_tree::ptree& a_tree)

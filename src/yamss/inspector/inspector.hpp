@@ -27,7 +27,7 @@ public:
   virtual
   void
   finalize(const eom_type& a_eom, const structure_type& a_structure) = 0;
-}; // inspector<Types> class
+}; // inspector<T> class
 
 } // inspector namespace
 } // yamss namespace

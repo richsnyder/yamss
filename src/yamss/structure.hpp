@@ -7,6 +7,7 @@
 #include <boost/unordered_map.hpp>
 #include "yamss/element.hpp"
 #include "yamss/load.hpp"
+#include "yamss/map_values.hpp"
 #include "yamss/node.hpp"
 
 namespace yamss {
@@ -20,8 +21,14 @@ public:
   typedef size_t size_type;
   typedef const T& const_reference;
   typedef node<T> node_type;
+  typedef map_values_iterator<key_type, node_type> node_iterator;
+  typedef map_values_iterator<key_type, const node_type> const_node_iterator;
   typedef load<T> load_type;
+  typedef map_values_iterator<key_type, load_type> load_iterator;
+  typedef map_values_iterator<key_type, const load_type> const_load_iterator;
   typedef element element_type;
+  typedef map_values_iterator<key_type, element_type> element_iterator;
+  typedef map_values_iterator<key_type, const element_type> const_element_iterator;
   typedef arma::Col<T> vector_type;
 
   structure(size_type a_number_of_modes)
@@ -101,6 +108,30 @@ public:
     }
   }
 
+  node_iterator
+  begin_nodes()
+  {
+    return node_iterator(m_nodes.begin());
+  }
+
+  node_iterator
+  end_nodes()
+  {
+    return node_iterator(m_nodes.end());
+  }
+
+  const_node_iterator
+  begin_nodes() const
+  {
+    return const_node_iterator(m_nodes.begin());
+  }
+
+  const_node_iterator
+  end_nodes() const
+  {
+    return const_node_iterator(m_nodes.end());
+  }
+
   template <typename Fn>
   load_type&
   add_load(key_type a_key, Fn a_function)
@@ -152,6 +183,30 @@ public:
     {
       return result->second;
     }
+  }
+
+  load_iterator
+  begin_loads()
+  {
+    return load_iterator(m_loads.begin());
+  }
+
+  load_iterator
+  end_loads()
+  {
+    return load_iterator(m_loads.end());
+  }
+
+  const_load_iterator
+  begin_loads() const
+  {
+    return const_load_iterator(m_loads.begin());
+  }
+
+  const_load_iterator
+  end_loads() const
+  {
+    return const_load_iterator(m_loads.end());
   }
 
   void
@@ -256,6 +311,30 @@ public:
     {
       return result->second;
     }
+  }
+
+  element_iterator
+  begin_elements()
+  {
+    return element_iterator(m_elements.begin());
+  }
+
+  element_iterator
+  end_elements()
+  {
+    return element_iterator(m_elements.end());
+  }
+
+  const_element_iterator
+  begin_elements() const
+  {
+    return const_element_iterator(m_elements.begin());
+  }
+
+  const_element_iterator
+  end_elements() const
+  {
+    return const_element_iterator(m_elements.end());
   }
 private:
   typedef boost::unordered_map<key_type, node_type> nodes_type;

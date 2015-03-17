@@ -13,9 +13,10 @@
 #include "yamss/evaluator/lua.hpp"
 
 // Inspectors
+#include "yamss/inspector/modes.hpp"
+#include "yamss/inspector/motion.hpp"
 #include "yamss/inspector/ptree.hpp"
 #include "yamss/inspector/summary.hpp"
-#include "yamss/inspector/tecplot.hpp"
 
 // Integrators
 #include "yamss/integrator/generalized_alpha.hpp"
@@ -183,21 +184,21 @@ protected:
     }
   }
 
-  element::shape_type
+  element_type::shape_type
   get_shape(const std::string& a_keyword) const
   {
-    element::shape_type shape;
+    element_type::shape_type shape;
     if (a_keyword == "line")
     {
-      shape = element::LINE;
+      shape = element_type::LINE;
     }
     else if (a_keyword == "tria")
     {
-      shape = element::TRIANGLE;
+      shape = element_type::TRIANGLE;
     }
     else if (a_keyword == "quad")
     {
-      shape = element::QUADRILATERAL;
+      shape = element_type::QUADRILATERAL;
     }
     else
     {
@@ -429,17 +430,21 @@ protected:
     for (p = range.first; p != range.second; ++p)
     {
       type_ = p->second.get<std::string>("type");
-      if (type_ == "summary")
+      if (type_ == "modes")
       {
-        add_inspector<inspector::summary<T> >(p->second);
+        add_inspector<inspector::modes<T> >(p->second);
+      }
+      else if (type_ == "motion")
+      {
+        add_inspector<inspector::motion<T> >(p->second);
       }
       else if (type_ == "ptree")
       {
         add_inspector<inspector::ptree<T> >(p->second);
       }
-      else if (type_ == "tecplot")
+      else if (type_ == "summary")
       {
-        add_inspector<inspector::tecplot<T> >(p->second);
+        add_inspector<inspector::summary<T> >(p->second);
       }
       else
       {

@@ -17,9 +17,10 @@
         + [Newmark-$\beta$ Method](#newmark-beta-method)
         + [Generalized-$\alpha$ Method](#generalized-alpha-method)
     - [Outputs](#outputs)
-        + [Summary Filter](#summary-filter)
+        + [Modes Filter](#modes-filter)
+        + [Motion Filter](#motion-filter)
         + [Property Tree Filter](#property-tree-filter)
-        + [Tecplot Filters](#tecplot-filters)
+        + [Summary Filter](#summary-filter)
 * [Nomenclature](#nomenclature)
 
 # Synopsis
@@ -81,7 +82,7 @@ $$
 \end{aligned}
 $$
 
-If a finite set of $M$ mode shapes $\left[\Phi\right]$ are used in place of the
+If a finite set of $m$ mode shapes $\left[\Phi\right]$ are used in place of the
 full set of eigenvectors $\left[\Psi\right]$, then:
 
 $$
@@ -93,7 +94,7 @@ $$
 
 YAMSS solves this set of ordinary differential equations for the time history
 of the modal coordinates $\left\{q\right\}$.  The governing equations are
-approximate when $M < N$, but can be quite accurate, even when $M \ll N$.
+approximate when $m < n$, but can be quite accurate, even when $m \ll n$.
 
 # Options
 
@@ -158,10 +159,9 @@ Nodes can be connected to form elements.  Elements are currently only used for
 visualization purposes, so a structure need not contain any elements to be
 valid.  The following element types are supported:
 
-* `point` -- 0D point element, $n_v = 1$
-* `line` -- 1D line element, $n_v = 2$
-* `tria` -- 2D triangular element, $n_v = 3$
-* `quad` -- 2D quadrilateral element, $n_v = 4$ 
+* `line` -- 1D line element, $p = 2$
+* `tria` -- 2D triangular element, $p = 3$
+* `quad` -- 2D quadrilateral element, $p = 4$
 
 In addition to its type, each element has an the following properties:
 
@@ -170,7 +170,7 @@ In addition to its type, each element has an the following properties:
 
 As with the nodes, each element identification number should be unique amongst
 all of the elements, but need not be sequential.  There must be as many node
-references elements as vertices in the element.  
+references elements as vertices in the element.
 
 ### Example
 
@@ -201,7 +201,7 @@ two triangular elements.
 ## Modes
 
 The mode shapes $\left[\Phi\right]$ are required to compute the generalized
-forces $F$ from the applied loads $\tilde{F}$.  For each of the $M$ modes, the following properties are defined at each node:
+forces $F$ from the applied loads $\tilde{F}$.  For each of the $m$ modes, the following properties are defined at each node:
 
 * `id` -- reference to an identification number (type: $\mathbb{N}_0$, required)
 * `x` -- translation along the x-coordinate (type: $\mathbb{R}$, default: 0)
@@ -217,7 +217,7 @@ rotational coordinates are typically zero and can be left out of the input
 file.
 
 Within the XML file, the `<modes>` element should contain one `<mode>` element
-for each of the $M$ modes.  Each `<mode>` must contain a single `<nodes>`
+for each of the $m$ modes.  Each `<mode>` must contain a single `<nodes>`
 element that, in turn, contains any number of `<node>` elements.  Nodes not
 referenced are assumed to have zero displacement.  The following fragment
 defines two modes $\phi_1 = (x, y, 0)$ and $\phi_2 = (0, 0, x + y)$ for the
@@ -253,20 +253,20 @@ and `<initial_conditions>`.  The elements below can be used inside `<matrices>`
 to define the generalized mass, damping, and stiffness matrices.
 
 * `mass` -- Generalized mass matrix $\left[M\right]$ (type:
-            $\mathbb{R}^{M\times M}$, default: $\left[1\right]$)
+            $\mathbb{R}^{m\times m}$, default: $\left[1\right]$)
 * `damping` -- Generalized damping matrix $\left[C\right]$ (type:
-               $\mathbb{R}^{M\times M}$, default: $\left[0\right]$)
+               $\mathbb{R}^{m\times m}$, default: $\left[0\right]$)
 * `stiffness` -- Generalized stiffness matrix $\left[K\right]$ (type:
-                 $\mathbb{R}^{M\times M}$, default: $\left[1\right]$)
+                 $\mathbb{R}^{m\times m}$, default: $\left[1\right]$)
 
 The initial values and time rates of change of the generalized coordinates can
 be set using the following children of `<initial_conditions>`:
 
 * `displacement` -- Initial values of the modal coordinates,
-                    $\left\{q(0)\right\}$ (type: $\mathbb{R}^M$, default:
+                    $\left\{q(0)\right\}$ (type: $\mathbb{R}^m$, default:
                     $\left\{0\right\}$)
 * `velocity` -- Initial values of the modal velocities,
-                $\left\{\dot{q}(0)\right\}$ (type: $\mathbb{R}^M$, default:
+                $\left\{\dot{q}(0)\right\}$ (type: $\mathbb{R}^m$, default:
                 $\left\{0\right\}$)
 
 Vectors are specified as a space-separated list of values.  Matrices are input
@@ -564,19 +564,35 @@ modal coordinates.
 </outputs>
 ```
 
-### Summary Filter
+### Modes Filter
 
-The summary filter outputs the iteration counter $n$, the time $t$, and a
-subset of the modal coordinates $\left\{q\right\}$ as the solution progresses.
-It takes the following parameters:
+The modes filter outputs an ASCII Tecplot data file containing a history of
+the iteration $n$, time $t$, generalized displacements $\left\{q\right\}$,
+generalized velocities $\left\{\dot{q}\right\}$, generalized accelerations
+$\left\{\ddot{q}\right\}$, and generalized forces $\left\{F\right\}$.
+Parameters for the `tecplot` filter are:
 
-* `filename` -- the output file name (type: string, default: "")
+* `filename` -- the output file name (type: string, default: `modes.dat`)
 * `stride` -- the number of iterations between output
               (type: $\mathbb{N}_1$, default: 1)
-* `limit` -- the maximum number of modes to include in the output
-             (type: $\mathbb{N}_1$, default: 3)
+* `brief` -- if present, do not include $\left\{\dot{q}\right\}$,
+             $\left\{\ddot{q}\right\}$, and $\left\{F\right\}$
 
-If `filename` is empty, then output is directed to the standard console.
+If the `filename` is empty, then output is directed to the standard console.
+
+### Motion Filter
+
+The motion filter outputs a series of ASCII Tecplot data files containing
+snapshots of the structure.
+
+* `filename` -- the output file name template (type: string,
+                default `motion/snapshot.%1$04d.dat`)
+* `stride` -- the number of iterations between snapshots
+              (type: $\mathbb{N}_1$, default: 1)
+
+The `filename` parameter must contain a single [Boost format][boost_format]
+decimal format specification.  This will be replaced by the snapshot number,
+starting åfrom zero.
 
 ### Property Tree Filter
 
@@ -594,21 +610,19 @@ This filter can write files in XML, JSON, and INFO formats.  The format depends
 on the filename extension: `.xml` for XML, `.json` for JSON, and `.info` for
 INFO.
 
-### Tecplot Filter
+### Summary Filter
 
-The Tecplot filter outputs an ASCII Tecplot data file containing a history of
-the iteration $n$, time $t$, generalized displacements $\left\{q\right\}$,
-generalized velocities $\left\{\dot{q}\right\}$, generalized accelerations
-$\left\{\ddot{q}\right\}$, and generalized forces $\left\{F\right\}$.
-Parameters for the `tecplot` filter are:
+The summary filter outputs the iteration counter $n$, the time $t$, and a
+subset of the modal coordinates $\left\{q\right\}$ as the solution progresses.
+It takes the following parameters:
 
-* `filename` -- the output file name (type: string, default: `yamss.dat`)
+* `filename` -- the output file name (type: string, default: "")
 * `stride` -- the number of iterations between output
               (type: $\mathbb{N}_1$, default: 1)
-* `brief` -- if present, do not include $\left\{\dot{q}\right\}$,
-             $\left\{\ddot{q}\right\}$, and $\left\{F\right\}$
+* `limit` -- the maximum number of modes to include in the output
+             (type: $\mathbb{N}_1$, default: 3)
 
-If the `filename` is empty, then output is directed to the standard console.
+If `filename` is empty, then output is directed to the standard console.
 
 # Nomenclature
 
@@ -636,14 +650,14 @@ ${\left[\tilde{M}\right]}$
 ${\left[M\right]}$
 :   Modal mass matrix.  A symmetric $M\times M$ matrix.
 
-$M$
+$m$
 :   Number of mode shapes.
 
-$n_v$
-:   Number of vertices in an element.
-
-$N$
+$n$
 :   Number of degrees of freedom.
+
+$p$
+:   Number of vertices in an element.
 
 $\left\{q\right\}$
 :   Generalized coordinate vector.  An $M$-dimensional vector.
@@ -664,4 +678,5 @@ ${\left[\Psi\right]}$
 bibliography: references.bib
 ...
 
+[boost_format]: http://www.boost.org/doc/libs/1_57_0/libs/format
 [lua]: http://www.lua.org

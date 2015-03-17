@@ -16,6 +16,7 @@ element::element(key_type a_key, shape_type a_shape)
 
 element::element(const element& a_other)
   : m_key(a_other.m_key)
+  , m_shape(a_other.m_shape)
   , m_vertices(a_other.m_vertices)
 {
   // empty
@@ -30,6 +31,7 @@ element&
 element::operator=(const element& a_other)
 {
   m_key = a_other.m_key;
+  m_shape = a_other.m_shape;
   m_vertices = a_other.m_vertices;
   return *this;
 }
@@ -82,9 +84,6 @@ element::set_shape(shape_type a_shape)
   m_shape = a_shape;
   switch (m_shape)
   {
-    case POINT:
-      m_vertices.resize(1);
-      break;
     case LINE:
       m_vertices.resize(2);
       break;
