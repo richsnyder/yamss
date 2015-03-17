@@ -22,6 +22,8 @@ public:
   typedef structure<T> structure_type;
 
   motion()
+    : m_stride(1)
+    , m_filename("motion/snapshot.%04d.dat")
   {
     // empty
   }

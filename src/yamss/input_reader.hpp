@@ -146,10 +146,20 @@ protected:
     typedef pt::ptree::const_assoc_iterator const_iterator;
     typedef std::pair<const_iterator, const_iterator> range_type;
 
+    pt::ptree nodes_tree;
+    try
+    {
+      nodes_tree = m_document.get_child("structure.nodes");
+    }
+    catch (pt::ptree_bad_path& e)
+    {
+      return;
+    }
+
     const_iterator p;
     boost::optional<key_type> id;
     boost::optional<value_type> dof;
-    range_type range = m_document.get_child("structure.nodes").equal_range("node");
+    range_type range = nodes_tree.equal_range("node");
     for (p = range.first; p != range.second; ++p)
     {
       id = p->second.get_optional<key_type>("id");
@@ -235,16 +245,23 @@ protected:
     element::shape_type shape;
     boost::optional<key_type> id;
     pt::ptree::const_iterator p;
-    pt::ptree elements = m_document.get_child("structure.elements");
-    for (p = elements.begin(); p != elements.end(); ++p)
+    try
     {
-      id = p->second.get_optional<key_type>("id");
-      if (id)
+      pt::ptree elements = m_document.get_child("structure.elements");
+      for (p = elements.begin(); p != elements.end(); ++p)
       {
-        shape = get_shape(p->first);
-        element_type& element_ = m_structure->add_element(*id, shape);
-        add_vertices(element_, p->second);
+        id = p->second.get_optional<key_type>("id");
+        if (id)
+        {
+          shape = get_shape(p->first);
+          element_type& element_ = m_structure->add_element(*id, shape);
+          add_vertices(element_, p->second);
+        }
       }
+    }
+    catch (pt::ptree_bad_path& e)
+    {
+      // empty
     }
   }
 
@@ -260,43 +277,60 @@ protected:
     size_type mode = 0;
     boost::optional<key_type> id;
     boost::optional<value_type> dof;
-    range_type range = m_document.get_child("modes").equal_range("mode");
-    for (p = range.first; p != range.second; ++p)
+    pt::ptree nodes_tree;
+    try
     {
-      range_type nrange = p->second.get_child("nodes").equal_range("node");
-      for (q = nrange.first; q != nrange.second; ++q)
+      pt::ptree modes_tree = m_document.get_child("modes");
+      range_type range = m_document.get_child("modes").equal_range("mode");
+      for (p = range.first; p != range.second; ++p)
       {
-        id = q->second.get_optional<key_type>("id");
-        if (id)
+        try
         {
-          node_type& node_ = m_structure->get_node(*id);
-          if ((dof = q->second.get_optional<value_type>("x")))
+          nodes_tree = p->second.get_child("nodes");
+          range_type nrange = nodes_tree.equal_range("node");
+          for (q = nrange.first; q != nrange.second; ++q)
           {
-            node_.set_mode(mode, 0, *dof);
-          }
-          if ((dof = q->second.get_optional<value_type>("y")))
-          {
-            node_.set_mode(mode, 1, *dof);
-          }
-          if ((dof = q->second.get_optional<value_type>("z")))
-          {
-            node_.set_mode(mode, 2, *dof);
-          }
-          if ((dof = q->second.get_optional<value_type>("p")))
-          {
-            node_.set_mode(mode, 3, *dof);
-          }
-          if ((dof = q->second.get_optional<value_type>("q")))
-          {
-            node_.set_mode(mode, 4, *dof);
-          }
-          if ((dof = q->second.get_optional<value_type>("r")))
-          {
-            node_.set_mode(mode, 5, *dof);
+            id = q->second.get_optional<key_type>("id");
+            if (id)
+            {
+              node_type& node_ = m_structure->get_node(*id);
+              if ((dof = q->second.get_optional<value_type>("x")))
+              {
+                node_.set_mode(mode, 0, *dof);
+              }
+              if ((dof = q->second.get_optional<value_type>("y")))
+              {
+                node_.set_mode(mode, 1, *dof);
+              }
+              if ((dof = q->second.get_optional<value_type>("z")))
+              {
+                node_.set_mode(mode, 2, *dof);
+              }
+              if ((dof = q->second.get_optional<value_type>("p")))
+              {
+                node_.set_mode(mode, 3, *dof);
+              }
+              if ((dof = q->second.get_optional<value_type>("q")))
+              {
+                node_.set_mode(mode, 4, *dof);
+              }
+              if ((dof = q->second.get_optional<value_type>("r")))
+              {
+                node_.set_mode(mode, 5, *dof);
+              }
+            }
           }
         }
+        catch (pt::ptree_bad_path& e)
+        {
+          // empty
+        }
+        ++mode;
       }
-      ++mode;
+    }
+    catch (pt::ptree_bad_path& e)
+    {
+      // empty
     }
   }
 
@@ -306,28 +340,42 @@ protected:
     boost::optional<std::string> str;
     boost::property_tree::ptree tree;
 
-    tree = m_document.get_child("eom.matrices");
-    if ((str = tree.get_optional<std::string>("mass")))
+    try
     {
-      m_eom ->set_mass(matrix_cast<value_type>(*str));
+      tree = m_document.get_child("eom.matrices");
+      if ((str = tree.get_optional<std::string>("mass")))
+      {
+        m_eom ->set_mass(matrix_cast<value_type>(*str));
+      }
+      if ((str = tree.get_optional<std::string>("damping")))
+      {
+        m_eom->set_damping(matrix_cast<value_type>(*str));
+      }
+      if ((str = tree.get_optional<std::string>("stiffness")))
+      {
+        m_eom->set_stiffness(matrix_cast<value_type>(*str));
+      }
     }
-    if ((str = tree.get_optional<std::string>("damping")))
+    catch (boost::property_tree::ptree_bad_path& e)
     {
-      m_eom->set_damping(matrix_cast<value_type>(*str));
-    }
-    if ((str = tree.get_optional<std::string>("stiffness")))
-    {
-      m_eom->set_stiffness(matrix_cast<value_type>(*str));
+      // empty
     }
 
-    tree = m_document.get_child("eom.initial_conditions");
-    if ((str = tree.get_optional<std::string>("displacement")))
+    try
     {
-      m_eom->set_displacement(vector_cast<value_type>(*str));
+      tree = m_document.get_child("eom.initial_conditions");
+      if ((str = tree.get_optional<std::string>("displacement")))
+      {
+        m_eom->set_displacement(vector_cast<value_type>(*str));
+      }
+      if ((str = tree.get_optional<std::string>("velocity")))
+      {
+        m_eom->set_velocity(vector_cast<value_type>(*str));
+      }
     }
-    if ((str = tree.get_optional<std::string>("velocity")))
+    catch (boost::property_tree::ptree_bad_path& e)
     {
-      m_eom->set_velocity(vector_cast<value_type>(*str));
+      // empty
     }
   }
 
@@ -365,11 +413,21 @@ protected:
     typedef pt::ptree::const_assoc_iterator const_iterator;
     typedef std::pair<const_iterator, const_iterator> range_type;
 
+    pt::ptree loads_tree;
+    try
+    {
+      loads_tree = m_document.get_child("loads");
+    }
+    catch (pt::ptree_bad_path& e)
+    {
+      return;
+    }
+
     const_iterator p;
     const_iterator q;
     boost::optional<key_type> id;
     boost::optional<std::string> type_;
-    range_type range = m_document.get_child("loads").equal_range("load");
+    range_type range = loads_tree.equal_range("load");
     for (p = range.first; p != range.second; ++p)
     {
       id = p->second.get_optional<key_type>("id");
@@ -424,9 +482,19 @@ protected:
     typedef pt::ptree::const_assoc_iterator const_iterator;
     typedef std::pair<const_iterator, const_iterator> range_type;
 
+    pt::ptree outputs_tree;
+    try
+    {
+      outputs_tree = m_document.get_child("outputs");
+    }
+    catch (pt::ptree_bad_path& e)
+    {
+      return;
+    }
+
     const_iterator p;
     std::string type_;
-    range_type range = m_document.get_child("outputs").equal_range("output");
+    range_type range = outputs_tree.equal_range("output");
     for (p = range.first; p != range.second; ++p)
     {
       type_ = p->second.get<std::string>("type");

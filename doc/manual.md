@@ -41,7 +41,7 @@ $$
 = \left\{\tilde{F}\right\},
 $$
 
-where $\left\{x\right\}$ is a time-dependent vector of the $N$ degrees of
+where $\left\{x\right\}$ is a time-dependent vector of the $n$ degrees of
 freedom, $\left\{\tilde{F}\right\}$ is a vector of applied forces, and
 $\left[\tilde{M}\right]$, $\left[\tilde{C}\right]$, and
 $\left[\tilde{K}\right]$ are symmetric matrices referred to respectively as
@@ -558,7 +558,7 @@ modal coordinates.
         </parameters>
     </output>
     <output>
-        <type>tecplot</type>
+        <type>modes</type>
         <parameters />
     </output>
 </outputs>
@@ -586,7 +586,7 @@ The motion filter outputs a series of ASCII Tecplot data files containing
 snapshots of the structure.
 
 * `filename` -- the output file name template (type: string,
-                default `motion/snapshot.%1$04d.dat`)
+                default `motion/snapshot.%04d.dat`)
 * `stride` -- the number of iterations between snapshots
               (type: $\mathbb{N}_1$, default: 1)
 
@@ -627,28 +627,28 @@ If `filename` is empty, then output is directed to the standard console.
 # Nomenclature
 
 ${\left[\tilde{C}\right]}$
-:   Damping matrix.  A symmetric $N\times N$ matrix.
+:   Damping matrix.  A symmetric $n\times n$ matrix.
 
 ${\left[C\right]}$
-:   Modal damping matrix.  A symmetric $M\times M$ matrix.
+:   Modal damping matrix.  A symmetric $m\times m$ matrix.
 
 $\left\{\tilde{F}\right\}$
-:   Forcing term.  An $N$-dimensional vector.
+:   Forcing term.  An $n$-dimensional vector.
 
 $\left\{F\right\}$
-:   Modal forcing term.  An $M$-dimensional vector.
+:   Modal forcing term.  An $m$-dimensional vector.
 
 ${\left[\tilde{K}\right]}$
-:   Stiffness matrix.  A symmetric $N\times N$ matrix.
+:   Stiffness matrix.  A symmetric $n\times n$ matrix.
 
 ${\left[K\right]}$
-:   Modal stiffness matrix.  A symmetric $M\times M$ matrix.
+:   Modal stiffness matrix.  A symmetric $m\times m$ matrix.
 
 ${\left[\tilde{M}\right]}$
-:   Mass matrix.  A symmetric $N\times N$ matrix.
+:   Mass matrix.  A symmetric $n\times n$ matrix.
 
 ${\left[M\right]}$
-:   Modal mass matrix.  A symmetric $M\times M$ matrix.
+:   Modal mass matrix.  A symmetric $m\times m$ matrix.
 
 $m$
 :   Number of mode shapes.
@@ -660,14 +660,14 @@ $p$
 :   Number of vertices in an element.
 
 $\left\{q\right\}$
-:   Generalized coordinate vector.  An $M$-dimensional vector.
+:   Generalized coordinate vector.  An $m$-dimensional vector.
 
 $\left\{x\right\}$
-:   Coordinates of the vibrational degrees of freedom.  An $N$-dimensional
+:   Coordinates of the vibrational degrees of freedom.  An $n$-dimensional
     vector.
 
 ${\left[\Phi\right]}$
-:   Mode shapes.  An $M\times N$ matrix.
+:   Mode shapes.  An $m\times n$ matrix.
 
 ${\left[\Psi\right]}$
 :   Eigenvectors of the vibrational system.
