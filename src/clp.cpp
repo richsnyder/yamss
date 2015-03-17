@@ -20,8 +20,7 @@ clp::good() const
   return
       m_variables_map.count("help") == 0 &&
       m_variables_map.count("legal") == 0 &&
-      m_variables_map.count("version") == 0 &&
-      m_variables_map.count("input") == 1;
+      m_variables_map.count("version") == 0;
 }
 
 void
@@ -30,7 +29,7 @@ clp::initialize()
   namespace po = boost::program_options;
   m_argument_options.add_options()
     (
-      "input",
+      "input-filename",
       po::value<std::string>(),
       "input XML file"
     );
@@ -48,7 +47,7 @@ clp::initialize()
       "version,v",
       "print the version and exit"
     );
-  m_positional.add("input", 1);
+  m_positional.add("input-filename", 1);
 }
 
 bool
@@ -57,10 +56,16 @@ clp::complex_mode() const
   return m_variables_map.count("complex") == 1;
 }
 
-std::string
-clp::input() const
+bool
+clp::has_input_filename() const
 {
-  return m_variables_map["input"].as<std::string>();
+  return m_variables_map.count("input-filename") == 1;
+}
+
+std::string
+clp::input_filename() const
+{
+  return m_variables_map["input-filename"].as<std::string>();
 }
 
 void
@@ -86,7 +91,7 @@ void
 clp::report(std::ostream& a_out) const
 {
   bool has_help = m_variables_map.count("help");
-  bool has_input = m_variables_map.count("input");
+  bool has_input = m_variables_map.count("input-filename");
   bool has_legal = m_variables_map.count("legal");
   bool has_version = m_variables_map.count("version");
 
@@ -114,16 +119,12 @@ clp::report(std::ostream& a_out) const
   {
     version(a_out);
   }
-  else if (!has_input)
-  {
-    usage(a_out);
-  }
 }
 
 void
 clp::usage(std::ostream& a_out) const
 {
-  a_out << "Usage: " << m_program_name << " [options] input-file" << std::endl;
+  a_out << "Usage: " << m_program_name << " [options] [input-file]" << std::endl;
   a_out << std::endl;
   a_out << m_visible_options;
 }

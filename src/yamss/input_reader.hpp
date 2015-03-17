@@ -31,6 +31,25 @@ public:
   typedef T value_type;
   typedef runner<T> runner_type;
 
+  input_reader()
+    : m_eom()
+    , m_structure()
+    , m_integrator()
+    , m_runner()
+  {
+    parse_standard_input();
+    create_integrator();
+    create_structure_and_eom();
+    create_runner();
+    process_nodes();
+    process_elements();
+    process_modes();
+    process_eom();
+    process_loads();
+    process_solution();
+    process_output();
+  }
+
   input_reader(const std::string& a_filename)
     : m_eom()
     , m_structure()
@@ -64,6 +83,14 @@ protected:
   typedef typename runner_type::eom_type eom_type;
   typedef typename runner_type::integrator_type integrator_type;
   typedef typename runner_type::structure_type structure_type;
+
+  void
+  parse_standard_input()
+  {
+    boost::property_tree::ptree document;
+    boost::property_tree::read_xml(std::cin, document);
+    m_document = document.get_child("yamss");
+  }
 
   void
   parse_file(const std::string& a_filename)
@@ -529,6 +556,14 @@ private:
   boost::shared_ptr<integrator_type> m_integrator;
   boost::shared_ptr<runner_type> m_runner;
 }; // input_reader<T> class
+
+template <typename T>
+boost::shared_ptr<runner<T> >
+read_input()
+{
+  input_reader<T> reader;
+  return reader.get_runner();
+}
 
 template <typename T>
 boost::shared_ptr<runner<T> >

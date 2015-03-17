@@ -18,7 +18,16 @@ main(int argc, char* argv[])
       typedef std::complex<double> value_type;
       typedef yamss::runner<value_type> runner_type;
       typedef boost::shared_ptr<runner_type> runner_pointer;
-      runner_pointer runner = yamss::read_input<value_type>(parser.input());
+
+      runner_pointer runner;
+      if (parser.has_input_filename())
+      {
+        runner = yamss::read_input<value_type>(parser.input_filename());
+      }
+      else
+      {
+        runner = yamss::read_input<value_type>();
+      }
       runner->initialize();
       runner->run();
       runner->finalize();
@@ -28,7 +37,16 @@ main(int argc, char* argv[])
       typedef double value_type;
       typedef yamss::runner<value_type> runner_type;
       typedef boost::shared_ptr<runner_type> runner_pointer;
-      runner_pointer runner = yamss::read_input<value_type>(parser.input());
+
+      runner_pointer runner;
+      if (parser.has_input_filename())
+      {
+        runner = yamss::read_input<value_type>(parser.input_filename());
+      }
+      else
+      {
+        runner = yamss::read_input<value_type>();
+      }
       runner->initialize();
       runner->run();
       runner->finalize();

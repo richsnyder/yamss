@@ -19,8 +19,11 @@ public:
   bool
   complex_mode() const;
 
+  bool
+  has_input_filename() const;
+
   std::string
-  input() const;
+  input_filename() const;
 
   void
   legal(std::ostream& a_out) const;
