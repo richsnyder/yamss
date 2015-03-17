@@ -37,8 +37,6 @@
     </initial_conditions>
   </eom>
 
-  <loads />
-
   <solution>
     <time>
       <span>25.13</span>
@@ -47,7 +45,7 @@
 
   <outputs>
     <output>
-      <type>tecplot</type>
+      <type>modes</type>
       <parameters />
     </output>
   </outputs>

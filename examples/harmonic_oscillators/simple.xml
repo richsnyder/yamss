@@ -29,13 +29,10 @@
   </modes>
 
   <eom>
-    <matrices />
     <initial_conditions>
       <displacement>1.0</displacement>
     </initial_conditions>
   </eom>
-
-  <loads />
 
   <solution>
     <time>
@@ -45,7 +42,7 @@
 
   <outputs>
     <output>
-      <type>tecplot</type>
+      <type>modes</type>
       <parameters />
     </output>
   </outputs>

@@ -60,7 +60,7 @@
 
   <outputs>
     <output>
-      <type>tecplot</type>
+      <type>modes</type>
       <parameters />
     </output>
   </outputs>
