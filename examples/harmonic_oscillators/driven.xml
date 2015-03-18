@@ -47,7 +47,7 @@
         </expressions>
       </parameters>
       <nodes>
-        <node>1</node>
+        <all />
       </nodes>
     </load>
   </loads>

@@ -1,6 +1,7 @@
 #ifndef YAMSS_INPUT_READER_HPP
 #define YAMSS_INPUT_READER_HPP
 
+#include <limits>
 #include <stdexcept>
 #include <boost/format.hpp>
 #include <boost/make_shared.hpp>
@@ -406,15 +407,91 @@ protected:
     }
   }
 
-  template <typename Evaluator>
   void
-  add_load(key_type& a_id, const boost::property_tree::ptree& a_tree)
+  add_all_nodes(load_type& a_load, const boost::property_tree::ptree& a_tree)
+  {
+    typename structure_type::node_iterator p;
+    if (a_tree.find("all") != a_tree.not_found())
+    {
+      for (p = m_structure->begin_nodes(); p != m_structure->end_nodes(); ++p)
+      {
+        a_load.add_node(p->get_key());
+      }
+    }
+  }
+
+  void
+  add_range_nodes(load_type& a_load, const boost::property_tree::ptree& a_tree)
+  {
+    namespace pt = boost::property_tree;
+    typedef pt::ptree::const_assoc_iterator const_iterator;
+    typedef std::pair<const_iterator, const_iterator> range_type;
+
+    key_type id;
+    key_type lower;
+    key_type upper;
+    key_type min_key = std::numeric_limits<key_type>::min();
+    key_type max_key = std::numeric_limits<key_type>::max();
+
+    const_iterator p;
+    typename structure_type::node_iterator q;
+    range_type range = a_tree.equal_range("range");
+    for (p = range.first; p != range.second; ++p)
+    {
+      lower = p->second.get<key_type>("begin", min_key);
+      upper = p->second.get<key_type>("end", max_key);
+      for (q = m_structure->begin_nodes(); q != m_structure->end_nodes(); ++q)
+      {
+        id = q->get_key();
+        if (lower <= id && id <= upper)
+        {
+          a_load.add_node(id);
+        }
+      }
+    }
+  }
+
+  void
+  add_single_nodes(load_type& a_load, const boost::property_tree::ptree& a_tree)
   {
     namespace pt = boost::property_tree;
     typedef pt::ptree::const_assoc_iterator const_iterator;
     typedef std::pair<const_iterator, const_iterator> range_type;
 
     const_iterator p;
+    range_type range = a_tree.equal_range("node");
+    for (p = range.first; p != range.second; ++p)
+    {
+      a_load.add_node(p->second.get_value<key_type>());
+    }
+  }
+
+  void
+  add_nodes(load_type& a_load, const boost::property_tree::ptree& a_tree)
+  {
+    typedef typename structure_type::node_iterator node_iterator;
+
+    boost::property_tree::ptree tree;
+    try
+    {
+      tree = a_tree.get_child("nodes");
+    }
+    catch (boost::property_tree::ptree_bad_path& e)
+    {
+      return;
+    }
+
+    add_all_nodes(a_load, tree);
+    add_range_nodes(a_load, tree);
+    add_single_nodes(a_load, tree);
+  }
+
+  template <typename Evaluator>
+  void
+  add_load(key_type& a_id, const boost::property_tree::ptree& a_tree)
+  {
+    namespace pt = boost::property_tree;
+
     boost::shared_ptr<evaluator::evaluator<value_type> > ptr;
     try
     {
@@ -426,11 +503,7 @@ protected:
       ptr = boost::make_shared<Evaluator>();
     }
     load_type& load_ = m_structure->add_load(a_id, ptr);
-    range_type range = a_tree.get_child("nodes").equal_range("id");
-    for (p = range.first; p != range.second; ++p)
-    {
-      load_.add_node(p->second.get_value<key_type>());
-    }
+    add_nodes(load_, a_tree);
   }
 
   void

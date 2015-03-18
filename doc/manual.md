@@ -301,18 +301,34 @@ Each load has the following properties:
 
 * `id` -- identification number (type: $\mathbb{N}_0$, required)
 * `type` -- evaluator type (type: string, required)
-* `parameters` -- evaluator-dependent properties
-* `nodes` -- a list of nodes on which the load is applied
+* `parameters` -- evaluator-dependent properties (optional)
+* `nodes` -- defines the nodes on which the load is applied (required)
 
 Two loads must not share the same identification number.  While the numbers
 must be unique, they do not need to be sequential.  The type must be one of the
-following:
+following, each of which is described in greater detail below.
 
 * `lua` -- Lua evaluator
 
-These load evaluators are described below in greater detail.  The following
-XML fragment serves as an example.  Here, a uniform vertical and sinusoidally
-varying load is applied to four nodes in the structure.
+Each load is applied to a subset of the nodes in the structure.  This node set
+is formed by including any combination of the following elements under the
+load's `<nodes>` entry in the input file:
+
+* `all` -- add all nodes to the load set (type: empty)
+* `node` -- add a single node to the load set (type: $\mathbb{N}_0$, required)
+* `range` -- add a range of nodes to the load set (see below)
+
+The `range` element includes the following two parameters:
+
+* `begin` -- lower bound on the range (type: $\mathbb{N}_0$, default: 0)
+* `end` -- upper bound on the range (type: $\mathbb{N}_0$, default: largest ID)
+
+Because of the default values, an empty `<range />` is equivalent to `<all />`.
+
+### Example
+
+The following XML fragment serves as an example.  Here, a uniform vertical and
+sinusoidally varying load is applied to four nodes in the structure.
 
 ```xml
 <loads>
@@ -325,10 +341,10 @@ varying load is applied to four nodes in the structure.
             </expressions>
         </parameters>
         <nodes>
-            <node>1</node>
-            <node>2</node>
-            <node>3</node>
-            <node>4</node>
+            <range>
+                <begin>1</begin>
+                <end>4</end>
+            </range>
         </nodes>
     </load>
     ...
