@@ -26,6 +26,7 @@ SET(YAMSS_HEADERS
     yamss/inspector/modes.hpp
     yamss/inspector/motion.hpp
     yamss/inspector/ptree.hpp
+    yamss/inspector/stream_inspector.hpp
     yamss/inspector/summary.hpp
     yamss/integrator/integrator.hpp
     yamss/integrator/generalized_alpha.hpp
