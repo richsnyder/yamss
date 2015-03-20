@@ -287,6 +287,23 @@ initial conditions for a two degree-of-freedom system.
 </eom>
 ```
 
+A shorthand notation is available for specifying diagonal matrices.  The
+fragment below uses the `diag()` function to define the same damping and
+stiffness matrices as in the previous fragment.
+
+```xml
+<eom>
+    <matrices>
+        <damping>diag(0.05 0.25)</damping>
+        <stiffness>diag(4 16)</stiffness>
+    </matrices>
+    <initial_conditions>
+        <displacement>1 0</displacement>
+        <velocity>0 4</velocity>
+    </initial_conditions>
+</eom>
+```
+
 ## Loads
 
 Any number of external loads can be applied to the structure; these are summed

@@ -5,6 +5,7 @@
 #include <string>
 #include <armadillo>
 #include <boost/lexical_cast.hpp>
+#include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 
 namespace yamss {
@@ -51,6 +52,13 @@ matrix_cast(const std::string& a_string)
   typedef arma::Mat<T> matrix_type;
   typedef boost::char_separator<char> separator_type;
   typedef boost::tokenizer<separator_type> tokenizer_type;
+
+  boost::smatch match;
+  boost::regex re("^\\s*diag\\(\\s*(?<vector>.*)\\s*\\)\\s*$");
+  if (boost::regex_match(a_string, match, re))
+  {
+    return arma::diagmat(vector_cast<T>(match["vector"]));
+  }
 
   separator_type separator(" \t", ";");
   tokenizer_type tokens(a_string, separator);
