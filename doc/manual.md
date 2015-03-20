@@ -593,6 +593,8 @@ Parameters for the `tecplot` filter are:
               (type: $\mathbb{N}_1$, default: 1)
 * `brief` -- if present, do not include $\left\{\dot{q}\right\}$,
              $\left\{\ddot{q}\right\}$, and $\left\{F\right\}$
+* `no_header` -- if present, do not include the Tecplot header lines
+                 in the output
 
 If the `filename` is empty, then output is directed to the standard console.
 

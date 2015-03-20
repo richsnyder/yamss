@@ -7,6 +7,7 @@
 #include <boost/bind.hpp>
 #include <boost/format.hpp>
 #include <boost/shared_ptr.hpp>
+#include "yamss/complex.hpp"
 #include "yamss/eom.hpp"
 #include "yamss/structure.hpp"
 #include "yamss/inspector/inspector.hpp"
@@ -132,7 +133,7 @@ public:
   void
   run()
   {
-    while (std::real(m_eom->get_time(0)) < std::real(m_final_time))
+    while (::yamss::real(m_eom->get_time(0)) < ::yamss::real(m_final_time))
     {
       step();
     }

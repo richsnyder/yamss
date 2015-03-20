@@ -21,6 +21,7 @@ public:
   modes()
     : stream_inspector<T>()
     , m_brief(false)
+    , m_tecplot(true)
     , m_stride(1)
     , m_filename("yamss.dat")
   {
@@ -31,6 +32,7 @@ public:
     : stream_inspector<T>()
   {
     m_brief = a_tree.find("brief") != a_tree.not_found();
+    m_tecplot = a_tree.find("no_header") == a_tree.not_found();
     m_stride = a_tree.get<size_type>("stride", 1);
     m_filename = a_tree.get<std::string>("filename", "modes.dat");
   }
@@ -47,30 +49,33 @@ public:
   {
     this->open(m_filename);
 
-    size_type n;
-    size_type size = a_eom.get_size();
-    this->out() << "TITLE = \"Mode History\"" << std::endl;
-    this->out() << "VARIABLES = \"Iteration\", \"Time\"";
-    for (n = 1; n <= size; ++n)
+    if (m_tecplot)
     {
-      this->out() << boost::format(", \"Q(%1%)\"") % n;
+      size_type n;
+      size_type size = a_eom.get_size();
+      this->out() << "TITLE = \"Mode History\"" << std::endl;
+      this->out() << "VARIABLES = \"Iteration\", \"Time\"";
+      for (n = 1; n <= size; ++n)
+      {
+        this->out() << boost::format(", \"Q(%1%)\"") % n;
+      }
+      if (!m_brief)
+      {
+        for (n = 1; n <= size; ++n)
+        {
+          this->out() << boost::format(", \"Q'(%1%)\"") % n;
+        }
+        for (n = 1; n <= size; ++n)
+        {
+          this->out() << boost::format(", \"Q''(%1%)\"") % n;
+        }
+        for (n = 1; n <= size; ++n)
+        {
+          this->out() << boost::format(", \"F(%1%)\"") % n;
+        }
+      }
+      this->out() << std::endl << "ZONE DATAPACKING=POINT" << std::endl;
     }
-    if (!m_brief)
-    {
-      for (n = 1; n <= size; ++n)
-      {
-        this->out() << boost::format(", \"Q'(%1%)\"") % n;
-      }
-      for (n = 1; n <= size; ++n)
-      {
-        this->out() << boost::format(", \"Q''(%1%)\"") % n;
-      }
-      for (n = 1; n <= size; ++n)
-      {
-        this->out() << boost::format(", \"F(%1%)\"") % n;
-      }
-    }
-    this->out() << std::endl << "ZONE DATAPACKING=POINT" << std::endl;
   }
 
   virtual
@@ -123,6 +128,7 @@ private:
   typedef arma::Col<T> vector_type;
 
   bool m_brief;
+  bool m_tecplot;
   size_type m_stride;
   std::string m_filename;
 }; // modes<T> class
