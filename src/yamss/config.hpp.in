@@ -1,0 +1,6 @@
+#ifndef YAMSS_CONFIG_HPP
+#define YAMSS_CONFIG_HPP
+
+#cmakedefine YAMSS_SUPPORTS_SERVER_MODE
+
+#endif // YAMSS_CONFIG_HPP

@@ -17,6 +17,7 @@ public:
   typedef T value_type;
   typedef eom<T> eom_type;
   typedef structure<T> structure_type;
+  typedef typename stream_inspector<T>::path_type path_type;
 
   modes()
     : stream_inspector<T>()
@@ -45,9 +46,11 @@ public:
 
   virtual
   void
-  initialize(const eom_type& a_eom, const structure_type& a_structure)
+  initialize(const eom_type& a_eom,
+             const structure_type& a_structure,
+             const path_type& a_directory)
   {
-    this->open(m_filename);
+    this->open(a_directory, m_filename);
 
     if (m_tecplot)
     {

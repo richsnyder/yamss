@@ -1,12 +1,11 @@
 #ifndef YAMSS_INSPECTOR_MOTION_HPP
 #define YAMSS_INSPECTOR_MOTION_HPP
 
-#include <fstream>
 #include <iostream>
 #include <map>
 #include <set>
 #include <armadillo>
-#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 #include <boost/format.hpp>
 #include "yamss/inspector/inspector.hpp"
 
@@ -20,15 +19,20 @@ public:
   typedef T value_type;
   typedef eom<T> eom_type;
   typedef structure<T> structure_type;
+  typedef typename inspector<T>::path_type path_type;
 
   motion()
     : m_stride(1)
+    , m_directory(".")
     , m_filename("motion/snapshot.%04d.dat")
+    , m_files()
   {
     // empty
   }
 
   motion(const boost::property_tree::ptree& a_tree)
+    : m_directory(".")
+    , m_files()
   {
     std::string filename = "motion/snapshot.%04d.dat";
     m_stride = a_tree.get<size_type>("stride", 1);
@@ -43,9 +47,12 @@ public:
 
   virtual
   void
-  initialize(const eom_type& a_eom, const structure_type& a_structure)
+  initialize(const eom_type& a_eom,
+             const structure_type& a_structure,
+             const path_type& a_directory)
   {
     m_counter = 0;
+    m_directory = a_directory;
     create_directory();
     process_structure(a_structure);
   }
@@ -63,7 +70,9 @@ public:
       const vector_type& q = a_eom.get_displacement(0);
 
       boost::format fmt(m_filename);
-      std::ofstream out(boost::str(fmt % m_counter++).c_str());
+      std::string filename = boost::str(fmt % m_counter++);
+      m_files.insert(filename);
+      boost::filesystem::ofstream out(m_directory / filename);
       out << "TITLE = \"Structural Deformation\"" << std::endl;
       out << "VARIABLES = \"X\", \"Y\", \"Z\"" << std::endl;
       fmt.parse("%1$16.9e %2$16.9e %3$16.9e");
@@ -120,12 +129,19 @@ public:
     m_line_elements.reset();
     m_quad_elements.reset();
   }
+
+  virtual
+  void
+  get_files(std::set<path_type>& a_set) const
+  {
+    a_set.insert(m_files.begin(), m_files.end());
+  }
 protected:
   void
   create_directory()
   {
     boost::format fmt(m_filename);
-    boost::filesystem::path path(boost::str(fmt % 0));
+    boost::filesystem::path path = m_directory / boost::str(fmt % 0);
     bool status = boost::filesystem::create_directory(path.parent_path());
   }
 
@@ -218,7 +234,9 @@ private:
   typedef arma::Col<T> vector_type;
 
   size_type m_stride;
+  path_type m_directory;
   std::string m_filename;
+  std::set<path_type> m_files;
 
   size_type m_counter;
   std::set<key_type> m_line_nodes;

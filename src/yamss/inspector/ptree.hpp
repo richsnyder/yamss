@@ -1,10 +1,8 @@
 #ifndef YAMSS_INSPECTOR_PTREE_HPP
 #define YAMSS_INSPECTOR_PTREE_HPP
 
-#include <fstream>
 #include <iterator>
 #include <string>
-#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/info_parser.hpp>
@@ -23,17 +21,20 @@ public:
   typedef T value_type;
   typedef eom<T> eom_type;
   typedef structure<T> structure_type;
+  typedef typename inspector<T>::path_type path_type;
 
   ptree()
     : m_stride(1)
     , m_filename("yamss.xml")
+    , m_directory()
     , m_document()
   {
     // empty
   }
 
   ptree(const boost::property_tree::ptree& a_tree)
-    : m_document()
+    : m_directory()
+    , m_document()
   {
     m_stride = a_tree.get<size_type>("stride", 1);
     m_filename = a_tree.get<std::string>("filename", "yamss.xml");
@@ -47,9 +48,12 @@ public:
 
   virtual
   void
-  initialize(const eom_type& a_eom, const structure_type& a_structure)
+  initialize(const eom_type& a_eom,
+             const structure_type& a_structure,
+             const path_type& a_directory)
   {
     m_document.clear();
+    m_directory = a_directory;
   }
 
   virtual
@@ -92,20 +96,28 @@ public:
   void
   finalize(const eom_type& a_eom, const structure_type& a_structure)
   {
+    std::string filename = (m_directory / m_filename).native();
     std::string ext = boost::filesystem::extension(m_filename);
     boost::to_lower(ext);
     if (ext == ".info")
     {
-      boost::property_tree::write_info(m_filename, m_document);
+      boost::property_tree::write_info(filename, m_document);
     }
     else if (ext == ".json")
     {
-      boost::property_tree::write_json(m_filename, m_document);
+      boost::property_tree::write_json(filename, m_document);
     }
     else
     {
-      boost::property_tree::write_xml(m_filename, m_document);
+      boost::property_tree::write_xml(filename, m_document);
     }
+  }
+
+  virtual
+  void
+  get_files(std::set<path_type>& a_set) const
+  {
+    a_set.insert(m_filename);
   }
 protected:
   typedef size_t size_type;
@@ -119,6 +131,8 @@ protected:
 
   size_type m_stride;
   std::string m_filename;
+
+  path_type m_directory;
   boost::property_tree::ptree m_document;
 }; // ptree<T> class
 

@@ -5,6 +5,7 @@
 #include <iostream>
 #include <list>
 #include <boost/bind.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 #include <boost/shared_ptr.hpp>
 #include "yamss/complex.hpp"
@@ -29,6 +30,7 @@ public:
   typedef boost::shared_ptr<structure_type> structure_pointer;
   typedef boost::shared_ptr<inspector_type> inspector_pointer;
   typedef boost::shared_ptr<integrator_type> integrator_pointer;
+  typedef boost::filesystem::path path_type;
 
   runner(const eom_pointer a_eom,
          const structure_pointer a_structure,
@@ -96,7 +98,7 @@ public:
   }
 
   void
-  initialize()
+  initialize(const path_type& a_output_path = path_type())
   {
     m_structure->apply_loads(m_eom->get_time(0));
     m_eom->set_force(m_structure->get_generalized_force());
@@ -104,7 +106,7 @@ public:
     std::for_each(
         m_inspectors.begin(),
         m_inspectors.end(),
-        boost::bind(&runner<T>::initialize, this, _1)
+        boost::bind(&runner<T>::initialize, this, _1, a_output_path)
       );
   }
 
@@ -146,6 +148,18 @@ public:
     m_final_time = a_final_time;
     run();
   }
+
+  std::set<path_type>
+  get_files() const
+  {
+    std::set<path_type> files;
+    typename std::list<inspector_pointer>::const_iterator ip;
+    for (ip = m_inspectors.begin(); ip != m_inspectors.end(); ++ip)
+    {
+      ip->get()->get_files(files);
+    }
+    return files;
+  }
 protected:
   runner()
   {
@@ -174,9 +188,9 @@ protected:
   }
 
   void
-  initialize(inspector_pointer a_inspector)
+  initialize(inspector_pointer a_inspector, const path_type& a_output_path)
   {
-    a_inspector->initialize(*m_eom, *m_structure);
+    a_inspector->initialize(*m_eom, *m_structure, a_output_path);
   }
 
   void

@@ -1,56 +1,51 @@
 #include <complex>
 #include "yamss/clp.hpp"
-#include "yamss/input_reader.hpp"
+#include "yamss/run_server.hpp"
+#include "yamss/run_simulation.hpp"
 
 int
 main(int argc, char* argv[])
 {
   try
   {
-    yamss::clp parser(argc, argv);
+    yamss::clp parser(argc, argv, "tcp://*:49200");
     if (!parser.good())
     {
       return 0;
     }
 
-    if (parser.complex_mode())
+#ifdef YAMSS_SUPPORTS_SERVER_MODE
+
+    if (parser.server_mode())
+    {
+      yamss::run_server(parser);
+    }
+    else if (parser.complex_mode())
     {
       typedef std::complex<double> value_type;
-      typedef yamss::runner<value_type> runner_type;
-      typedef boost::shared_ptr<runner_type> runner_pointer;
-
-      runner_pointer runner;
-      if (parser.has_input_filename())
-      {
-        runner = yamss::read_input<value_type>(parser.input_filename());
-      }
-      else
-      {
-        runner = yamss::read_input<value_type>();
-      }
-      runner->initialize();
-      runner->run();
-      runner->finalize();
+      yamss::run_simulation<value_type>(parser);
     }
     else
     {
       typedef double value_type;
-      typedef yamss::runner<value_type> runner_type;
-      typedef boost::shared_ptr<runner_type> runner_pointer;
-
-      runner_pointer runner;
-      if (parser.has_input_filename())
-      {
-        runner = yamss::read_input<value_type>(parser.input_filename());
-      }
-      else
-      {
-        runner = yamss::read_input<value_type>();
-      }
-      runner->initialize();
-      runner->run();
-      runner->finalize();
+      yamss::run_simulation<value_type>(parser);
     }
+
+#else
+
+    if (parser.complex_mode())
+    {
+      typedef std::complex<double> value_type;
+      yamss::run_simulation<value_type>(parser);
+    }
+    else
+    {
+      typedef double value_type;
+      yamss::run_simulation<value_type>(parser);
+    }
+
+#endif
+
   }
   catch (std::exception& e)
   {
