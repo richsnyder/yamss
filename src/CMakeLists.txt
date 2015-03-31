@@ -59,6 +59,7 @@ IF(BUILD_SERVER)
       yamss/server/transporter.hpp
   )
 ENDIF(BUILD_SERVER)
+INSTALL(FILES yamss.thrift DESTINATION share)
 
 # Identify the directories that contain include files.
 
@@ -69,18 +70,18 @@ INCLUDE_DIRECTORIES(BEFORE ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 FOREACH(file ${YAMSS_HEADERS})
   GET_FILENAME_COMPONENT(subdirectory ${file} DIRECTORY)
-  INSTALL(FILES ${file} DESTINATION include/${subdirectory})
+  #INSTALL(FILES ${file} DESTINATION include/${subdirectory})
 ENDFOREACH(file)
 FOREACH(file ${YAMSS_CONFIG_HEADERS})
   GET_FILENAME_COMPONENT(subdirectory ${file} DIRECTORY)
   SET(src ${CMAKE_CURRENT_SOURCE_DIR}/${file}.in)
   SET(dst ${CMAKE_CURRENT_BINARY_DIR}/include/${file})
   CONFIGURE_FILE(${src} ${dst})
-  INSTALL(FILES ${dst} DESTINATION include/${subdirectory})
+  #INSTALL(FILES ${dst} DESTINATION include/${subdirectory})
 ENDFOREACH(file)
 FOREACH(file ${THRIFT_HEADERS})
   GET_FILENAME_COMPONENT(directory ${file} DIRECTORY)
-  INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/${file} DESTINATION ${directory})
+  #INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/${file} DESTINATION ${directory})
 ENDFOREACH(file)
 
 # Define the executable target.
