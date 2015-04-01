@@ -11,6 +11,7 @@
 #include "yamss/runner.hpp"
 
 // Evaluators
+#include "yamss/evaluator/interface.hpp"
 #include "yamss/evaluator/lua.hpp"
 
 // Inspectors
@@ -534,7 +535,11 @@ protected:
       type_ = p->second.get<std::string>("type", "lua");
       if (id)
       {
-        if (*type_ == "lua")
+        if (*type_ == "interface")
+        {
+          add_load<evaluator::interface<T> >(*id, p->second);
+        }
+        else if (*type_ == "lua")
         {
           add_load<evaluator::lua<T> >(*id, p->second);
         }

@@ -56,6 +56,12 @@ public:
     return m_key;
   }
 
+  bool
+  is_interface() const
+  {
+    return m_evaluator->is_interface();
+  }
+
   void
   add_node(key_type a_key)
   {

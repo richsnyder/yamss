@@ -24,6 +24,7 @@ SET(YAMSS_HEADERS
     yamss/runner.hpp
     yamss/structure.hpp
     yamss/evaluator/evaluator.hpp
+    yamss/evaluator/interface.hpp
     yamss/evaluator/lua.hpp
     yamss/inspector/inspector.hpp
     yamss/inspector/modes.hpp

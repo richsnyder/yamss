@@ -37,6 +37,34 @@ handler::finalize(const std::string& a_job_key)
 }
 
 void
+handler::getInterfaces(std::vector<Interface>& a_interfaces,
+                       const std::string& a_job_key)
+{
+  runner_pointer runner_ = m_jobs[a_job_key].first;
+  eom_pointer eom_ = runner_->get_eom();
+  structure_pointer structure_ = runner_->get_structure();
+  typename structure_type::load_iterator lp;
+  typename load_type::const_iterator np;
+  int64_t key;
+  for (lp = structure_->begin_loads(); lp != structure_->end_loads(); ++lp)
+  {
+    if (lp->is_interface())
+    {
+      Interface iface;
+      iface.key = lp->get_key();
+      iface.activeDofs = structure_->get_active_dofs();
+      for (np = lp->begin(); np != lp->end(); ++np)
+      {
+        key = static_cast<int64_t>(*np);
+        const vector_type& x = structure_->get_node(*np).get_position();
+        iface.positions[key] = ::arma::conv_to<std::vector<double> >::from(x);
+      }
+      a_interfaces.push_back(iface);
+    }
+  }
+}
+
+void
 handler::getModes(std::vector<double>& a_modes,
                   const std::string& a_job_key)
 {
@@ -53,8 +81,9 @@ handler::getNode(Node& a_node,
 {
   runner_pointer runner_ = m_jobs[a_job_key].first;
   eom_pointer eom_ = runner_->get_eom();
+  key_type node_key = static_cast<key_type>(a_node_key);
   structure_pointer structure_ = runner_->get_structure();
-  const node_type& node_ = structure_->get_node(a_node_key);
+  const node_type& node_ = structure_->get_node(node_key);
   const vector_type& q = eom_->get_displacement(0);
   const vector_type& x = node_.get_position();
   const vector_type& f = node_.get_force();

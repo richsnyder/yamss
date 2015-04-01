@@ -56,6 +56,20 @@ public:
     return m_active_dofs(a_dof) > 0.5 ? true : false;
   }
 
+  std::vector<bool>
+  get_active_dofs() const
+  {
+    std::vector<bool> active(6, false);
+    for (size_type n = 0; n < 6; ++n)
+    {
+      if (is_active(n))
+      {
+        active[n] = true;
+      }
+    }
+    return active;
+  }
+
   node_type&
   add_node(key_type a_key)
   {

@@ -4,6 +4,12 @@ exception YamssException {
   1: string what
 }
 
+struct Interface {
+  1: i64 key,
+  2: list<bool> activeDofs,
+  3: map<i64, list<double>> positions
+}
+
 struct Node {
   1: list<double> position,
   2: list<double> displacement,
@@ -23,6 +29,10 @@ service Yamss {
   void
   finalize(1: string a_job_key)
            throws (1: YamssException e),
+
+  list<Interface>
+  getInterfaces(1: string a_job_key)
+                throws (1: YamssException e),
 
   list<double>
   getModes(1: string a_job_key)

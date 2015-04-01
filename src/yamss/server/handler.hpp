@@ -23,12 +23,16 @@ public:
   finalize(const std::string& a_job_key);
 
   void
+  getInterfaces(std::vector<Interface>& a_interfaces,
+                const std::string& a_job_key);
+
+  void
   getModes(std::vector<double>& a_modes, const std::string& a_job_key);
 
   void
   getNode(Node& a_position,
           const std::string& a_job_key,
-          const int64_t a_node);
+          const int64_t a_node_key);
 
   void
   getState(State& a_state, const std::string& a_job_key);
@@ -51,14 +55,20 @@ public:
   void
   step(const std::string& a_job_key);
 protected:
+  typedef size_t key_type;
   typedef double value_type;
   typedef ::arma::Col<value_type> vector_type;
+
   typedef ::yamss::runner<value_type> runner_type;
   typedef ::boost::shared_ptr<runner_type> runner_pointer;
   typedef ::std::pair<runner_pointer, std::string> job_type;
+
   typedef typename runner_type::eom_pointer eom_pointer;
   typedef typename runner_type::structure_pointer structure_pointer;
-  typedef typename runner_type::structure_type::node_type node_type;
+  typedef typename runner_type::structure_type structure_type;
+
+  typedef typename structure_type::load_type load_type;
+  typedef typename structure_type::node_type node_type;
 private:
   ::boost::filesystem::path m_directory;
   ::yamss::server::transporter m_transporter;
