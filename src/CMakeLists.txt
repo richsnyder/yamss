@@ -4,6 +4,7 @@ SET(YAMSS_SOURCES
     about.cpp
     clp.cpp
     element.cpp
+    ostream.cpp
     run_server.cpp
     yamss.cpp
 )
@@ -29,8 +30,8 @@ SET(YAMSS_HEADERS
     yamss/inspector/inspector.hpp
     yamss/inspector/modes.hpp
     yamss/inspector/motion.hpp
+    yamss/inspector/ostream.hpp
     yamss/inspector/ptree.hpp
-    yamss/inspector/stream_inspector.hpp
     yamss/inspector/summary.hpp
     yamss/integrator/integrator.hpp
     yamss/integrator/generalized_alpha.hpp

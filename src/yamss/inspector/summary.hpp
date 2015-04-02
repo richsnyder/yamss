@@ -1,40 +1,38 @@
 #ifndef YAMSS_INSPECTOR_SUMMARY_HPP
 #define YAMSS_INSPECTOR_SUMMARY_HPP
 
-#include <algorithm>
-#include <fstream>
-#include <iostream>
 #include <armadillo>
 #include <boost/format.hpp>
-#include "yamss/inspector/stream_inspector.hpp"
+#include "yamss/inspector/inspector.hpp"
+#include "yamss/inspector/ostream.hpp"
 
 namespace yamss {
 namespace inspector {
 
 template <typename T = double>
-class summary : public stream_inspector<T>
+class summary : public inspector<T>
 {
 public:
   typedef T value_type;
   typedef eom<T> eom_type;
   typedef structure<T> structure_type;
-  typedef typename stream_inspector<T>::path_type path_type;
+  typedef typename ostream::path_type path_type;
 
   summary()
-    : stream_inspector<T>()
-    , m_limit(3)
+    : m_limit(3)
     , m_stride(1)
     , m_filename()
     , m_last(0)
     , m_more()
+    , m_out()
   {
     // empty
   }
 
   summary(const boost::property_tree::ptree& a_tree)
-    : stream_inspector<T>()
-    , m_last(0)
+    : m_last(0)
     , m_more()
+    , m_out()
   {
     m_limit = a_tree.get<size_type>("limit", 3);
     m_stride = a_tree.get<size_type>("stride", 1);
@@ -53,7 +51,7 @@ public:
              const structure_type& a_structure,
              const path_type& a_directory)
   {
-    this->open(a_directory, m_filename);
+    m_out.open(a_directory, m_filename);
 
     size_type size = a_eom.get_size();
     if (size > m_limit)
@@ -77,16 +75,16 @@ public:
     {
       const value_type t = a_eom.get_time(0);
       const vector_type& q = a_eom.get_displacement(0);
-      this->out() << boost::format("N = %1$6d   T = %2$10.4E   Q = { ") % n % t;
+      m_out << boost::format("N = %1$6d   T = %2$10.4E   Q = { ") % n % t;
       if (m_last > 0)
       {
-        this->out() << boost::format("%1$+10.3E") % q(0);
+        m_out << boost::format("%1$+10.3E") % q(0);
       }
       for (size_type i = 1; i < m_last; ++i)
       {
-        this->out() << boost::format(", %1$+10.3E") % q(i);
+        m_out << boost::format(", %1$+10.3E") % q(i);
       }
-      this->out() << m_more << " }" << std::endl;
+      m_out << m_more << " }" << std::endl;
     }
   }
 
@@ -94,7 +92,17 @@ public:
   void
   finalize(const eom_type& a_eom, const structure_type& a_structure)
   {
-    this->close();
+    m_out.close();
+  }
+
+  virtual
+  void
+  get_files(std::set<path_type>& a_set) const
+  {
+    if (!m_filename.empty())
+    {
+      a_set.insert(m_filename);
+    }
   }
 private:
   typedef size_t size_type;
@@ -106,6 +114,7 @@ private:
 
   size_type m_last;
   std::string m_more;
+  ostream m_out;
 }; // summary<T> class
 
 } // inspector namespace
