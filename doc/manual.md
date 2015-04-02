@@ -155,10 +155,11 @@ for visualization purposes.
 
 ### Elements
 
-Nodes can be connected to form elements.  Elements are currently only used for
-visualization purposes, so a structure need not contain any elements to be
-valid.  The following element types are supported:
+Nodes can be connected to form elements.  External loads are applied to
+elements.  They are used for visualization purposes.  The following element
+types are supported:
 
+* `point` -- 0D point element, $p = 1$
 * `line` -- 1D line element, $p = 2$
 * `tria` -- 2D triangular element, $p = 3$
 * `quad` -- 2D quadrilateral element, $p = 4$
@@ -319,7 +320,7 @@ Each load has the following properties:
 * `id` -- identification number (type: $\mathbb{N}_0$, required)
 * `type` -- evaluator type (type: string, required)
 * `parameters` -- evaluator-dependent properties (optional)
-* `nodes` -- defines the nodes on which the load is applied (required)
+* `elements` -- defines the elements on which the load is applied (required)
 
 Two loads must not share the same identification number.  While the numbers
 must be unique, they do not need to be sequential.  The type must be one of the
@@ -327,15 +328,15 @@ following, each of which is described in greater detail below.
 
 * `lua` -- Lua evaluator
 
-Each load is applied to a subset of the nodes in the structure.  This node set
-is formed by including any combination of the following elements under the
-load's `<nodes>` entry in the input file:
+Each load is applied to a subset of the elements in the structure.  This
+element set is formed by including any combination of the following tags under
+the load's `<elements>` entry in the input file:
 
-* `all` -- add all nodes to the load set (type: empty)
-* `node` -- add a single node to the load set (type: $\mathbb{N}_0$, required)
-* `range` -- add a range of nodes to the load set (see below)
+* `element` -- add a single element to the load set (type: $\mathbb{N}_0$, required)
+* `range` -- add a range of elements to the load set (see below)
+* `all` -- add all elements to the load set (type: empty)
 
-The `range` element includes the following two parameters:
+The `range` tag includes the following two parameters:
 
 * `begin` -- lower bound on the range (type: $\mathbb{N}_0$, default: 0)
 * `end` -- upper bound on the range (type: $\mathbb{N}_0$, default: largest ID)
@@ -345,7 +346,7 @@ Because of the default values, an empty `<range />` is equivalent to `<all />`.
 ### Example
 
 The following XML fragment serves as an example.  Here, a uniform vertical and
-sinusoidally varying load is applied to four nodes in the structure.
+sinusoidally varying load is applied to two elements in the structure.
 
 ```xml
 <loads>
@@ -357,12 +358,12 @@ sinusoidally varying load is applied to four nodes in the structure.
                 <z>math.sin(t)</z>
             </expressions>
         </parameters>
-        <nodes>
+        <elements>
             <range>
                 <begin>1</begin>
-                <end>4</end>
+                <end>2</end>
             </range>
-        </nodes>
+        </elements>
     </load>
     ...
 </loads>

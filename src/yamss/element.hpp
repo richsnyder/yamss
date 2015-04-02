@@ -14,6 +14,7 @@ public:
 
   enum shape_type
   {
+    POINT,
     LINE,
     TRIANGLE,
     QUADRILATERAL

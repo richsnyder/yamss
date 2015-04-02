@@ -84,6 +84,9 @@ element::set_shape(shape_type a_shape)
   m_shape = a_shape;
   switch (m_shape)
   {
+    case POINT:
+      m_vertices.resize(1);
+      break;
     case LINE:
       m_vertices.resize(2);
       break;

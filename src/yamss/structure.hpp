@@ -247,7 +247,9 @@ public:
     for (load_iter = m_loads.begin(); load_iter != m_loads.end(); ++load_iter)
     {
       const load_type& load_ = load_iter->second;
-      for (key_iter = load_.begin(); key_iter != load_.end(); ++key_iter)
+      for (key_iter = load_.begin_nodes();
+           key_iter != load_.end_nodes();
+           ++key_iter)
       {
         node_iter = m_nodes.find(*key_iter);
         if (node_iter != m_nodes.end())

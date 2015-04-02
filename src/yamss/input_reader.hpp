@@ -227,7 +227,11 @@ protected:
   get_shape(const std::string& a_keyword) const
   {
     element_type::shape_type shape;
-    if (a_keyword == "line")
+    if (a_keyword == "point")
+    {
+      shape = element_type::POINT;
+    }
+    else if (a_keyword == "line")
     {
       shape = element_type::LINE;
     }
@@ -409,20 +413,20 @@ protected:
   }
 
   void
-  add_all_nodes(load_type& a_load, const boost::property_tree::ptree& a_tree)
+  add_all_elements(load_type& a_load,
+                   const boost::property_tree::ptree& a_tree)
   {
-    typename structure_type::node_iterator p;
+    typename structure_type::element_iterator p;
     if (a_tree.find("all") != a_tree.not_found())
     {
-      for (p = m_structure->begin_nodes(); p != m_structure->end_nodes(); ++p)
-      {
-        a_load.add_node(p->get_key());
-      }
+      a_load.add_elements(m_structure->begin_elements(),
+                          m_structure->end_elements());
     }
   }
 
   void
-  add_range_nodes(load_type& a_load, const boost::property_tree::ptree& a_tree)
+  add_range_elements(load_type& a_load,
+                     const boost::property_tree::ptree& a_tree)
   {
     namespace pt = boost::property_tree;
     typedef pt::ptree::const_assoc_iterator const_iterator;
@@ -435,56 +439,61 @@ protected:
     key_type max_key = std::numeric_limits<key_type>::max();
 
     const_iterator p;
-    typename structure_type::node_iterator q;
+    typename structure_type::element_iterator q;
     range_type range = a_tree.equal_range("range");
     for (p = range.first; p != range.second; ++p)
     {
       lower = p->second.get<key_type>("begin", min_key);
       upper = p->second.get<key_type>("end", max_key);
-      for (q = m_structure->begin_nodes(); q != m_structure->end_nodes(); ++q)
+      for (q = m_structure->begin_elements();
+           q != m_structure->end_elements();
+           ++q)
       {
         id = q->get_key();
         if (lower <= id && id <= upper)
         {
-          a_load.add_node(id);
+          a_load.add_element(*q);
         }
       }
     }
   }
 
   void
-  add_single_nodes(load_type& a_load, const boost::property_tree::ptree& a_tree)
+  add_single_elements(load_type& a_load,
+                      const boost::property_tree::ptree& a_tree)
   {
     namespace pt = boost::property_tree;
     typedef pt::ptree::const_assoc_iterator const_iterator;
     typedef std::pair<const_iterator, const_iterator> range_type;
 
+    key_type id;
     const_iterator p;
-    range_type range = a_tree.equal_range("node");
+    range_type range = a_tree.equal_range("element");
     for (p = range.first; p != range.second; ++p)
     {
-      a_load.add_node(p->second.get_value<key_type>());
+      id = p->second.get_value<key_type>();
+      a_load.add_element(m_structure->get_element(id));
     }
   }
 
   void
-  add_nodes(load_type& a_load, const boost::property_tree::ptree& a_tree)
+  add_elements(load_type& a_load, const boost::property_tree::ptree& a_tree)
   {
     typedef typename structure_type::node_iterator node_iterator;
 
     boost::property_tree::ptree tree;
     try
     {
-      tree = a_tree.get_child("nodes");
+      tree = a_tree.get_child("elements");
     }
     catch (boost::property_tree::ptree_bad_path& e)
     {
       return;
     }
 
-    add_all_nodes(a_load, tree);
-    add_range_nodes(a_load, tree);
-    add_single_nodes(a_load, tree);
+    add_all_elements(a_load, tree);
+    add_range_elements(a_load, tree);
+    add_single_elements(a_load, tree);
   }
 
   template <typename Evaluator>
@@ -504,7 +513,7 @@ protected:
       ptr = boost::make_shared<Evaluator>();
     }
     load_type& load_ = m_structure->add_load(a_id, ptr);
-    add_nodes(load_, a_tree);
+    add_elements(load_, a_tree);
   }
 
   void

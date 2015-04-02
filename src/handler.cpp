@@ -56,7 +56,7 @@ handler::getInterface(Interface& a_interface,
   typename load_type::const_iterator np;
   a_interface.activeDofs = structure_->get_active_dofs();
   a_interface.positions.clear();
-  for (np = load_.begin(); np != load_.end(); ++np)
+  for (np = load_.begin_nodes(); np != load_.end_nodes(); ++np)
   {
     const vector_type& x = structure_->get_node(*np).get_position();
     a_interface.positions[static_cast<int64_t>(*np)] = converter::from(x);
@@ -79,7 +79,7 @@ handler::getInterfaceNodes(std::map<int64_t, Node>& a_nodes,
   typename load_type::const_iterator np;
   a_nodes.clear();
   const vector_type& q = eom_->get_displacement(0);
-  for (np = load_.begin(); np != load_.end(); ++np)
+  for (np = load_.begin_nodes(); np != load_.end_nodes(); ++np)
   {
     const node_type& node_ = structure_->get_node(*np);
     const vector_type& x = node_.get_position();

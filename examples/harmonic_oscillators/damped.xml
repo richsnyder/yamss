@@ -46,7 +46,6 @@
   <outputs>
     <output>
       <type>modes</type>
-      <parameters />
     </output>
   </outputs>
 

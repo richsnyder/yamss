@@ -3,8 +3,10 @@
 
 #include <algorithm>
 #include <armadillo>
+#include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/unordered_set.hpp>
+#include "yamss/element.hpp"
 #include "yamss/evaluator/evaluator.hpp"
 
 namespace yamss {
@@ -12,13 +14,15 @@ namespace yamss {
 template <typename T>
 class load
 {
+protected:
+  typedef boost::unordered_set<size_t> set_type;
 public:
   typedef T value_type;
   typedef size_t key_type;
   typedef node<T> node_type;
+  typedef element element_type;
   typedef evaluator::evaluator<T> evaluator_type;
   typedef boost::shared_ptr<evaluator_type> evaluator_pointer;
-  typedef boost::unordered_set<size_t> set_type;
   typedef arma::Col<T> vector_type;
   typedef typename set_type::const_iterator const_iterator;
 
@@ -32,6 +36,7 @@ public:
   load(const load& a_other)
     : m_key(a_other.m_key)
     , m_nodes(a_other.m_nodes)
+    , m_elements(a_other.m_elements)
     , m_evaluator(a_other.m_evaluator)
   {
     // empty
@@ -47,6 +52,7 @@ public:
   {
     m_key = a_other.m_key;
     m_nodes = a_other.m_nodes;
+    m_elements = a_other.m_elements;
     m_evaluator = a_other.m_evaluator;
     return *this;
   }
@@ -64,26 +70,46 @@ public:
   }
 
   void
-  add_node(key_type a_key)
+  add_element(const element_type& a_element)
   {
-    m_nodes.insert(a_key);
+    typedef typename element_type::vector_type vertices_type;
+    typedef typename vertices_type::const_iterator const_iterator;
+
+    m_elements.insert(a_element.get_key());
+    const vertices_type& vertices = a_element.get_vertices();
+    for (const_iterator p = vertices.begin(); p != vertices.end(); ++p)
+    {
+      m_nodes.insert(*p);
+    }
   }
 
   template <typename Iterator>
   void
-  add_nodes(Iterator a_begin, Iterator a_end)
+  add_elements(Iterator a_begin, Iterator a_end)
   {
-    std::copy(a_begin, a_end, m_nodes.begin());
+    std::for_each(a_begin, a_end, boost::bind(&load<T>::add_element, this, _1));
   }
 
   const_iterator
-  begin() const
+  begin_elements() const
+  {
+    return m_elements.begin();
+  }
+
+  const_iterator
+  end_elements() const
+  {
+    return m_elements.end();
+  }
+
+  const_iterator
+  begin_nodes() const
   {
     return m_nodes.begin();
   }
 
   const_iterator
-  end() const
+  end_nodes() const
   {
     return m_nodes.end();
   }
@@ -101,6 +127,7 @@ private:
 
   key_type m_key;
   set_type m_nodes;
+  set_type m_elements;
   evaluator_pointer m_evaluator;
 }; // load<T> class
 

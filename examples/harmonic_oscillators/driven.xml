@@ -18,6 +18,9 @@
     <nodes>
       <node><id>1</id></node>
     </nodes>
+    <elements>
+      <point><id>1</id><v>1</v></point>
+    </elements>
   </structure>
 
   <modes>
@@ -46,9 +49,9 @@
           <x>math.sin(t)</x>
         </expressions>
       </parameters>
-      <nodes>
+      <elements>
         <all />
-      </nodes>
+      </elements>
     </load>
   </loads>
 
@@ -61,7 +64,6 @@
   <outputs>
     <output>
       <type>modes</type>
-      <parameters />
     </output>
   </outputs>
 
