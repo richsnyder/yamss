@@ -555,10 +555,47 @@ protected:
   void
   process_solution()
   {
+    namespace pt = boost::property_tree;
+
     value_type t = m_document.get<value_type>("solution.time.span", 1.0);
     value_type dt = m_document.get<value_type>("solution.time.step", 0.01);
     m_runner->set_time_step(dt);
     m_runner->set_final_time(t);
+
+    pt::ptree dofs_tree;
+    try
+    {
+      dofs_tree = m_document.get_child("solution").get_child("dofs");
+    }
+    catch (pt::ptree_bad_path& e)
+    {
+      return;
+    }
+
+    if (dofs_tree.count("x") == 0)
+    {
+      m_structure->deactivate_dof(0);
+    }
+    if (dofs_tree.count("y") == 0)
+    {
+      m_structure->deactivate_dof(1);
+    }
+    if (dofs_tree.count("z") == 0)
+    {
+      m_structure->deactivate_dof(2);
+    }
+    if (dofs_tree.count("p") == 0)
+    {
+      m_structure->deactivate_dof(3);
+    }
+    if (dofs_tree.count("q") == 0)
+    {
+      m_structure->deactivate_dof(4);
+    }
+    if (dofs_tree.count("r") == 0)
+    {
+      m_structure->deactivate_dof(5);
+    }
   }
 
   template <typename Output>

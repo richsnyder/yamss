@@ -23,8 +23,14 @@ public:
   finalize(const std::string& a_job_key);
 
   void
-  getInterfaces(std::vector<Interface>& a_interfaces,
-                const std::string& a_job_key);
+  getInterface(Interface& a_interface,
+               const std::string& a_job_key,
+               const int64_t a_load_key);
+
+  void
+  getInterfaceNodes(std::map<int64_t, Node>& a_zed,
+                    const std::string& a_job_key,
+                    const int64_t a_load_key);
 
   void
   getModes(std::vector<double>& a_modes, const std::string& a_job_key);
@@ -53,6 +59,11 @@ public:
   runJob(const std::string& a_url);
 
   void
+  setInterfaceForces(const std::string& a_job_key,
+                     const int64_t a_load_key,
+                     const std::map<int64_t, std::vector<double> >& a_forces);
+
+  void
   step(const std::string& a_job_key);
 protected:
   typedef size_t key_type;
@@ -69,6 +80,9 @@ protected:
 
   typedef typename structure_type::load_type load_type;
   typedef typename structure_type::node_type node_type;
+
+  runner_pointer
+  get_runner(const std::string& a_key);
 private:
   ::boost::filesystem::path m_directory;
   ::yamss::server::transporter m_transporter;

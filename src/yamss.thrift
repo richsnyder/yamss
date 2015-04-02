@@ -5,7 +5,6 @@ exception YamssException {
 }
 
 struct Interface {
-  1: i64 key,
   2: list<bool> activeDofs,
   3: map<i64, list<double>> positions
 }
@@ -30,9 +29,15 @@ service Yamss {
   finalize(1: string a_job_key)
            throws (1: YamssException e),
 
-  list<Interface>
-  getInterfaces(1: string a_job_key)
-                throws (1: YamssException e),
+  Interface
+  getInterface(1: string a_job_key,
+               2: i64 a_load_key)
+               throws (1: YamssException e),
+
+  map<i64, Node>
+  getInterfaceNodes(1: string a_job_key,
+                    2: i64 a_load_key)
+                    throws (1: YamssException e),
 
   list<double>
   getModes(1: string a_job_key)
@@ -66,6 +71,12 @@ service Yamss {
   void
   runJob(1: string a_url)
          throws (1: YamssException e),
+
+  void
+  setInterfaceForces(1: string a_job_key,
+                     2: i64 a_load_key,
+                     3: map<i64, list<double>> a_forces)
+                     throws (1: YamssException e),
 
   void
   step(1: string a_job_key)

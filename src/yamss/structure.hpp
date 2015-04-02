@@ -170,8 +170,8 @@ public:
   {
     typedef typename loads_type::iterator iterator;
 
-    iterator result = m_nodes.find(a_key);
-    if (result == m_nodes.end())
+    iterator result = m_loads.find(a_key);
+    if (result == m_loads.end())
     {
       boost::format fmt("Failed to find load %1% on the structure.");
       throw std::runtime_error(boost::str(fmt % a_key));
@@ -188,7 +188,7 @@ public:
     typedef typename load_type::const_iterator const_iterator;
 
     const_iterator result = m_loads.find(a_key);
-    if (result == m_nodes.end())
+    if (result == m_loads.end())
     {
       boost::format fmt("Failed to find load %1% on the structure.");
       throw std::runtime_error(boost::str(fmt % a_key));

@@ -17,6 +17,7 @@ public:
   typedef size_t key_type;
   typedef node<T> node_type;
   typedef evaluator::evaluator<T> evaluator_type;
+  typedef boost::shared_ptr<evaluator_type> evaluator_pointer;
   typedef boost::unordered_set<size_t> set_type;
   typedef arma::Col<T> vector_type;
   typedef typename set_type::const_iterator const_iterator;
@@ -56,10 +57,10 @@ public:
     return m_key;
   }
 
-  bool
-  is_interface() const
+  evaluator_pointer
+  get_evaluator() const
   {
-    return m_evaluator->is_interface();
+    return m_evaluator;
   }
 
   void
@@ -100,7 +101,7 @@ private:
 
   key_type m_key;
   set_type m_nodes;
-  boost::shared_ptr<evaluator_type> m_evaluator;
+  evaluator_pointer m_evaluator;
 }; // load<T> class
 
 } // yamss namespace

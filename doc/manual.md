@@ -423,8 +423,23 @@ $$
 
 ## Solution
 
-This section of the input file is used to define the integration method and
-the range of integration.  It contains two elements: `<method>` and `<time>`.
+This section of the input file is used to define the active degrees of freedom,
+the integration method, and the range of integration.  It contains three
+elements: `<dofs>`, `<method>`, and `<time>`.
+
+The active degrees of freedom are indicated by providing an appropriate
+combination of the following elements within `<dofs>`.
+
+* `x` -- activate translation along the x-coordinate
+* `y` -- activate translation along the y-coordinate
+* `z` -- activate translation along the z-coordinate
+* `p` -- activate rotation about the x-axis
+* `q` -- activate rotation about the x-axis
+* `r` -- activate rotation about the x-axis
+
+If the `<dofs>` element is missing, then all degrees of freedom are considered
+to be active.
+
 The method is defined by two parameters:
 
 * `type` -- integrator type (type: string, default: `newmark_beta`)
@@ -444,12 +459,13 @@ contains the following properties:
 
 The following input file fragment uses the generalized-$\alpha$ method to
 select the Hughes, Hilber, and Taylor $\alpha$ integration method with
-$\alpha = -1/3$ ($\alpha = 1 - \alpha_f$).  The time interval for integration
-is set to $t \in [0, 10]$ and the time step is left at its default value of
-$\Delta t = 0.01$.
+$\alpha = -1/3$ ($\alpha = 1 - \alpha_f$).  Only the translational degrees of
+freedom are active.  The time interval for integration is set to $t \in [0, 10]$
+and the time step is left at its default value of $\Delta t = 0.01$.
 
 ```xml
 <solution>
+    <dofs><x/><y/><z/></dofs>
     <method>
         <type>generalized_alpha</type>
         <parameters>
@@ -579,7 +595,7 @@ Any number of output filters can be active.
 
 The following input file fragment configures YAMSS to generate two types of
 output.  The `summary` filter writes summary information to a stream and the
-`tecplot` filter generates a Tecplot data file that contains a history of the
+`modes` filter generates a Tecplot data file that contains a history of the
 modal coordinates.
 
 ```xml
@@ -592,7 +608,6 @@ modal coordinates.
     </output>
     <output>
         <type>modes</type>
-        <parameters />
     </output>
 </outputs>
 ```

@@ -36,31 +36,59 @@ handler::finalize(const std::string& a_job_key)
   m_jobs.erase(a_job_key);
 }
 
-void
-handler::getInterfaces(std::vector<Interface>& a_interfaces,
-                       const std::string& a_job_key)
+handler::runner_pointer
+handler::get_runner(const std::string& a_key)
 {
-  runner_pointer runner_ = m_jobs[a_job_key].first;
+  return m_jobs[a_key].first;
+}
+
+void
+handler::getInterface(Interface& a_interface,
+                      const std::string& a_job_key,
+                      const int64_t a_load_key)
+{
+  typedef ::arma::conv_to<std::vector<double> > converter;
+
+  runner_pointer runner_ = get_runner(a_job_key);
   eom_pointer eom_ = runner_->get_eom();
   structure_pointer structure_ = runner_->get_structure();
-  typename structure_type::load_iterator lp;
+  const load_type& load_ = structure_->get_load(a_load_key);
   typename load_type::const_iterator np;
-  int64_t key;
-  for (lp = structure_->begin_loads(); lp != structure_->end_loads(); ++lp)
+  a_interface.activeDofs = structure_->get_active_dofs();
+  a_interface.positions.clear();
+  for (np = load_.begin(); np != load_.end(); ++np)
   {
-    if (lp->is_interface())
-    {
-      Interface iface;
-      iface.key = lp->get_key();
-      iface.activeDofs = structure_->get_active_dofs();
-      for (np = lp->begin(); np != lp->end(); ++np)
-      {
-        key = static_cast<int64_t>(*np);
-        const vector_type& x = structure_->get_node(*np).get_position();
-        iface.positions[key] = ::arma::conv_to<std::vector<double> >::from(x);
-      }
-      a_interfaces.push_back(iface);
-    }
+    const vector_type& x = structure_->get_node(*np).get_position();
+    a_interface.positions[static_cast<int64_t>(*np)] = converter::from(x);
+  }
+}
+
+void
+handler::getInterfaceNodes(std::map<int64_t, Node>& a_nodes,
+                           const std::string& a_job_key,
+                           const int64_t a_load_key)
+{
+  typedef ::arma::conv_to<std::vector<double> > converter;
+
+  Node n;
+  key_type key;
+  runner_pointer runner_ = get_runner(a_job_key);
+  eom_pointer eom_ = runner_->get_eom();
+  structure_pointer structure_ = runner_->get_structure();
+  const load_type& load_ = structure_->get_load(a_load_key);
+  typename load_type::const_iterator np;
+  a_nodes.clear();
+  const vector_type& q = eom_->get_displacement(0);
+  for (np = load_.begin(); np != load_.end(); ++np)
+  {
+    const node_type& node_ = structure_->get_node(*np);
+    const vector_type& x = node_.get_position();
+    const vector_type& f = node_.get_force();
+    const vector_type u = node_.get_displacement(q);
+    n.position = converter::from(x);
+    n.displacement = converter::from(u);
+    n.force = converter::from(f);
+    a_nodes[static_cast<int64_t>(node_.get_key())] = n;
   }
 }
 
@@ -68,9 +96,7 @@ void
 handler::getModes(std::vector<double>& a_modes,
                   const std::string& a_job_key)
 {
-  runner_pointer runner_ = m_jobs[a_job_key].first;
-  eom_pointer eom_ = runner_->get_eom();
-  const vector_type& q = eom_->get_displacement(0);
+  const vector_type& q = get_runner(a_job_key)->get_eom()->get_displacement(0);
   a_modes = ::arma::conv_to<std::vector<double> >::from(q);
 }
 
@@ -79,46 +105,42 @@ handler::getNode(Node& a_node,
                  const std::string& a_job_key,
                  const int64_t a_node_key)
 {
-  runner_pointer runner_ = m_jobs[a_job_key].first;
+  typedef ::arma::conv_to<std::vector<double> > converter;
+
+  runner_pointer runner_ = get_runner(a_job_key);
   eom_pointer eom_ = runner_->get_eom();
-  key_type node_key = static_cast<key_type>(a_node_key);
-  structure_pointer structure_ = runner_->get_structure();
-  const node_type& node_ = structure_->get_node(node_key);
-  const vector_type& q = eom_->get_displacement(0);
-  const vector_type& x = node_.get_position();
-  const vector_type& f = node_.get_force();
-  vector_type u = node_.get_displacement(q);
-  a_node.position = ::arma::conv_to<std::vector<double> >::from(x);
-  a_node.displacement = ::arma::conv_to<std::vector<double> >::from(u);
-  a_node.force = ::arma::conv_to<std::vector<double> >::from(f);
+  key_type key = static_cast<key_type>(a_node_key);
+  const node_type& node_ = runner_->get_structure()->get_node(key);
+  vector_type u = node_.get_displacement(eom_->get_displacement(0));
+  a_node.force = converter::from(node_.get_force());
+  a_node.position = converter::from(node_.get_position());
+  a_node.displacement = converter::from(u);
 }
 
 void
 handler::getState(State& a_state, const std::string& a_job_key)
 {
-  runner_pointer runner_ = m_jobs[a_job_key].first;
+  typedef ::arma::conv_to<std::vector<double> > converter;
+
+  runner_pointer runner_ = get_runner(a_job_key);
   eom_pointer eom_ = runner_->get_eom();
-  const vector_type& q = eom_->get_displacement(0);
-  const vector_type& dq = eom_->get_velocity(0);
-  const vector_type& ddq = eom_->get_acceleration(0);
-  const vector_type& f = eom_->get_force(0);
   a_state.time = eom_->get_time(0);
-  a_state.displacement = ::arma::conv_to<std::vector<double> >::from(q);
-  a_state.velocity = ::arma::conv_to<std::vector<double> >::from(dq);
-  a_state.acceleration = ::arma::conv_to<std::vector<double> >::from(ddq);
-  a_state.force = ::arma::conv_to<std::vector<double> >::from(f);
+  a_state.displacement = converter::from(eom_->get_displacement(0));
+  a_state.velocity = converter::from(eom_->get_velocity(0));
+  a_state.acceleration = converter::from(eom_->get_acceleration(0));
+  a_state.force = converter::from(eom_->get_force(0));
 }
 
 double
 handler::getTime(const std::string& a_job_key)
 {
-  return m_jobs[a_job_key].first->get_eom()->get_time(0);
+  return get_runner(a_job_key)->get_eom()->get_time(0);
 }
 
 double
 handler::getTimeStep(const std::string& a_job_key)
 {
-  return m_jobs[a_job_key].first->get_time_step();
+  return get_runner(a_job_key)->get_time_step();
 }
 
 void
@@ -145,7 +167,7 @@ handler::initialize(std::string& a_job_key, const std::string& a_url)
 void
 handler::run(const std::string& a_job_key)
 {
-  m_jobs[a_job_key].first->run();
+  get_runner(a_job_key)->run();
 }
 
 void
@@ -158,9 +180,33 @@ handler::runJob(const std::string& a_url)
 }
 
 void
+handler::setInterfaceForces(const std::string& a_job_key,
+                            const int64_t a_load_key,
+                            const std::map<int64_t, std::vector<double> >& a_forces)
+{
+  typedef ::yamss::evaluator::interface<double> interface_type;
+  typedef ::boost::shared_ptr<interface_type> interface_pointer;
+  typedef ::arma::conv_to<typename interface_type::vector_type> converter;
+
+  key_type key;
+  runner_pointer runner_ = get_runner(a_job_key);
+  structure_pointer structure_ = runner_->get_structure();
+  std::vector<bool> dofs = structure_->get_active_dofs();
+  load_type& load_ = structure_->get_load(static_cast<key_type>(a_load_key));
+  typename load_type::evaluator_pointer evaluator_ = load_.get_evaluator();
+  interface_pointer interface_ = ::boost::dynamic_pointer_cast<interface_type>(evaluator_);
+  std::map<int64_t, std::vector<double> >::const_iterator fp;
+  for (fp = a_forces.begin(); fp != a_forces.end(); ++fp)
+  {
+    key = static_cast<key_type>(fp->first);
+    interface_->insert(key, converter::from(fp->second));
+  }
+}
+
+void
 handler::step(const std::string& a_job_key)
 {
-  m_jobs[a_job_key].first->step();
+  get_runner(a_job_key)->step();
 }
 
 } // server namespace
