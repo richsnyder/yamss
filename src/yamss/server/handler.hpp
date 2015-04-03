@@ -9,6 +9,7 @@
 #include <boost/unordered_map.hpp>
 #include "yamss/input_reader.hpp"
 #include "yamss/runner.hpp"
+#include "yamss/evaluator/interface.hpp"
 #include "yamss/server/transporter.hpp"
 #include "yamss/server/Yamss.h"
 

@@ -1,6 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
 
-PROJECT(yamss LANGUAGES C CXX VERSION 2.8.2)
+PROJECT(yamss LANGUAGES C CXX VERSION 2.8.3)
 
 # Add custom modules to the module search path and mark them for installation.
 

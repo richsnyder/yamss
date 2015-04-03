@@ -397,7 +397,8 @@ handler::getState(State& a_state, const JobKey& a_key)
 double
 handler::getTime(const JobKey& a_key)
 {
-  return get_runner(a_key)->get_eom()->get_time(0);
+  typename runner_type::eom_pointer eom_ = get_runner(a_key)->get_eom();
+  return eom_->get_time(0) + eom_->get_time_step(0);
 }
 
 double
@@ -473,6 +474,8 @@ handler::setInterfaceLoading(const JobKey& a_key,
   typedef typename structure_type::load_type load_type;
   typedef typename structure_type::node_type node_type;
   typedef typename load_type::const_iterator const_iterator;
+  typedef typename evaluator::interface<double> interface_type;
+  typedef boost::shared_ptr<interface_type> interface_pointer;
 
   int32_t n;
   load_type* load_;
@@ -493,6 +496,11 @@ handler::setInterfaceLoading(const JobKey& a_key,
     ye.what = e.what();
     throw ye;
   }
+
+  std::vector<double> f(6);
+  interface_pointer evaluator_ = boost::dynamic_pointer_cast<interface_type>(
+      load_->get_evaluator()
+    );
 
   size_type n_dofs = structure_->get_number_of_active_dofs();
   size_type n_nodes = load_->get_number_of_nodes();
@@ -522,9 +530,14 @@ handler::setInterfaceLoading(const JobKey& a_key,
       {
         if (structure_->is_active(dof))
         {
-          node_.add_force(dof, a_loading.forces[offsets[dof] + n]);
+          f[dof] = a_loading.forces[offsets[dof] + n];
+        }
+        else
+        {
+          f[dof] = 0.0;
         }
       }
+      evaluator_->insert(node_.get_key(), f);
     }
   }
   catch (std::runtime_error& e)
