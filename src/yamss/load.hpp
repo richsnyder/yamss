@@ -19,6 +19,7 @@ protected:
 public:
   typedef T value_type;
   typedef size_t key_type;
+  typedef size_t size_type;
   typedef node<T> node_type;
   typedef element element_type;
   typedef evaluator::evaluator<T> evaluator_type;
@@ -67,6 +68,18 @@ public:
   get_evaluator() const
   {
     return m_evaluator;
+  }
+
+  size_type
+  get_number_of_elements() const
+  {
+    return m_elements.size();
+  }
+
+  size_type
+  get_number_of_nodes() const
+  {
+    return m_nodes.size();
   }
 
   void

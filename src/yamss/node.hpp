@@ -159,6 +159,36 @@ public:
     return m_modes.t() * a_q;
   }
 
+  value_type
+  get_displacement(size_type a_dof, const vector_type& a_q) const
+  {
+    return arma::dot(m_modes.col(a_dof), a_q);
+  }
+
+  vector_type
+  get_velocity(const vector_type& a_dq) const
+  {
+    return m_modes.t() * a_dq;
+  }
+
+  value_type
+  get_velocity(size_type a_dof, const vector_type& a_dq) const
+  {
+    return arma::dot(m_modes.col(a_dof), a_dq);
+  }
+
+  vector_type
+  get_acceleration(const vector_type& a_ddq) const
+  {
+    return m_modes.t() * a_ddq;
+  }
+
+  value_type
+  get_acceleration(size_type a_dof, const vector_type& a_ddq) const
+  {
+    return arma::dot(m_modes.col(a_dof), a_ddq);
+  }
+
   vector_type
   get_generalized_force(const vector_type& a_active) const
   {

@@ -70,6 +70,17 @@ public:
     return active;
   }
 
+  size_type
+  get_number_of_active_dofs() const
+  {
+    size_type result = 0;
+    for (size_type n = 0; n < 6; ++n)
+    {
+      result += m_active_dofs(n) > 0.5 ? 1 : 0;
+    }
+    return result;
+  }
+
   node_type&
   add_node(key_type a_key)
   {
