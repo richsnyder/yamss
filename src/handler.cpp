@@ -12,7 +12,7 @@ handler::handler(const boost::filesystem::path& a_directory)
 }
 
 void
-handler::create(JobKey& a_key, const std::string& a_url)
+handler::create(JobKey& a_job, const std::string& a_url)
 {
   namespace fs = boost::filesystem;
 
@@ -69,21 +69,21 @@ handler::create(JobKey& a_key, const std::string& a_url)
     throw ye;
   }
 
-  a_key = key.c_str();
-  m_jobs[a_key] = std::make_pair(runner_, url);
+  a_job = key.c_str();
+  m_jobs[a_job] = std::make_pair(runner_, url);
 }
 
 void
-handler::finalize(const JobKey& a_key)
+handler::finalize(const JobKey& a_job)
 {
   namespace fs = boost::filesystem;
 
-  typename jobs_type::const_iterator job = m_jobs.find(a_key);
+  typename jobs_type::const_iterator job = m_jobs.find(a_job);
   if (job == m_jobs.end())
   {
     YamssException e;
     boost::format fmt("Job %1% does not exist");
-    e.what = boost::str(fmt % a_key);
+    e.what = boost::str(fmt % a_job);
     throw e;
   }
   runner_pointer runner_ = job->second.first;
@@ -99,7 +99,7 @@ handler::finalize(const JobKey& a_key)
   {
     YamssException ye;
     boost::format fmt("Failed to finalize the job %1%");
-    ye.what = boost::str(fmt % a_key);
+    ye.what = boost::str(fmt % a_job);
     throw ye;
   }
 
@@ -110,7 +110,7 @@ handler::finalize(const JobKey& a_key)
   {
     for (fp = files.begin(); fp != files.end(); ++fp)
     {
-      local_path = m_directory / a_key / *fp;
+      local_path = m_directory / a_job / *fp;
       remote_url = url + fp->native();
       m_transporter.put(local_path, remote_url);
     }
@@ -124,29 +124,29 @@ handler::finalize(const JobKey& a_key)
 }
 
 handler::runner_pointer
-handler::get_runner(const JobKey& a_key)
+handler::get_runner(const JobKey& a_job)
 {
-  typename jobs_type::const_iterator job = m_jobs.find(a_key);
+  typename jobs_type::const_iterator job = m_jobs.find(a_job);
   if (job == m_jobs.end())
   {
     YamssException e;
     boost::format fmt("Job %1% does not exist");
-    e.what = boost::str(fmt % a_key);
+    e.what = boost::str(fmt % a_job);
     throw e;
   }
   return job->second.first;
 }
 
 double
-handler::getFinalTime(const JobKey& a_key)
+handler::getFinalTime(const JobKey& a_job)
 {
-  return get_runner(a_key)->get_final_time();
+  return get_runner(a_job)->get_final_time();
 }
 
 void
 handler::getInterface(Interface& a_interface,
-                      const JobKey& a_key,
-                      const int64_t a_load_key)
+                      const JobKey& a_job,
+                      const int64_t a_load)
 {
   typedef typename runner_type::structure_pointer structure_pointer;
   typedef typename runner_type::structure_type structure_type;
@@ -161,14 +161,14 @@ handler::getInterface(Interface& a_interface,
   const_iterator np;
   const_iterator beg;
   const_iterator end;
-  runner_pointer runner_ = get_runner(a_key);
+  runner_pointer runner_ = get_runner(a_job);
   structure_pointer structure_ = runner_->get_structure();
   boost::unordered_map<key_type, int32_t> node_order;
 
-  key_type key = static_cast<key_type>(a_load_key);
+  key_type key = static_cast<key_type>(a_load);
   try
   {
-    load_ = &(structure_->get_load(a_load_key));
+    load_ = &(structure_->get_load(a_load));
   }
   catch (std::runtime_error& e)
   {
@@ -264,8 +264,8 @@ handler::getInterface(Interface& a_interface,
 
 void
 handler::getInterfaceMovement(InterfaceMovement& a_movement,
-                              const JobKey& a_key,
-                              const int64_t a_load_key)
+                              const JobKey& a_job,
+                              const int64_t a_load)
 {
   typedef typename runner_type::eom_pointer eom_pointer;
   typedef typename runner_type::eom_type eom_type;
@@ -281,14 +281,14 @@ handler::getInterfaceMovement(InterfaceMovement& a_movement,
   const_iterator np;
   const_iterator beg;
   const_iterator end;
-  runner_pointer runner_ = get_runner(a_key);
+  runner_pointer runner_ = get_runner(a_job);
   eom_pointer eom_ = runner_->get_eom();
   structure_pointer structure_ = runner_->get_structure();
 
-  key_type key = static_cast<key_type>(a_load_key);
+  key_type key = static_cast<key_type>(a_load);
   try
   {
-    load_ = &(structure_->get_load(a_load_key));
+    load_ = &(structure_->get_load(a_load));
   }
   catch (std::runtime_error& e)
   {
@@ -350,24 +350,24 @@ handler::getInterfaceMovement(InterfaceMovement& a_movement,
 }
 
 void
-handler::getModes(std::vector<double>& a_modes, const JobKey& a_key)
+handler::getModes(std::vector<double>& a_modes, const JobKey& a_job)
 {
   typedef ::arma::Col<double> vector_type;
   typedef ::arma::conv_to<std::vector<double> > converter;
 
-  runner_pointer runner_ = get_runner(a_key);
+  runner_pointer runner_ = get_runner(a_job);
   const vector_type& q = runner_->get_eom()->get_displacement(0);
   a_modes = converter::from(q);
 }
 
 void
-handler::getNode(Node& a_node, const JobKey& a_key, const int64_t a_node_key)
+handler::getNode(Node& a_node, const JobKey& a_job, const int64_t a_node_key)
 {
   typedef ::arma::Col<double> vector_type;
   typedef ::arma::conv_to<std::vector<double> > converter;
   typedef typename runner_type::structure_type::node_type node_type;
 
-  runner_pointer runner_ = get_runner(a_key);
+  runner_pointer runner_ = get_runner(a_job);
   key_type key = static_cast<key_type>(a_node_key);
   const node_type& node_ = runner_->get_structure()->get_node(key);
   const vector_type& q = runner_->get_eom()->get_displacement(0);
@@ -380,11 +380,11 @@ handler::getNode(Node& a_node, const JobKey& a_key, const int64_t a_node_key)
 }
 
 void
-handler::getState(State& a_state, const JobKey& a_key)
+handler::getState(State& a_state, const JobKey& a_job)
 {
   typedef ::arma::conv_to<std::vector<double> > converter;
 
-  runner_pointer runner_ = get_runner(a_key);
+  runner_pointer runner_ = get_runner(a_job);
   typename runner_type::eom_pointer eom_ = runner_->get_eom();
   a_state.step = eom_->get_step(0);
   a_state.time = eom_->get_time(0);
@@ -395,45 +395,44 @@ handler::getState(State& a_state, const JobKey& a_key)
 }
 
 double
-handler::getTime(const JobKey& a_key)
+handler::getTime(const JobKey& a_job)
 {
-  typename runner_type::eom_pointer eom_ = get_runner(a_key)->get_eom();
-  return eom_->get_time(0) + eom_->get_time_step(0);
+  return get_runner(a_job)->get_eom()->get_time(0);
 }
 
 double
-handler::getTimeStep(const JobKey& a_key)
+handler::getTimeStep(const JobKey& a_job)
 {
-  return get_runner(a_key)->get_time_step();
+  return get_runner(a_job)->get_time_step();
 }
 
 void
-handler::initialize(const JobKey& a_key)
+handler::initialize(const JobKey& a_job)
 {
-  runner_pointer runner_ = get_runner(a_key);
+  runner_pointer runner_ = get_runner(a_job);
   try
   {
-    runner_->initialize(m_directory / a_key);
+    runner_->initialize(m_directory / a_job);
   }
   catch (std::exception& e)
   {
     YamssException ye;
     boost::format fmt("Failed to initialize the job %1%");
-    ye.what = boost::str(fmt % a_key);
+    ye.what = boost::str(fmt % a_job);
     throw ye;
   }
 }
 
 void
-handler::release(const JobKey& a_key)
+handler::release(const JobKey& a_job)
 {
-  m_jobs.erase(a_key);
+  m_jobs.erase(a_job);
 }
 
 void
-handler::run(const JobKey& a_key)
+handler::run(const JobKey& a_job)
 {
-  runner_pointer runner_ = get_runner(a_key);
+  runner_pointer runner_ = get_runner(a_job);
   try
   {
     runner_->run();
@@ -442,7 +441,7 @@ handler::run(const JobKey& a_key)
   {
     YamssException ye;
     boost::format fmt("Failed to run the job %1%");
-    ye.what = boost::str(fmt % a_key);
+    ye.what = boost::str(fmt % a_job);
     throw ye;
   }
 }
@@ -459,14 +458,14 @@ handler::runJob(const std::string& a_url)
 }
 
 void
-handler::setFinalTime(const JobKey& a_key, const double a_final_time)
+handler::setFinalTime(const JobKey& a_job, const double a_final_time)
 {
-  get_runner(a_key)->set_final_time(a_final_time);
+  get_runner(a_job)->set_final_time(a_final_time);
 }
 
 void
-handler::setInterfaceLoading(const JobKey& a_key,
-                             const int64_t a_load_key,
+handler::setInterfaceLoading(const JobKey& a_job,
+                             const int64_t a_load,
                              const InterfaceLoading& a_loading)
 {
   typedef typename runner_type::structure_pointer structure_pointer;
@@ -482,13 +481,13 @@ handler::setInterfaceLoading(const JobKey& a_key,
   const_iterator np;
   const_iterator beg;
   const_iterator end;
-  runner_pointer runner_ = get_runner(a_key);
+  runner_pointer runner_ = get_runner(a_job);
   structure_pointer structure_ = runner_->get_structure();
 
-  key_type key = static_cast<key_type>(a_load_key);
+  key_type key = static_cast<key_type>(a_load);
   try
   {
-    load_ = &(structure_->get_load(a_load_key));
+    load_ = &(structure_->get_load(a_load));
   }
   catch (std::runtime_error& e)
   {
@@ -549,9 +548,9 @@ handler::setInterfaceLoading(const JobKey& a_key,
 }
 
 void
-handler::step(const JobKey& a_key)
+handler::step(const JobKey& a_job)
 {
-  runner_pointer runner_ = get_runner(a_key);
+  runner_pointer runner_ = get_runner(a_job);
   try
   {
     runner_->step();
@@ -560,7 +559,27 @@ handler::step(const JobKey& a_key)
   {
     YamssException ye;
     boost::format fmt("Failed to step the job %1%");
-    ye.what = boost::str(fmt % a_key);
+    ye.what = boost::str(fmt % a_job);
+    throw ye;
+  }
+}
+
+void
+handler::stepN(const JobKey& a_job, const int32_t a_steps)
+{
+  runner_pointer runner_ = get_runner(a_job);
+  try
+  {
+    for (size_type n = 0; n < a_steps; ++n)
+    {
+      runner_->step();
+    }
+  }
+  catch (std::exception& e)
+  {
+    YamssException ye;
+    boost::format fmt("Failed to step the job %1%");
+    ye.what = boost::str(fmt % a_job);
     throw ye;
   }
 }

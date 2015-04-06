@@ -61,6 +61,8 @@ service Yamss {
 
   void step(1: JobKey a_key) throws (1: YamssException e),
 
+  void stepN(1: JobKey a_key, 2: i32 a_steps) throws (1: YamssException e),
+
   void run(1: JobKey a_key) throws (1: YamssException e),
 
   void runJob(1: string a_url) throws (1: YamssException e),

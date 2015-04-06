@@ -150,14 +150,14 @@ Each node has the following properties:
 
 Two nodes must not share the same identification number.  While the numbers
 must be unique, they do not need to be sequential.  The nodal coordinates are
-not used when integrating the equations of motion and are currently only used
-for visualization purposes.
+not used when integrating the equations of motion.  They may be used for
+visualization or for interacting with an external program that provides loads.
 
 ### Elements
 
 Nodes can be connected to form elements.  External loads are applied to
-elements.  They are used for visualization purposes.  The following element
-types are supported:
+elements.  They may also be used for visualization purposes.  The following
+element types are supported:
 
 * `point` -- 0D point element, $p = 1$
 * `line` -- 1D line element, $p = 2$
@@ -172,6 +172,8 @@ In addition to its type, each element has an the following properties:
 As with the nodes, each element identification number should be unique amongst
 all of the elements, but need not be sequential.  There must be as many node
 references elements as vertices in the element.
+
+![Element Types](images/elements "Element Types")
 
 ### Example
 

@@ -19,3 +19,11 @@ pre.sourceCode {
   background: #EEEEEE;
   padding: 0.5em 1.0em;
 }
+
+figure {
+  text-align: center;
+}
+
+figcaption {
+  font-weight: bold;
+}

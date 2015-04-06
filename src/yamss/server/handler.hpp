@@ -24,66 +24,69 @@ public:
   // Job management
 
   void
-  create(JobKey& a_key, const std::string& a_url);
+  create(JobKey& a_job, const std::string& a_url);
 
   void
-  release(const JobKey& a_key);
+  release(const JobKey& a_job);
 
   // Simulation control
 
   void
-  initialize(const JobKey& a_key);
+  initialize(const JobKey& a_job);
 
   void
-  finalize(const JobKey& a_key);
+  finalize(const JobKey& a_job);
 
   void
-  step(const JobKey& a_key);
+  step(const JobKey& a_job);
 
   void
-  run(const JobKey& a_key);
+  stepN(const JobKey& a_job, const int32_t a_steps);
+
+  void
+  run(const JobKey& a_job);
 
   void
   runJob(const std::string& a_url);
 
   void
-  setFinalTime(const JobKey& a_key, const double a_final_time);
+  setFinalTime(const JobKey& a_job, const double a_final_time);
 
   // Queries
 
   double
-  getTime(const JobKey& a_key);
+  getTime(const JobKey& a_job);
 
   double
-  getTimeStep(const JobKey& a_key);
+  getTimeStep(const JobKey& a_job);
 
   double
-  getFinalTime(const JobKey& a_key);
+  getFinalTime(const JobKey& a_job);
 
   void
-  getModes(std::vector<double>& a_modes, const JobKey& a_key);
+  getModes(std::vector<double>& a_modes, const JobKey& a_job);
 
   void
-  getNode(Node& a_position, const JobKey& a_key, const int64_t a_node_key);
+  getNode(Node& a_position, const JobKey& a_job, const int64_t a_node_key);
 
   void
-  getState(State& a_state, const JobKey& a_key);
+  getState(State& a_state, const JobKey& a_job);
 
   // Interface methods
 
   void
   getInterface(Interface& a_interface,
-               const JobKey& a_key,
-               const int64_t a_load_key);
+               const JobKey& a_job,
+               const int64_t a_load);
 
   void
   getInterfaceMovement(InterfaceMovement& a_movement,
-                       const JobKey& a_key,
-                       const int64_t a_load_key);
+                       const JobKey& a_job,
+                       const int64_t a_load);
 
   void
-  setInterfaceLoading(const JobKey& a_key,
-                      const int64_t a_load_key,
+  setInterfaceLoading(const JobKey& a_job,
+                      const int64_t a_load,
                       const InterfaceLoading& a_loading);
 protected:
   typedef size_t key_type;
@@ -93,7 +96,7 @@ protected:
   typedef ::std::pair<runner_pointer, std::string> job_type;
 
   runner_pointer
-  get_runner(const std::string& a_key);
+  get_runner(const std::string& a_job);
 private:
   typedef ::boost::unordered_map<std::string, job_type> jobs_type;
 
