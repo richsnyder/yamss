@@ -23,12 +23,12 @@ public:
   typedef node<T> node_type;
   typedef map_values_iterator<key_type, node_type> node_iterator;
   typedef map_values_iterator<key_type, const node_type> const_node_iterator;
-  typedef load<T> load_type;
-  typedef map_values_iterator<key_type, load_type> load_iterator;
-  typedef map_values_iterator<key_type, const load_type> const_load_iterator;
   typedef element element_type;
   typedef map_values_iterator<key_type, element_type> element_iterator;
   typedef map_values_iterator<key_type, const element_type> const_element_iterator;
+  typedef load<T> load_type;
+  typedef map_values_iterator<key_type, load_type> load_iterator;
+  typedef map_values_iterator<key_type, const load_type> const_load_iterator;
   typedef arma::Col<T> vector_type;
 
   structure(size_type a_number_of_modes)
@@ -133,6 +133,12 @@ public:
     }
   }
 
+  size_type
+  get_number_of_nodes() const
+  {
+    return m_nodes.size();
+  }
+
   node_iterator
   begin_nodes()
   {
@@ -155,6 +161,88 @@ public:
   end_nodes() const
   {
     return const_node_iterator(m_nodes.end());
+  }
+
+  element_type&
+  add_element(key_type a_key, element::shape_type a_shape)
+  {
+    typedef typename elements_type::iterator iterator;
+
+    std::pair<iterator, bool> result = m_elements.insert(std::make_pair(
+        a_key, element_type(a_key, a_shape)));
+    if (result.second)
+    {
+      return result.first->second;
+    }
+    else
+    {
+      boost::format fmt("Failed to add element %1% to the structure.");
+      throw std::runtime_error(boost::str(fmt % a_key));
+    }
+  }
+
+  element_type&
+  get_element(key_type a_key)
+  {
+    typedef typename elements_type::iterator iterator;
+
+    iterator result = m_elements.find(a_key);
+    if (result == m_elements.end())
+    {
+      boost::format fmt("Failed to find element %1% in the structure.");
+      throw std::runtime_error(boost::str(fmt % a_key));
+    }
+    else
+    {
+      return result->second;
+    }
+  }
+
+  const element_type&
+  get_element(key_type a_key) const
+  {
+    typedef typename elements_type::const_iterator const_iterator;
+
+    const_iterator result = m_elements.find(a_key);
+    if (result == m_elements.end())
+    {
+      boost::format fmt("Failed to find element %1% in the structure.");
+      throw std::runtime_error(boost::str(fmt % a_key));
+    }
+    else
+    {
+      return result->second;
+    }
+  }
+
+  size_type
+  get_number_of_elements() const
+  {
+    return m_elements.size();
+  }
+
+  element_iterator
+  begin_elements()
+  {
+    return element_iterator(m_elements.begin());
+  }
+
+  element_iterator
+  end_elements()
+  {
+    return element_iterator(m_elements.end());
+  }
+
+  const_element_iterator
+  begin_elements() const
+  {
+    return const_element_iterator(m_elements.begin());
+  }
+
+  const_element_iterator
+  end_elements() const
+  {
+    return const_element_iterator(m_elements.end());
   }
 
   template <typename Fn>
@@ -286,82 +374,6 @@ public:
       ++node_iterator;
     }
     return f;
-  }
-
-  element_type&
-  add_element(key_type a_key, element::shape_type a_shape)
-  {
-    typedef typename elements_type::iterator iterator;
-
-    std::pair<iterator, bool> result = m_elements.insert(std::make_pair(
-        a_key, element_type(a_key, a_shape)));
-    if (result.second)
-    {
-      return result.first->second;
-    }
-    else
-    {
-      boost::format fmt("Failed to add element %1% to the structure.");
-      throw std::runtime_error(boost::str(fmt % a_key));
-    }
-  }
-
-  element_type&
-  get_element(key_type a_key)
-  {
-    typedef typename elements_type::iterator iterator;
-
-    iterator result = m_elements.find(a_key);
-    if (result == m_elements.end())
-    {
-      boost::format fmt("Failed to find element %1% in the structure.");
-      throw std::runtime_error(boost::str(fmt % a_key));
-    }
-    else
-    {
-      return result->second;
-    }
-  }
-
-  const element_type&
-  get_element(key_type a_key) const
-  {
-    typedef typename elements_type::const_iterator const_iterator;
-
-    const_iterator result = m_elements.find(a_key);
-    if (result == m_elements.end())
-    {
-      boost::format fmt("Failed to find element %1% in the structure.");
-      throw std::runtime_error(boost::str(fmt % a_key));
-    }
-    else
-    {
-      return result->second;
-    }
-  }
-
-  element_iterator
-  begin_elements()
-  {
-    return element_iterator(m_elements.begin());
-  }
-
-  element_iterator
-  end_elements()
-  {
-    return element_iterator(m_elements.end());
-  }
-
-  const_element_iterator
-  begin_elements() const
-  {
-    return const_element_iterator(m_elements.begin());
-  }
-
-  const_element_iterator
-  end_elements() const
-  {
-    return const_element_iterator(m_elements.end());
   }
 private:
   typedef boost::unordered_map<key_type, node_type> nodes_type;

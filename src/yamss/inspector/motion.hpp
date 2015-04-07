@@ -5,6 +5,7 @@
 #include <map>
 #include <set>
 #include <armadillo>
+#include <boost/algorithm/string/case_conv.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/format.hpp>
 #include "yamss/inspector/inspector.hpp"
@@ -25,6 +26,7 @@ public:
     : m_stride(1)
     , m_directory(".")
     , m_filename("motion/snapshot.%04d.dat")
+    , m_format(TECPLOT)
     , m_files()
   {
     // empty
@@ -37,6 +39,21 @@ public:
     std::string filename = "motion/snapshot.%04d.dat";
     m_stride = a_tree.get<size_type>("stride", 1);
     m_filename = a_tree.get<std::string>("filename", filename);
+    std::string format = a_tree.get<std::string>("format", "tecplot");
+    boost::to_lower(format);
+    if (format == "ply")
+    {
+      m_format = PLY;
+    }
+    else if (format == "tec" || format == "tecplot")
+    {
+      m_format = TECPLOT;
+    }
+    else
+    {
+      boost::format fmt("The %1% format is not supported");
+      throw std::runtime_error(boost::str(fmt % format));
+    }
   }
 
   virtual
@@ -73,48 +90,14 @@ public:
       std::string filename = boost::str(fmt % m_counter++);
       m_files.insert(filename);
       boost::filesystem::ofstream out(m_directory / filename);
-      out << "TITLE = \"Structural Deformation\"" << std::endl;
-      out << "VARIABLES = \"X\", \"Y\", \"Z\"" << std::endl;
-      fmt.parse("%1$16.9e %2$16.9e %3$16.9e");
-
-      if (m_line_nodes.size() > 0)
+      switch (m_format)
       {
-        out << "ZONE T=\"Iteration " << n << "\"" <<
-            ", DATAPACKING=POINT" <<
-            ", NODES=" << m_line_nodes.size() <<
-            ", ELEMENTS=" << m_line_elements.n_rows <<
-            ", ZONETYPE=FELINESEG" << std::endl;
-        for (p = m_line_nodes.begin(); p != m_line_nodes.end(); ++p)
-        {
-          x = a_structure.get_node(*p).get_displaced_position(q);
-          out << fmt % x(0) % x(1) % x(2) << std::endl;
-        }
-        for (elem = 0; elem < m_line_elements.n_rows; ++elem)
-        {
-          out << m_line_elements(elem, 0) << " "
-              << m_line_elements(elem, 1) << std::endl;
-        }
-      }
-
-      if (m_quad_nodes.size() > 0)
-      {
-        out << "ZONE T=\"Iteration " << n << "\"" <<
-            ", DATAPACKING=POINT" <<
-            ", NODES=" << m_quad_nodes.size() <<
-            ", ELEMENTS=" << m_quad_elements.n_rows <<
-            ", ZONETYPE=FEQUADRILATERAL" << std::endl;
-        for (p = m_quad_nodes.begin(); p != m_quad_nodes.end(); ++p)
-        {
-          x = a_structure.get_node(*p).get_displaced_position(q);
-          out << fmt % x(0) % x(1) % x(2) << std::endl;
-        }
-        for (elem = 0; elem < m_quad_elements.n_rows; ++elem)
-        {
-          out << m_quad_elements(elem, 0) << " "
-              << m_quad_elements(elem, 1) << " "
-              << m_quad_elements(elem, 2) << " "
-              << m_quad_elements(elem, 3) << std::endl;
-        }
+        case PLY:
+          write_ply(out, a_eom, a_structure);
+          break;
+        case TECPLOT:
+          write_tecplot(out, a_eom, a_structure);
+          break;
       }
       out.close();
     }
@@ -227,7 +210,123 @@ protected:
       }
     }
   }
+
+  void
+  write_ply(std::ostream& a_out,
+            const eom_type& a_eom,
+            const structure_type& a_structure)
+  {
+    size_type i;
+    vector_type x;
+    const size_type n = a_eom.get_step(0);
+    const value_type& t = a_eom.get_time(0);
+    const vector_type& q = a_eom.get_displacement(0);
+
+    a_out << "ply" << std::endl;
+    a_out << "format ascii 1.0" << std::endl;
+    a_out << "comment Iteration " << n << std::endl;
+    a_out << "comment Time " << boost::format("%16.9e") % t << std::endl;
+    a_out << "element vertex " << a_structure.get_number_of_nodes() << std::endl;
+    a_out << "property float x" << std::endl;
+    a_out << "property float y" << std::endl;
+    a_out << "property float z" << std::endl;
+    a_out << "element face " << a_structure.get_number_of_elements() << std::endl;
+    a_out << "property list uchar int vertex_indices" << std::endl;
+    a_out << "end_header" << std::endl;
+
+    std::map<key_type, size_type> indices;
+    typename structure_type::const_node_iterator np;
+    boost::format node_formatter("%1$16.9e %2$16.9e %3$16.9e");
+    for (np = a_structure.begin_nodes(), i = 0;
+         np != a_structure.end_nodes();
+         ++np, ++i)
+    {
+      indices[np->get_key()] = i;
+      x = np->get_displaced_position(q);
+      a_out << node_formatter % x(0) % x(1) % x(2) << std::endl;
+    }
+
+    size_type len;
+    typename structure_type::const_element_iterator ep;
+    for (ep = a_structure.begin_elements();
+         ep != a_structure.end_elements();
+         ++ep)
+    {
+      len = ep->get_size();
+      a_out << len;
+      for (i = 0; i < len; ++i)
+      {
+        a_out << " " << indices[ep->get_vertex(i)];
+      }
+      a_out << std::endl;
+    }
+  }
+
+  void
+  write_tecplot(std::ostream& a_out,
+                const eom_type& a_eom,
+                const structure_type& a_structure)
+  {
+    size_type i;
+    vector_type x;
+    size_type elem;
+    std::set<key_type>::const_iterator p;
+    const size_type n = a_eom.get_step(0);
+    const vector_type& q = a_eom.get_displacement(0);
+    boost::format node_formatter("%1$16.9e %2$16.9e %3$16.9e");
+
+    a_out << "TITLE = \"Structural Deformation\"" << std::endl;
+    a_out << "VARIABLES = \"X\", \"Y\", \"Z\"" << std::endl;
+
+    if (m_line_nodes.size() > 0)
+    {
+      a_out << "ZONE T=\"Iteration " << n << "\"" <<
+          ", DATAPACKING=POINT" <<
+          ", NODES=" << m_line_nodes.size() <<
+          ", ELEMENTS=" << m_line_elements.n_rows <<
+          ", ZONETYPE=FELINESEG" << std::endl;
+      for (p = m_line_nodes.begin(); p != m_line_nodes.end(); ++p)
+      {
+        x = a_structure.get_node(*p).get_displaced_position(q);
+        a_out << node_formatter % x(0) % x(1) % x(2) << std::endl;
+      }
+      for (elem = 0; elem < m_line_elements.n_rows; ++elem)
+      {
+        a_out
+            << m_line_elements(elem, 0) << " "
+            << m_line_elements(elem, 1) << std::endl;
+      }
+    }
+
+    if (m_quad_nodes.size() > 0)
+    {
+      a_out << "ZONE T=\"Iteration " << n << "\"" <<
+          ", DATAPACKING=POINT" <<
+          ", NODES=" << m_quad_nodes.size() <<
+          ", ELEMENTS=" << m_quad_elements.n_rows <<
+          ", ZONETYPE=FEQUADRILATERAL" << std::endl;
+      for (p = m_quad_nodes.begin(); p != m_quad_nodes.end(); ++p)
+      {
+        x = a_structure.get_node(*p).get_displaced_position(q);
+        a_out << node_formatter % x(0) % x(1) % x(2) << std::endl;
+      }
+      for (elem = 0; elem < m_quad_elements.n_rows; ++elem)
+      {
+        a_out
+            << m_quad_elements(elem, 0) << " "
+            << m_quad_elements(elem, 1) << " "
+            << m_quad_elements(elem, 2) << " "
+            << m_quad_elements(elem, 3) << std::endl;
+      }
+    }
+  }
 private:
+  enum format_type
+  {
+    TECPLOT,
+    PLY
+  };
+
   typedef size_t key_type;
   typedef size_t size_type;
   typedef element element_type;
@@ -236,6 +335,8 @@ private:
   size_type m_stride;
   path_type m_directory;
   std::string m_filename;
+  format_type m_format;
+
   std::set<path_type> m_files;
 
   size_type m_counter;

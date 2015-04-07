@@ -45,6 +45,7 @@ public:
     create_runner();
     process_nodes();
     process_elements();
+    process_grids();
     process_modes();
     process_eom();
     process_loads();
@@ -64,6 +65,7 @@ public:
     create_runner();
     process_nodes();
     process_elements();
+    process_grids();
     process_modes();
     process_eom();
     process_loads();
@@ -295,6 +297,124 @@ protected:
     catch (pt::ptree_bad_path& e)
     {
       // empty
+    }
+  }
+
+  void
+  process_grids()
+  {
+    namespace pt = boost::property_tree;
+    typedef pt::ptree::const_assoc_iterator const_iterator;
+    typedef std::pair<const_iterator, const_iterator> range_type;
+
+    pt::ptree grids_tree;
+    try
+    {
+      grids_tree = m_document.get_child("structure.grids");
+    }
+    catch (pt::ptree_bad_path& e)
+    {
+      return;
+    }
+
+    size_type i;
+    size_type j;
+    size_type n;
+    size_type i_dim;
+    size_type j_dim;
+    size_type node_id;
+    size_type elem_id;
+    value_type u;
+    value_type v;
+    const_iterator grid_p;
+    const_iterator vert_p;
+    boost::optional<key_type> id;
+    boost::optional<value_type> coord;
+    pt::ptree vertex_tree;
+    range_type vertex_range;
+    range_type grid_range = grids_tree.equal_range("grid");
+    typename element_type::shape_type shape = element_type::QUADRILATERAL;
+    std::vector<typename node_type::vector_type> vertices;
+    for (grid_p = grid_range.first; grid_p != grid_range.second; ++grid_p)
+    {
+      id = grid_p->second.get_optional<key_type>("id");
+      if (id)
+      {
+        vertices.resize(4);
+        vertices[0].resize(6);
+        vertices[1].resize(6);
+        vertices[2].resize(6);
+        vertices[3].resize(6);
+        vertices[0].zeros();
+        vertices[1].zeros();
+        vertices[2].zeros();
+        vertices[3].zeros();
+        vertices[1](0) = 1.0;
+        vertices[2](0) = 1.0;
+        vertices[2](1) = 1.0;
+        vertices[3](1) = 1.0;
+        i_dim = grid_p->second.get<size_type>("u", 11);
+        j_dim = grid_p->second.get<size_type>("v", 11);
+        try
+        {
+          vertex_tree = grid_p->second.get_child("vertices");
+          vertex_range = vertex_tree.equal_range("vertex");
+          for (vert_p = vertex_range.first, n = 0;
+               vert_p != vertex_range.second;
+               ++vert_p, ++n)
+          {
+            if ((coord = vert_p->second.get<value_type>("x")))
+            {
+              vertices[n](0) = *coord;
+            }
+            if ((coord = vert_p->second.get<value_type>("y")))
+            {
+              vertices[n](1) = *coord;
+            }
+            if ((coord = vert_p->second.get<value_type>("z")))
+            {
+              vertices[n](2) = *coord;
+            }
+          }
+        }
+        catch (pt::ptree_bad_path& e)
+        {
+          // empty
+        }
+
+        node_id = *id;
+        typename node_type::vector_type x;
+        for (j = 0; j < j_dim; ++j)
+        {
+          v = static_cast<value_type>(j) / static_cast<value_type>(j_dim - 1);
+          for (i = 0; i < i_dim; ++i)
+          {
+            u = static_cast<value_type>(i) / static_cast<value_type>(i_dim - 1);
+            x =   (1.0 - u) * (1.0 - v) * vertices[0]
+                +        u  * (1.0 - v) * vertices[1]
+                +        u  *        v  * vertices[2]
+                + (1.0 - u) *        v  * vertices[3];
+            node_type& node_ = m_structure->add_node(node_id);
+            node_.set_position(x);
+            ++node_id;
+          }
+        }
+
+        elem_id = *id;
+        for (j = 0; j < j_dim - 1; ++j)
+        {
+          for (i = 0; i < i_dim - 1; ++i)
+          {
+            n = i + i_dim * j + 1;
+            element_type& element_ = m_structure->add_element(elem_id, shape);
+            element_.set_vertex(0, n);
+            element_.set_vertex(1, n + 1);
+            element_.set_vertex(2, n + i_dim + 1);
+            element_.set_vertex(3, n + i_dim);
+            ++elem_id;
+          }
+        }
+      }
     }
   }
 
