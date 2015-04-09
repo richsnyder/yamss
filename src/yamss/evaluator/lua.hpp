@@ -1,4 +1,4 @@
-#ifndef YAMSS_EVALUATOR_LUA_HPP
+ #ifndef YAMSS_EVALUATOR_LUA_HPP
 #define YAMSS_EVALUATOR_LUA_HPP
 
 #include <stdexcept>
@@ -101,24 +101,15 @@ public:
   {
     bootstrap();
     set_globals(a_time, a_node);
-    vector_type vec(6);
-    vec.zeros();
-    for (size_t n = 0; n < m_references.size(); ++n)
-    {
-      if (m_references[n] != LUA_NOREF)
-      {
-        lua_rawgeti(m_state, LUA_REGISTRYINDEX, m_references[n]);
-        int code = lua_pcall(m_state, 0, 1, 0);
-        if (code != LUA_OK)
-        {
-          close();
-          throw std::runtime_error("Could not evaluate an expression");
-        }
-        vec(n) = lua_tonumber(m_state, -1);
-        lua_pop(m_state, 1);
-      }
-    }
-    return vec;
+    return apply();
+  }
+
+  vector_type
+  operator()(const vector_type& a_position)
+  {
+    bootstrap();
+    set_globals(a_position);
+    return apply();
   }
 protected:
   void
@@ -168,6 +159,52 @@ protected:
     lua_setglobal(m_state, "q");
     lua_pushnumber(m_state, ::yamss::real(a_node.get_position(5)));
     lua_setglobal(m_state, "r");
+  }
+
+  void
+  set_globals(const vector_type& a_position)
+  {
+    if (a_position.size() >= 3)
+    {
+      lua_pushnumber(m_state, ::yamss::real(a_position(0)));
+      lua_setglobal(m_state, "x");
+      lua_pushnumber(m_state, ::yamss::real(a_position(1)));
+      lua_setglobal(m_state, "y");
+      lua_pushnumber(m_state, ::yamss::real(a_position(2)));
+      lua_setglobal(m_state, "z");
+    }
+    if (a_position.size() == 6)
+    {
+      lua_pushnumber(m_state, ::yamss::real(a_position(3)));
+      lua_setglobal(m_state, "p");
+      lua_pushnumber(m_state, ::yamss::real(a_position(4)));
+      lua_setglobal(m_state, "q");
+      lua_pushnumber(m_state, ::yamss::real(a_position(5)));
+      lua_setglobal(m_state, "r");
+    }
+  }
+
+  vector_type
+  apply()
+  {
+    vector_type vec(6);
+    vec.zeros();
+    for (size_t n = 0; n < m_references.size(); ++n)
+    {
+      if (m_references[n] != LUA_NOREF)
+      {
+        lua_rawgeti(m_state, LUA_REGISTRYINDEX, m_references[n]);
+        int code = lua_pcall(m_state, 0, 1, 0);
+        if (code != LUA_OK)
+        {
+          close();
+          throw std::runtime_error("Could not evaluate an expression");
+        }
+        vec(n) = lua_tonumber(m_state, -1);
+        lua_pop(m_state, 1);
+      }
+    }
+    return vec;
   }
 private:
   typedef std::vector<int> references_type;

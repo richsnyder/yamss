@@ -120,7 +120,7 @@ public:
   void
   set_mode(size_type a_mode, const vector_type& a_shape)
   {
-    m_modes.row(a_mode) = a_shape;
+    m_modes.row(a_mode) = a_shape.t();
   }
 
   void

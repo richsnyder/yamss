@@ -1,0 +1,320 @@
+<?xml version="1.0"?>
+
+<!-- --------------------------------------------------------------- -->
+<!--                                                                 -->
+<!-- Square Plate with SS-SS-SS-SS Boundary Conditions               -->
+<!--                                                                 -->
+<!-- One point load at the center of the plate:                      -->
+<!--                                                                 -->
+<!--     F( x=0.5 , y=0.5 ) = 10 sin(0.25 w11 * t)                   -->
+<!--                                                                 -->
+<!-- Author: Rich Snyder                                             -->
+<!--                                                                 -->
+<!-- --------------------------------------------------------------- -->
+
+<yamss>
+
+  <structure>
+    <nodes>
+      <node><id>0</id><x>0.5</x><y>0.5</y></node>
+    </nodes>
+    <elements>
+      <point><id>0</id><v>0</v></point>
+    </elements>
+    <grids>
+      <grid>
+        <id>1</id>
+      </grid>
+    </grids>
+  </structure>
+
+  <modes>
+    <mode>
+      <!-- m = 1, n = 1, w = 19.7392 -->
+      <shape>
+        <type>lua</type>
+        <parameters>
+          <expressions>
+            <z>math.sin(1.0 * math.pi * x) * math.sin(1.0 * math.pi * y)</z>
+          </expressions>
+        </parameters>
+      </shape>
+    </mode>
+    <mode>
+      <!-- m = 2, n = 1, w = 49.348 -->
+      <shape>
+        <type>lua</type>
+        <parameters>
+          <expressions>
+            <z>math.sin(2.0 * math.pi * x) * math.sin(1.0 * math.pi * y)</z>
+          </expressions>
+        </parameters>
+      </shape>
+    </mode>
+    <mode>
+      <!-- m = 1, n = 2, w = 49.348 -->
+      <shape>
+        <type>lua</type>
+        <parameters>
+          <expressions>
+            <z>math.sin(1.0 * math.pi * x) * math.sin(2.0 * math.pi * y)</z>
+          </expressions>
+        </parameters>
+      </shape>
+    </mode>
+    <mode>
+      <!-- m = 2, n = 2, w = 78.9568 -->
+      <shape>
+        <type>lua</type>
+        <parameters>
+          <expressions>
+            <z>math.sin(2.0 * math.pi * x) * math.sin(2.0 * math.pi * y)</z>
+          </expressions>
+        </parameters>
+      </shape>
+    </mode>
+    <mode>
+      <!-- m = 3, n = 1, w = 98.696 -->
+      <shape>
+        <type>lua</type>
+        <parameters>
+          <expressions>
+            <z>math.sin(3.0 * math.pi * x) * math.sin(1.0 * math.pi * y)</z>
+          </expressions>
+        </parameters>
+      </shape>
+    </mode>
+    <mode>
+      <!-- m = 1, n = 3, w = 98.696 -->
+      <shape>
+        <type>lua</type>
+        <parameters>
+          <expressions>
+            <z>math.sin(1.0 * math.pi * x) * math.sin(3.0 * math.pi * y)</z>
+          </expressions>
+        </parameters>
+      </shape>
+    </mode>
+    <mode>
+      <!-- m = 3, n = 2, w = 128.305 -->
+      <shape>
+        <type>lua</type>
+        <parameters>
+          <expressions>
+            <z>math.sin(3.0 * math.pi * x) * math.sin(2.0 * math.pi * y)</z>
+          </expressions>
+        </parameters>
+      </shape>
+    </mode>
+    <mode>
+      <!-- m = 2, n = 3, w = 128.305 -->
+      <shape>
+        <type>lua</type>
+        <parameters>
+          <expressions>
+            <z>math.sin(2.0 * math.pi * x) * math.sin(3.0 * math.pi * y)</z>
+          </expressions>
+        </parameters>
+      </shape>
+    </mode>
+    <mode>
+      <!-- m = 4, n = 1, w = 167.783 -->
+      <shape>
+        <type>lua</type>
+        <parameters>
+          <expressions>
+            <z>math.sin(4.0 * math.pi * x) * math.sin(1.0 * math.pi * y)</z>
+          </expressions>
+        </parameters>
+      </shape>
+    </mode>
+    <mode>
+      <!-- m = 1, n = 4, w = 167.783 -->
+      <shape>
+        <type>lua</type>
+        <parameters>
+          <expressions>
+            <z>math.sin(1.0 * math.pi * x) * math.sin(4.0 * math.pi * y)</z>
+          </expressions>
+        </parameters>
+      </shape>
+    </mode>
+    <mode>
+      <!-- m = 3, n = 3, w = 177.653 -->
+      <shape>
+        <type>lua</type>
+        <parameters>
+          <expressions>
+            <z>math.sin(3.0 * math.pi * x) * math.sin(3.0 * math.pi * y)</z>
+          </expressions>
+        </parameters>
+      </shape>
+    </mode>
+    <mode>
+      <!-- m = 4, n = 2, w = 197.392 -->
+      <shape>
+        <type>lua</type>
+        <parameters>
+          <expressions>
+            <z>math.sin(4.0 * math.pi * x) * math.sin(2.0 * math.pi * y)</z>
+          </expressions>
+        </parameters>
+      </shape>
+    </mode>
+    <mode>
+      <!-- m = 2, n = 4, w = 197.392 -->
+      <shape>
+        <type>lua</type>
+        <parameters>
+          <expressions>
+            <z>math.sin(2.0 * math.pi * x) * math.sin(4.0 * math.pi * y)</z>
+          </expressions>
+        </parameters>
+      </shape>
+    </mode>
+    <mode>
+      <!-- m = 4, n = 3, w = 246.74 -->
+      <shape>
+        <type>lua</type>
+        <parameters>
+          <expressions>
+            <z>math.sin(4.0 * math.pi * x) * math.sin(3.0 * math.pi * y)</z>
+          </expressions>
+        </parameters>
+      </shape>
+    </mode>
+    <mode>
+      <!-- m = 3, n = 4, w = 246.74 -->
+      <shape>
+        <type>lua</type>
+        <parameters>
+          <expressions>
+            <z>math.sin(3.0 * math.pi * x) * math.sin(4.0 * math.pi * y)</z>
+          </expressions>
+        </parameters>
+      </shape>
+    </mode>
+    <mode>
+      <!-- m = 5, n = 1, w = 256.61 -->
+      <shape>
+        <type>lua</type>
+        <parameters>
+          <expressions>
+            <z>math.sin(5.0 * math.pi * x) * math.sin(1.0 * math.pi * y)</z>
+          </expressions>
+        </parameters>
+      </shape>
+    </mode>
+    <mode>
+      <!-- m = 1, n = 5, w = 256.61 -->
+      <shape>
+        <type>lua</type>
+        <parameters>
+          <expressions>
+            <z>math.sin(1.0 * math.pi * x) * math.sin(5.0 * math.pi * y)</z>
+          </expressions>
+        </parameters>
+      </shape>
+    </mode>
+    <mode>
+      <!-- m = 5, n = 2, w = 286.219 -->
+      <shape>
+        <type>lua</type>
+        <parameters>
+          <expressions>
+            <z>math.sin(5.0 * math.pi * x) * math.sin(2.0 * math.pi * y)</z>
+          </expressions>
+        </parameters>
+      </shape>
+    </mode>
+    <mode>
+      <!-- m = 2, n = 5, w = 286.219 -->
+      <shape>
+        <type>lua</type>
+        <parameters>
+          <expressions>
+            <z>math.sin(2.0 * math.pi * x) * math.sin(5.0 * math.pi * y)</z>
+          </expressions>
+        </parameters>
+      </shape>
+    </mode>
+    <mode>
+      <!-- m = 4, n = 4, w = 315.827 -->
+      <shape>
+        <type>lua</type>
+        <parameters>
+          <expressions>
+            <z>math.sin(2.0 * math.pi * x) * math.sin(5.0 * math.pi * y)</z>
+          </expressions>
+        </parameters>
+      </shape>
+    </mode>
+  </modes>
+
+  <eom>
+    <matrices>
+      <stiffness>diag(
+        389.636
+        2435.23
+        2435.23
+        6234.18
+        9740.91
+        9740.91
+        16462.1
+        16462.1
+        28151.2
+        28151.2
+        31560.5
+        38963.6
+        38963.6
+        60880.7
+        60880.7
+        65848.5
+        65848.5
+        81921.0
+        81921.0
+        99746.9)</stiffness>
+    </matrices>
+  </eom>
+
+  <loads>
+    <load>
+      <id>1</id>
+      <type>lua</type>
+      <parameters>
+        <expressions>
+          <z>10.0 * math.sin(4.9348 * t)</z>
+        </expressions>
+      </parameters>
+      <elements>
+        <element>0</element>
+      </elements>
+    </load>
+  </loads>
+
+  <solution>
+    <time>
+      <span>10.0</span>
+      <step>0.001</step>
+    </time>
+  </solution>
+
+  <outputs>
+    <output>
+      <type>summary</type>
+      <parameters>
+        <stride>100</stride>
+      </parameters>
+    </output>
+    <output>
+      <type>modes</type>
+    </output>
+    <output>
+      <type>motion</type>
+      <parameters>
+        <stride>10</stride>
+      </parameters>
+    </output>
+  </outputs>
+
+</yamss>

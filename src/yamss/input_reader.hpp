@@ -3,6 +3,7 @@
 
 #include <limits>
 #include <stdexcept>
+#include <boost/algorithm/string/case_conv.hpp>
 #include <boost/format.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -419,71 +420,119 @@ protected:
   }
 
   void
+  add_mode_with_nodes(const boost::property_tree::ptree& a_tree,
+                      size_type a_mode)
+  {
+    namespace pt = boost::property_tree;
+    typedef pt::ptree::const_assoc_iterator const_iterator;
+    typedef std::pair<const_iterator, const_iterator> range_type;
+
+    const_iterator node_p;
+    boost::optional<key_type> id;
+    boost::optional<value_type> dof;
+    range_type range = a_tree.equal_range("node");
+    for (node_p = range.first; node_p != range.second; ++node_p)
+    {
+      id = node_p->second.get_optional<key_type>("id");
+      if (id)
+      {
+        node_type& node_ = m_structure->get_node(*id);
+        if ((dof = node_p->second.get_optional<value_type>("x")))
+        {
+          node_.set_mode(a_mode, 0, *dof);
+        }
+        if ((dof = node_p->second.get_optional<value_type>("y")))
+        {
+          node_.set_mode(a_mode, 1, *dof);
+        }
+        if ((dof = node_p->second.get_optional<value_type>("z")))
+        {
+          node_.set_mode(a_mode, 2, *dof);
+        }
+        if ((dof = node_p->second.get_optional<value_type>("p")))
+        {
+          node_.set_mode(a_mode, 3, *dof);
+        }
+        if ((dof = node_p->second.get_optional<value_type>("q")))
+        {
+          node_.set_mode(a_mode, 4, *dof);
+        }
+        if ((dof = node_p->second.get_optional<value_type>("r")))
+        {
+          node_.set_mode(a_mode, 5, *dof);
+        }
+      }
+    }
+  }
+
+  void
+  add_mode_with_lua(const boost::property_tree::ptree& a_tree,
+                    size_type a_mode)
+  {
+    typename structure_type::node_iterator node_p;
+    std::string type_ = a_tree.get<std::string>("type", "lua");
+    boost::to_lower(type_);
+    if (type_ == "lua")
+    {
+      evaluator::lua<value_type> evaluator_(a_tree);
+      for (node_p = m_structure->begin_nodes();
+           node_p != m_structure->end_nodes();
+           ++node_p)
+      {
+        node_p->set_mode(a_mode, evaluator_(node_p->get_position()));
+      }
+    }
+  }
+
+  void
   process_modes()
   {
     namespace pt = boost::property_tree;
     typedef pt::ptree::const_assoc_iterator const_iterator;
     typedef std::pair<const_iterator, const_iterator> range_type;
 
-    const_iterator p;
-    const_iterator q;
-    size_type mode = 0;
-    boost::optional<key_type> id;
-    boost::optional<value_type> dof;
-    pt::ptree nodes_tree;
+    pt::ptree modes_tree;
     try
     {
-      pt::ptree modes_tree = m_document.get_child("modes");
-      range_type range = m_document.get_child("modes").equal_range("mode");
-      for (p = range.first; p != range.second; ++p)
-      {
-        try
-        {
-          nodes_tree = p->second.get_child("nodes");
-          range_type nrange = nodes_tree.equal_range("node");
-          for (q = nrange.first; q != nrange.second; ++q)
-          {
-            id = q->second.get_optional<key_type>("id");
-            if (id)
-            {
-              node_type& node_ = m_structure->get_node(*id);
-              if ((dof = q->second.get_optional<value_type>("x")))
-              {
-                node_.set_mode(mode, 0, *dof);
-              }
-              if ((dof = q->second.get_optional<value_type>("y")))
-              {
-                node_.set_mode(mode, 1, *dof);
-              }
-              if ((dof = q->second.get_optional<value_type>("z")))
-              {
-                node_.set_mode(mode, 2, *dof);
-              }
-              if ((dof = q->second.get_optional<value_type>("p")))
-              {
-                node_.set_mode(mode, 3, *dof);
-              }
-              if ((dof = q->second.get_optional<value_type>("q")))
-              {
-                node_.set_mode(mode, 4, *dof);
-              }
-              if ((dof = q->second.get_optional<value_type>("r")))
-              {
-                node_.set_mode(mode, 5, *dof);
-              }
-            }
-          }
-        }
-        catch (pt::ptree_bad_path& e)
-        {
-          // empty
-        }
-        ++mode;
-      }
+      modes_tree = m_document.get_child("modes");
     }
     catch (pt::ptree_bad_path& e)
     {
-      // empty
+      return;
+    }
+
+    pt::ptree tree;
+    size_type mode_number;
+    const_iterator mode_p;
+    range_type range = modes_tree.equal_range("mode");
+    for (mode_p = range.first, mode_number = 0;
+         mode_p != range.second;
+         ++mode_p, ++mode_number)
+    {
+      try
+      {
+        tree = mode_p->second.get_child("nodes");
+        add_mode_with_nodes(tree, mode_number);
+        continue;
+      }
+      catch (pt::ptree_bad_path& e)
+      {
+        // empty
+      }
+      try
+      {
+        std::string type_ = mode_p->second.get<std::string>("shape.type", "lua");
+        tree = mode_p->second.get_child("shape").get_child("parameters");
+        boost::to_lower(type_);
+        if (type_ == "lua")
+        {
+          add_mode_with_lua(tree, mode_number);
+        }
+      }
+      catch (pt::ptree_bad_path& e)
+      {
+        // empty
+      }
     }
   }
 

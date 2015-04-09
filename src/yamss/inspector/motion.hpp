@@ -272,6 +272,7 @@ protected:
     size_type elem;
     std::set<key_type>::const_iterator p;
     const size_type n = a_eom.get_step(0);
+    const value_type& t = a_eom.get_time(0);
     const vector_type& q = a_eom.get_displacement(0);
     boost::format node_formatter("%1$16.9e %2$16.9e %3$16.9e");
 
@@ -284,7 +285,9 @@ protected:
           ", DATAPACKING=POINT" <<
           ", NODES=" << m_line_nodes.size() <<
           ", ELEMENTS=" << m_line_elements.n_rows <<
-          ", ZONETYPE=FELINESEG" << std::endl;
+          ", ZONETYPE=FELINESEG" <<
+          ", STRANDID=1" <<
+          ", SOLUTIONTIME=" << t << std::endl;
       for (p = m_line_nodes.begin(); p != m_line_nodes.end(); ++p)
       {
         x = a_structure.get_node(*p).get_displaced_position(q);
@@ -293,8 +296,8 @@ protected:
       for (elem = 0; elem < m_line_elements.n_rows; ++elem)
       {
         a_out
-            << m_line_elements(elem, 0) << " "
-            << m_line_elements(elem, 1) << std::endl;
+            << (m_line_elements(elem, 0) + 1) << " "
+            << (m_line_elements(elem, 1) + 1) << std::endl;
       }
     }
 
@@ -304,7 +307,9 @@ protected:
           ", DATAPACKING=POINT" <<
           ", NODES=" << m_quad_nodes.size() <<
           ", ELEMENTS=" << m_quad_elements.n_rows <<
-          ", ZONETYPE=FEQUADRILATERAL" << std::endl;
+          ", ZONETYPE=FEQUADRILATERAL" <<
+          ", STRANDID=1" <<
+          ", SOLUTIONTIME=" << t << std::endl;
       for (p = m_quad_nodes.begin(); p != m_quad_nodes.end(); ++p)
       {
         x = a_structure.get_node(*p).get_displaced_position(q);
@@ -313,10 +318,10 @@ protected:
       for (elem = 0; elem < m_quad_elements.n_rows; ++elem)
       {
         a_out
-            << m_quad_elements(elem, 0) << " "
-            << m_quad_elements(elem, 1) << " "
-            << m_quad_elements(elem, 2) << " "
-            << m_quad_elements(elem, 3) << std::endl;
+            << (m_quad_elements(elem, 0) + 1) << " "
+            << (m_quad_elements(elem, 1) + 1) << " "
+            << (m_quad_elements(elem, 2) + 1) << " "
+            << (m_quad_elements(elem, 3) + 1) << std::endl;
       }
     }
   }

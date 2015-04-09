@@ -20,7 +20,7 @@ vector_cast(const std::string& a_string)
   typedef boost::char_separator<char> separator_type;
   typedef boost::tokenizer<separator_type> tokenizer_type;
 
-  separator_type separator(" ;\t");
+  separator_type separator(" ;\t\r\n");
   tokenizer_type tokens(a_string, separator);
   tokenizer_type::const_iterator it;
 
@@ -60,7 +60,7 @@ matrix_cast(const std::string& a_string)
     return arma::diagmat(vector_cast<T>(match["vector"]));
   }
 
-  separator_type separator(" \t", ";");
+  separator_type separator(" \t\r\n", ";");
   tokenizer_type tokens(a_string, separator);
   tokenizer_type::const_iterator it;
 
