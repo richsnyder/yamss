@@ -12,6 +12,12 @@ handler::handler(const boost::filesystem::path& a_directory)
 }
 
 void
+handler::advance(const JobKey& a_job)
+{
+  return get_runner(a_job)->advance();
+}
+
+void
 handler::create(JobKey& a_job, const std::string& a_url)
 {
   namespace fs = boost::filesystem;
@@ -135,6 +141,12 @@ handler::get_runner(const JobKey& a_job)
     throw e;
   }
   return job->second.first;
+}
+
+void
+handler::getActiveDofs(std::vector<bool>& a_dofs, const JobKey& a_job)
+{
+  a_dofs = get_runner(a_job)->get_structure()->get_active_dofs();
 }
 
 double
@@ -379,6 +391,18 @@ handler::getNode(Node& a_node, const JobKey& a_job, const int64_t a_node_key)
   a_node.force = converter::from(f);
 }
 
+int32_t
+handler::getNumberOfActiveDofs(const JobKey& a_job)
+{
+  return get_runner(a_job)->get_structure()->get_number_of_active_dofs();
+}
+
+int32_t
+handler::getNumberOfNodes(const JobKey& a_job)
+{
+  return get_runner(a_job)->get_structure()->get_number_of_nodes();
+}
+
 void
 handler::getState(State& a_state, const JobKey& a_job)
 {
@@ -427,6 +451,12 @@ void
 handler::release(const JobKey& a_job)
 {
   m_jobs.erase(a_job);
+}
+
+void
+handler::report(const JobKey& a_job)
+{
+  return get_runner(a_job)->report();
 }
 
 void
@@ -582,6 +612,12 @@ handler::stepN(const JobKey& a_job, const int32_t a_steps)
     ye.what = boost::str(fmt % a_job);
     throw ye;
   }
+}
+
+void
+handler::subiterate(const JobKey& a_job)
+{
+  return get_runner(a_job)->subiterate();
 }
 
 } // server namespace

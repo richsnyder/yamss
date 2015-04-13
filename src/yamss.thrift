@@ -63,6 +63,12 @@ service Yamss {
 
   void stepN(1: JobKey a_key, 2: i32 a_steps) throws (1: YamssException e),
 
+  void advance(1: JobKey a_key) throws (1: YamssException e),
+
+  void subiterate(1: JobKey a_key) throws (1: YamssException e),
+
+  void report(1: JobKey a_key) throws (1: YamssException e),
+
   void run(1: JobKey a_key) throws (1: YamssException e),
 
   void runJob(1: string a_url) throws (1: YamssException e),
@@ -71,6 +77,12 @@ service Yamss {
             throws (1: YamssException e),
 
   // Queries
+
+  list<bool> getActiveDofs(1: JobKey a_key) throws (1: YamssException e),
+
+  i32 getNumberOfActiveDofs(1: JobKey a_key) throws (1: YamssException e),
+
+  i32 getNumberOfNodes(1: JobKey a_key) throws (1: YamssException e),
 
   double getTime(1: JobKey a_key) throws (1: YamssException e),
 

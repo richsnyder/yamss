@@ -44,6 +44,15 @@ public:
   stepN(const JobKey& a_job, const int32_t a_steps);
 
   void
+  advance(const JobKey& a_job);
+
+  void
+  subiterate(const JobKey& a_job);
+
+  void
+  report(const JobKey& a_job);
+
+  void
   run(const JobKey& a_job);
 
   void
@@ -53,6 +62,15 @@ public:
   setFinalTime(const JobKey& a_job, const double a_final_time);
 
   // Queries
+
+  void
+  getActiveDofs(std::vector<bool>& a_dofs, const JobKey& a_job);
+
+  int32_t
+  getNumberOfActiveDofs(const JobKey& a_job);
+
+  int32_t
+  getNumberOfNodes(const JobKey& a_job);
 
   double
   getTime(const JobKey& a_job);

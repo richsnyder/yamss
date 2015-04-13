@@ -133,6 +133,28 @@ public:
   }
 
   void
+  advance()
+  {
+    m_eom->advance(m_time_step);
+  }
+
+  void
+  subiterate()
+  {
+    m_integrator->operator()(*m_eom, *m_structure);
+  }
+
+  void
+  report()
+  {
+    std::for_each(
+        m_inspectors.begin(),
+        m_inspectors.end(),
+        boost::bind(&runner<T>::update, this, _1)
+      );
+  }
+
+  void
   run()
   {
     while (::yamss::real(m_eom->get_time(0)) < ::yamss::real(m_final_time))
