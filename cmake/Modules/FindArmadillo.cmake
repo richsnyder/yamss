@@ -25,6 +25,15 @@
 
 INCLUDE(FindPackageHandleStandardArgs)
 
+IF(Armadillo_FIND_QUIETLY)
+  SET(_FIND_PACKAGE_ARG ${_FIND_PACKAGE_ARGS} QUIET)
+ENDIF(Armadillo_FIND_QUIETLY)
+IF(Armadillo_FIND_REQUIRED)
+  SET(_FIND_PACKAGE_ARG ${_FIND_PACKAGE_ARGS} REQUIRED)
+ENDIF(Armadillo_FIND_REQUIRED)
+
+FIND_PACKAGE(LAPACK ${_FIND_PACKAGE_ARGS})
+
 FIND_PATH(Armadillo_INCLUDE_DIR armadillo_bits/arma_version.hpp)
 FIND_LIBRARY(Armadillo_LIBRARY NAMES armadillo)
 
@@ -54,12 +63,18 @@ ENDIF()
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(
     Armadillo
     FOUND_VAR Armadillo_FOUND
-    REQUIRED_VARS Armadillo_INCLUDE_DIR Armadillo_LIBRARY
+    REQUIRED_VARS
+      Armadillo_INCLUDE_DIR
+      Armadillo_LIBRARY
+      LAPACK_LIBRARIES
     VERSION_VAR Armadillo_VERSION)
 
 IF(Armadillo_FOUND)
-  SET(Armadillo_INCLUDE_DIRS ${Armadillo_INCLUDE_DIR})
-  SET(Armadillo_LIBRARIES ${Armadillo_LIBRARY})
+  SET(Armadillo_INCLUDE_DIRS
+    ${Armadillo_INCLUDE_DIR})
+  SET(Armadillo_LIBRARIES
+    ${Armadillo_LIBRARY}
+    ${LAPACK_LIBRARIES})
 ENDIF()
 
 MARK_AS_ADVANCED(Armadillo_INCLUDE_DIR Armadillo_LIBRARY)

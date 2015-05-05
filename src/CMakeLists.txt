@@ -5,7 +5,6 @@ SET(YAMSS_SOURCES
     clp.cpp
     element.cpp
     ostream.cpp
-    run_server.cpp
     yamss.cpp
 )
 SET(YAMSS_HEADERS
@@ -20,7 +19,6 @@ SET(YAMSS_HEADERS
     yamss/map_values.hpp
     yamss/matrix_cast.hpp
     yamss/node.hpp
-    yamss/run_server.hpp
     yamss/run_simulation.hpp
     yamss/runner.hpp
     yamss/structure.hpp
@@ -54,9 +52,11 @@ IF(BUILD_SERVER)
       GENERATED_HEADERS THRIFT_HEADERS)
   SET(YAMSS_SOURCES ${YAMSS_SOURCES}
       handler.cpp
+      run_server.cpp
       transporter.cpp
   )
   SET(YAMSS_HEADERS ${YAMSS_HEADERS}
+      yamss/run_server.hpp
       yamss/server/handler.hpp
       yamss/server/transporter.hpp
   )

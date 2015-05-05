@@ -1,6 +1,8 @@
 #include <complex>
 #include "yamss/clp.hpp"
-#include "yamss/run_server.hpp"
+#ifdef YAMSS_SUPPORTS_SERVER_MODE
+# include "yamss/run_server.hpp"
+#endif
 #include "yamss/run_simulation.hpp"
 
 int
