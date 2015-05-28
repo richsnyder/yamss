@@ -55,6 +55,7 @@ FUNCTION(_DOC_INITIALIZE)
     SET_PROPERTY(CACHE BUILD_DOC PROPERTY STRINGS AUTO ON OFF)
     OPTION(ENABLE_HTML "Create documentation in HTML format" ON)
     OPTION(ENABLE_PDF "Create documentation in PDF format" OFF)
+    OPTION(ENABLE_DOCX "Create documentation in DOCX format" OFF)
 
     IF(BUILD_DOC STREQUAL OFF)
       SET(flag OFF)
@@ -216,6 +217,15 @@ FUNCTION(_DOC_PNG_IMAGES)
 ENDFUNCTION(_DOC_PNG_IMAGES)
 
 # ------------------------------------------------------------------------------
+#
+# _DOC_CSS([VAR <var>] [FILES <files>])
+#
+# Create custom commands for copying CSS files into the HTML directory.
+#
+# Each entry in the <files> list is expected to be a CSS file.  A custom
+# command is created for each file that will copy the stylesheet into the
+# HTML output directory.
+#
 # ------------------------------------------------------------------------------
 
 FUNCTION(_DOC_CSS)
@@ -282,7 +292,7 @@ FUNCTION(_DOC_HTML)
   # Create a list of stylesheets on which the documents depend.
   FOREACH(file ${A_CSS})
     GET_FILENAME_COMPONENT(name_we "${file}" NAME_WE)
-    SET(dep "${CMAKE_CURRENT_BINARY_DIR}/html/${file}")
+    SET(dep "${CMAKE_CURRENT_BINARY_DIR}/html/css/${name_we}.css")
     SET(options ${options} --css="${dep}")
     LIST(APPEND stylesheets ${dep})
   ENDFOREACH(file)
@@ -395,6 +405,88 @@ ENDFUNCTION(_DOC_PDF)
 
 # ------------------------------------------------------------------------------
 #
+# _DOC_DOCX([VAR <var>] [FILES <files>] [IMAGES <images>] [STYLE <docx>])
+#
+# Create custom commands for generating DOCX files from Markdown source.
+#
+# Each entry in the <files> list is expected to be a Markdown file.  A custom
+# command is created for each Markdown file to convert it into a DOCX file.
+# The generated DOCX document may contain embedded PNG files in the <images>
+# list.  The DOCX files will be located in `${CMAKE_CURRENT_BINARY_DIR}/docx`
+# and will be marked for installation into `doc/word`.  If <var> is defined,
+# then it is set to a list of absolute paths to the DOCX files that will be
+# generated.
+#
+# ------------------------------------------------------------------------------
+
+FUNCTION(_DOC_DOCX)
+
+  # Parse the arguments to the function.
+  CMAKE_PARSE_ARGUMENTS(A
+    ""
+    "VAR;STYLE"
+    "BIBLIOGRAPHIES;FILES;IMAGES"
+    ${ARGN})
+
+  # Create a directory to store the generated documents.
+  FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/word)
+
+  # Set options for the conversion.
+  LIST(APPEND options --standalone --normalize --smart)
+  LIST(APPEND options --default-image-extension=png)
+  LIST(APPEND options --filter pandoc-citeproc)
+
+  # Create a list of stylesheets on which the documents depend.
+  IF (DEFINED A_STYLE)
+    SET(dep "${CMAKE_CURRENT_SOURCE_DIR}/${A_STYLE}")
+    SET(options ${options} --reference-docx="${dep}")
+    SET(stylesheet ${dep})
+  ENDIF()
+
+  # Create a list of bibliographies on which the documents depend.
+  FOREACH(file ${A_BIBLIOGRAPHIES})
+    SET(src "${CMAKE_CURRENT_SOURCE_DIR}/${file}")
+    SET(dst "${CMAKE_CURRENT_BINARY_DIR}/word/${file}")
+    LIST(APPEND bibliographies ${dst})
+    ADD_CUSTOM_COMMAND(OUTPUT ${dst}
+        COMMAND ${CMAKE_COMMAND} -E copy ${src} ${dst}
+        DEPENDS ${src})
+  ENDFOREACH(file)
+
+  # Create a list of images on which the documents depend.
+  FOREACH(file ${A_IMAGES})
+    GET_FILENAME_COMPONENT(name_we "${file}" NAME_WE)
+    SET(src "${CMAKE_CURRENT_BINARY_DIR}/html/images/${name_we}.png")
+    SET(dst "${CMAKE_CURRENT_BINARY_DIR}/word/images/${name_we}.png")
+    LIST(APPEND images ${dst})
+    ADD_CUSTOM_COMMAND(OUTPUT ${dst}
+        COMMAND ${CMAKE_COMMAND} -E copy ${src} ${dst}
+        DEPENDS ${src})
+  ENDFOREACH(file)
+
+  # Process each file in the supplied list of files.
+  FOREACH(file ${A_FILES})
+    GET_FILENAME_COMPONENT(name_we "${file}" NAME_WE)
+    SET(src "${CMAKE_CURRENT_SOURCE_DIR}/${file}")
+    SET(wrk "${CMAKE_CURRENT_BINARY_DIR}/word/${file}")
+    SET(dst "${CMAKE_CURRENT_BINARY_DIR}/word/${name_we}.docx")
+    LIST(APPEND dependencies ${dst})
+    ADD_CUSTOM_COMMAND(OUTPUT ${dst}
+        COMMAND ${CMAKE_COMMAND} -E copy ${src} ${wrk}
+        COMMAND ${Pandoc_EXECUTABLE} ${options} ${file} -o ${dst}
+        DEPENDS ${src} ${bibliographies} ${images} ${stylesheet}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/word)
+    INSTALL(FILES ${dst} DESTINATION doc/word)
+  ENDFOREACH(file)
+
+  # Return a list of the dependencies.
+  IF(DEFINED A_VAR)
+    SET(${A_VAR} ${dependencies} ${images} PARENT_SCOPE)
+  ENDIF()
+ENDFUNCTION(_DOC_DOCX)
+
+# ------------------------------------------------------------------------------
+#
 # DOC_SUMMARY([INDENT <indent>] [WIDTH <width>])
 #
 # Print a summary of the documentation options.
@@ -445,6 +537,11 @@ FUNCTION(DOC_SUMMARY)
     ELSE()
       SET(pdf_indicator "no")
     ENDIF()
+    IF(ENABLE_DOCX)
+      SET(docx_indicator "yes")
+    ELSE()
+      SET(docx_indicator "no")
+    ENDIF()
     _DOC_MESSAGE(
         KEY "Create HTML documentation"
         VALUE ${html_indicator}
@@ -453,6 +550,11 @@ FUNCTION(DOC_SUMMARY)
     _DOC_MESSAGE(
         KEY "Create PDF documentation"
         VALUE ${pdf_indicator}
+        INDENT ${A_INDENT}
+        WIDTH ${A_WIDTH})
+    _DOC_MESSAGE(
+        KEY "Create DOCX documentation"
+        VALUE ${docx_indicator}
         INDENT ${A_INDENT}
         WIDTH ${A_WIDTH})
   ENDIF()
@@ -481,7 +583,7 @@ FUNCTION(ADD_DOCUMENTATION)
   # Parse the arguments to the function.
   CMAKE_PARSE_ARGUMENTS(A
     ""
-    "TARGET"
+    "TARGET;REFERENCE_DOCX"
     "BIBLIOGRAPHIES;CSS;FILES;IMAGES"
     ${ARGN})
 
@@ -490,12 +592,14 @@ FUNCTION(ADD_DOCUMENTATION)
   ENDIF()
 
   IF(DOC_BUILD)
-    IF(ENABLE_HTML OR ENABLE_PDF)
+    IF(ENABLE_HTML OR ENABLE_PDF OR ENABLE_DOCX)
       _DOC_PDF_IMAGES(FILES ${A_IMAGES})
+    ENDIF()
+    IF(ENABLE_HTML OR ENABLE_DOCX)
+      _DOC_PNG_IMAGES(FILES ${A_IMAGES})
     ENDIF()
     IF(ENABLE_HTML)
       _DOC_CSS(FILES ${A_CSS})
-      _DOC_PNG_IMAGES(FILES ${A_IMAGES})
       _DOC_HTML(
           VAR html_dependencies
           BIBLIOGRAPHIES ${A_BIBLIOGRAPHIES}
@@ -511,6 +615,15 @@ FUNCTION(ADD_DOCUMENTATION)
           FILES ${A_FILES}
           IMAGES ${A_IMAGES})
       SET(dependencies ${dependencies} ${pdf_dependencies})
+    ENDIF()
+    IF(ENABLE_DOCX)
+      _DOC_DOCX(
+          VAR docx_dependencies
+          BIBLIOGRAPHIES ${A_BIBLIOGRAPHIES}
+          FILES ${A_FILES}
+          IMAGES ${A_IMAGES}
+          STYLE ${A_REFERENCE_DOCX})
+      SET(dependencies ${dependencies} ${docx_dependencies})
     ENDIF()
   ENDIF()
   ADD_CUSTOM_TARGET(${A_TARGET} ALL DEPENDS ${dependencies})
