@@ -16,14 +16,6 @@
 #   CONFIGURATION_REPORT()
 #     - Generates a report on the configuration for a YAMSS build.
 #
-# ------------------------------------------------------------------------------
-#
-# Copyright (c) 2015, Richard Snyder
-#
-# Use, modification, and distribution is subject to the BSD License.
-# See the accompanying file LICENSE.md for the full license.
-# Terms can also be found at http://creativecommons.org/licenses/BSD/.
-#
 # ==============================================================================
 
 INCLUDE(CMakeParseArguments)
@@ -125,7 +117,7 @@ FUNCTION(CONFIGURATION_REPORT)
   VERSION_OR_NOT_FOUND(VAR boost_version PACKAGE Boost VERSION bv)
   VERSION_OR_NOT_FOUND(VAR lua_version PACKAGE LUA VERSION LUA_VERSION_STRING)
   VERSION_OR_NOT_FOUND(VAR curl_version PACKAGE CURL VERSION CURL_VERSION_STRING)
-  VERSION_OR_NOT_FOUND(VAR zenith_version PACKAGE Zenith)
+  VERSION_OR_NOT_FOUND(VAR hermes_version PACKAGE Hermes)
 
   MESSAGE(STATUS "")
   MESSAGE(STATUS "Configuration Summary")
@@ -135,7 +127,7 @@ FUNCTION(CONFIGURATION_REPORT)
   MESSAGE(STATUS "  Boost version              : ${boost_version}")
   MESSAGE(STATUS "  Lua version                : ${lua_version}")
   MESSAGE(STATUS "  CURL version               : ${curl_version}")
-  MESSAGE(STATUS "  Zenith version             : ${zenith_version}")
+  MESSAGE(STATUS "  Hermes version             : ${hermes_version}")
   MESSAGE(STATUS "")
   DOC_SUMMARY()
   MESSAGE(STATUS "")

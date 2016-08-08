@@ -13,23 +13,15 @@
 #   Armadillo_INCLUDE_DIR      Where to find the Armadillo header files
 #   Armadillo_LIBRARY          Where to find the Armadillo library
 #
-# ------------------------------------------------------------------------------
-#
-# Copyright (c) 2015, Richard Snyder
-#
-# Use, modification, and distribution is subject to the BSD License.
-# See the accompanying file LICENSE.md for the full license.
-# Terms can also be found at http://creativecommons.org/licenses/BSD/.
-#
 # ==============================================================================
 
 INCLUDE(FindPackageHandleStandardArgs)
 
 IF(Armadillo_FIND_QUIETLY)
-  SET(_FIND_PACKAGE_ARG ${_FIND_PACKAGE_ARGS} QUIET)
+  SET(_FIND_PACKAGE_ARGS ${_FIND_PACKAGE_ARGS} QUIET)
 ENDIF(Armadillo_FIND_QUIETLY)
 IF(Armadillo_FIND_REQUIRED)
-  SET(_FIND_PACKAGE_ARG ${_FIND_PACKAGE_ARGS} REQUIRED)
+  SET(_FIND_PACKAGE_ARGS ${_FIND_PACKAGE_ARGS} REQUIRED)
 ENDIF(Armadillo_FIND_REQUIRED)
 
 FIND_PACKAGE(LAPACK ${_FIND_PACKAGE_ARGS})

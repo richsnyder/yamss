@@ -11,7 +11,7 @@ about::author()
 std::string
 about::copyright()
 {
-  return "Copyright (c) 2015, " + author();
+  return "Public domain software";
 }
 
 std::vector<std::string>
@@ -38,15 +38,15 @@ std::string
 about::legal()
 {
   return description() + "\n\n" + copyright() + "\n"
-      + "\nUse, modification, and distribution is subject to the BSD License."
-      + "\nSee the accompanying file LICENSE.md for the full license."
-      + "\nTerms can also be found at http://creativecommons.org/licenses/BSD/.";
+      + "\nUnless otherwise marked, this software is declared a work of the"
+      + "\nU.S. Government and is not subject to copyright protection in the"
+      + "\nUnited States.";
 }
 
 std::string
 about::license_type()
 {
-  return "BSD";
+  return "Public Domain";
 }
 
 std::string

@@ -14,14 +14,6 @@
 #   DOC_SUMMARY()
 #     - Generate a report on the configuration of the documentation.
 #
-# ------------------------------------------------------------------------------
-#
-# Copyright (c) 2015, Richard Snyder
-#
-# Use, modification, and distribution is subject to the BSD License.
-# See the accompanying file LICENSE.md for the full license.
-# Terms can also be found at http://creativecommons.org/licenses/BSD/.
-#
 # ==============================================================================
 
 INCLUDE(CMakeParseArguments)

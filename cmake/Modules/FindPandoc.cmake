@@ -11,14 +11,6 @@
 #   Pandoc_citeproc_EXECUTABLE   Full path to the Pandoc citeproc executable
 #   Pandoc_VERSION               The version of the Pandoc program
 #
-# ------------------------------------------------------------------------------
-#
-# Copyright (c) 2015, Richard Snyder
-#
-# Use, modification, and distribution is subject to the BSD License.
-# See the accompanying file LICENSE.md for the full license.
-# Terms can also be found at http://creativecommons.org/licenses/BSD/.
-#
 # ==============================================================================
 
 INCLUDE(FindPackageHandleStandardArgs)
