@@ -2,10 +2,8 @@
 #define YAMSS_RUN_SERVER_HPP
 
 #include <boost/filesystem.hpp>
-#include <boost/shared_ptr.hpp>
-#include <zenith/server.hpp>
 #include "yamss/clp.hpp"
-#include "yamss/server/handler.hpp"
+#include "yamss/server/server.hpp"
 
 namespace yamss {
 

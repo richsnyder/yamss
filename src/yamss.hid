@@ -1,0 +1,86 @@
+namespace cpp = yamss.server;
+
+alias JobKey = string;
+
+enumeration ElementType {
+  POINT,
+  LINE,
+  TRIANGLE,
+  QUADRILATERAL
+}
+
+exception YamssException {
+  string what
+}
+
+structure InterfacePatch {
+  vector<bool> activeDofs,
+  vector<real64> nodeCoordinates,
+  vector<ElementType> elementTypes,
+  vector<int32> elementVertices
+}
+
+structure InterfaceLoading {
+  vector<real64> forces
+}
+
+structure InterfaceMovement {
+  vector<real64> displacements,
+  vector<real64> velocities,
+  vector<real64> accelerations
+}
+
+structure Node {
+  vector<real64> position,
+  vector<real64> displacement,
+  vector<real64> force
+}
+
+structure State {
+  int64 step,
+  real64 time,
+  vector<real64> displacement,
+  vector<real64> velocity,
+  vector<real64> acceleration,
+  vector<real64> force
+}
+
+interface Yamss {
+
+  // Job management
+
+  JobKey create(string url) throws(YamssException),
+  void release(JobKey job),
+
+  // Simulation control
+
+  void initialize(JobKey job) throws(YamssException),
+  void finalize(JobKey job) throws(YamssException),
+  void step(JobKey job) throws(YamssException),
+  void stepN(JobKey job, int32 steps) throws(YamssException),
+  void advance(JobKey job) throws(YamssException),
+  void subiterate(JobKey job) throws(YamssException),
+  void report(JobKey job) throws(YamssException),
+  void run(JobKey job) throws(YamssException),
+  void runJob(string url) throws(YamssException),
+  void setFinalTime(JobKey job, real64 finalTime) throws(YamssException),
+
+  // Queries
+
+  vector<bool> getActiveDofs(JobKey job) throws(YamssException),
+  int32 getNumberOfActiveDofs(JobKey job) throws(YamssException),
+  int32 getNumberOfNodes(JobKey job) throws(YamssException),
+  real64 getTime(JobKey job) throws(YamssException),
+  real64 getTimeStep(JobKey job) throws(YamssException),
+  real64 getFinalTime(JobKey job) throws(YamssException),
+  vector<real64> getModes(JobKey job) throws(YamssException),
+  Node getNode(JobKey job, int64 nodeKey) throws(YamssException),
+  State getState(JobKey job) throws(YamssException),
+
+  // Interface methods
+
+  InterfacePatch getInterface(JobKey job, int64 loadKey) throws(YamssException),
+  InterfaceMovement getInterfaceMovement(JobKey job, int64 loadKey) throws(YamssException),
+  void setInterfaceLoading(JobKey job, int64 loadKey, InterfaceLoading loading) throws(YamssException)
+
+}

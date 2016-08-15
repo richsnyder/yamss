@@ -1,13 +1,13 @@
 # List all of the core source and header files.
 
-SET(YAMSS_SOURCES
+SET(SOURCES
     about.cpp
     clp.cpp
     element.cpp
     ostream.cpp
     yamss.cpp
 )
-SET(YAMSS_HEADERS
+SET(HEADERS
     yamss/about.hpp
     yamss/clp.hpp
     yamss/complex.hpp
@@ -35,59 +35,55 @@ SET(YAMSS_HEADERS
     yamss/integrator/generalized_alpha.hpp
     yamss/integrator/newmark_beta.hpp
 )
-SET(YAMSS_CONFIG_HEADERS
+SET(CONFIGURED_HEADERS
     yamss/config.hpp
     yamss/version.hpp
 )
 
-# Define the Thrift target if the server mode is enabled.
+# Define the Hermes target if the server mode is enabled.
 
 IF(BUILD_SERVER)
-  INCLUDE(UseThrift)
-  ADD_THRIFT(
+  INCLUDE(UseHermes)
+  ADD_HERMES(
       GENERATOR cpp
-      INTERFACE_DEFINITION yamss.thrift
+      INTERFACE_DEFINITION yamss.hid
       SOURCE_DIRECTORY include/yamss/server
-      GENERATED_SOURCES THRIFT_SOURCES
-      GENERATED_HEADERS THRIFT_HEADERS)
-  SET(YAMSS_SOURCES ${YAMSS_SOURCES}
-      handler.cpp
+      GENERATED_SOURCES HERMES_SOURCES
+      GENERATED_HEADERS HERMES_HEADERS
+  )
+  SET(SOURCES ${SOURCES}
+      server.cpp
       run_server.cpp
       transporter.cpp
   )
-  SET(YAMSS_HEADERS ${YAMSS_HEADERS}
+  SET(HEADERS ${HEADERS}
       yamss/run_server.hpp
-      yamss/server/handler.hpp
+      yamss/server/server.hpp
       yamss/server/transporter.hpp
   )
 ENDIF(BUILD_SERVER)
-INSTALL(FILES yamss.thrift DESTINATION share)
+INSTALL(FILES yamss.hid DESTINATION share)
 
 # Identify the directories that contain include files.
 
 INCLUDE_DIRECTORIES(BEFORE ${CMAKE_CURRENT_SOURCE_DIR})
+INCLUDE_DIRECTORIES(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
 INCLUDE_DIRECTORIES(BEFORE ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 # Process the header files.
 
-FOREACH(file ${YAMSS_HEADERS})
-  GET_FILENAME_COMPONENT(subdirectory ${file} DIRECTORY)
-  #INSTALL(FILES ${file} DESTINATION include/${subdirectory})
-ENDFOREACH(file)
-FOREACH(file ${YAMSS_CONFIG_HEADERS})
+FOREACH(file ${CONFIGURED_HEADERS})
   GET_FILENAME_COMPONENT(subdirectory ${file} DIRECTORY)
   SET(src ${CMAKE_CURRENT_SOURCE_DIR}/${file}.in)
   SET(dst ${CMAKE_CURRENT_BINARY_DIR}/include/${file})
   CONFIGURE_FILE(${src} ${dst})
-  #INSTALL(FILES ${dst} DESTINATION include/${subdirectory})
-ENDFOREACH(file)
-FOREACH(file ${THRIFT_HEADERS})
-  GET_FILENAME_COMPONENT(directory ${file} DIRECTORY)
-  #INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/${file} DESTINATION ${directory})
 ENDFOREACH(file)
 
 # Define the executable target.
 
-ADD_EXECUTABLE(yamss ${YAMSS_SOURCES} ${THRIFT_SOURCES})
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+SET(FEATURES cxx_auto_type cxx_defaulted_functions)
+ADD_EXECUTABLE(yamss ${SOURCES} ${HERMES_SOURCES})
+TARGET_COMPILE_FEATURES(yamss PUBLIC ${FEATURES})
 TARGET_LINK_LIBRARIES(yamss ${EXTRA_LIBS})
 INSTALL(TARGETS yamss RUNTIME DESTINATION bin)

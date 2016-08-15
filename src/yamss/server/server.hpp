@@ -11,20 +11,23 @@
 #include "yamss/runner.hpp"
 #include "yamss/evaluator/interface.hpp"
 #include "yamss/server/transporter.hpp"
-#include "yamss/server/Yamss.h"
+#include "yamss/server/yamss.hpp"
 
 namespace yamss {
 namespace server {
 
-class handler : virtual public YamssIf
+class server : public Yamss::server
 {
 public:
-  handler(const boost::filesystem::path& a_directory);
+  server(void* a_context,
+         const std::string& a_endpoint,
+         int a_type,
+         const boost::filesystem::path& a_directory);
 
   // Job management
 
-  void
-  create(JobKey& a_job, const std::string& a_url);
+  JobKey
+  create(const std::string& a_url);
 
   void
   release(const JobKey& a_job);
@@ -41,7 +44,7 @@ public:
   step(const JobKey& a_job);
 
   void
-  stepN(const JobKey& a_job, const int32_t a_steps);
+  stepN(const JobKey& a_job, const std::int32_t a_steps);
 
   void
   advance(const JobKey& a_job);
@@ -63,13 +66,13 @@ public:
 
   // Queries
 
-  void
-  getActiveDofs(std::vector<bool>& a_dofs, const JobKey& a_job);
+  std::vector<bool>
+  getActiveDofs(const JobKey& a_job);
 
-  int32_t
+  std::int32_t
   getNumberOfActiveDofs(const JobKey& a_job);
 
-  int32_t
+  std::int32_t
   getNumberOfNodes(const JobKey& a_job);
 
   double
@@ -81,30 +84,26 @@ public:
   double
   getFinalTime(const JobKey& a_job);
 
-  void
-  getModes(std::vector<double>& a_modes, const JobKey& a_job);
+  std::vector<double>
+  getModes(const JobKey& a_job);
 
-  void
-  getNode(Node& a_position, const JobKey& a_job, const int64_t a_node_key);
+  Node
+  getNode(const JobKey& a_job, const std::int64_t a_nodeKey);
 
-  void
-  getState(State& a_state, const JobKey& a_job);
+  State
+  getState(const JobKey& a_job);
 
   // Interface methods
 
-  void
-  getInterface(Interface& a_interface,
-               const JobKey& a_job,
-               const int64_t a_load);
+  InterfacePatch
+  getInterface(const JobKey& a_job, const std::int64_t a_loadKey);
 
-  void
-  getInterfaceMovement(InterfaceMovement& a_movement,
-                       const JobKey& a_job,
-                       const int64_t a_load);
+  InterfaceMovement
+  getInterfaceMovement(const JobKey& a_job, const std::int64_t a_loadKey);
 
   void
   setInterfaceLoading(const JobKey& a_job,
-                      const int64_t a_load,
+                      const std::int64_t a_loadKey,
                       const InterfaceLoading& a_loading);
 protected:
   typedef size_t key_type;
