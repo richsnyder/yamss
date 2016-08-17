@@ -2,14 +2,11 @@
 
 SET(SOURCES
     about.cpp
-    clp.cpp
     element.cpp
     ostream.cpp
-    yamss.cpp
 )
 SET(HEADERS
     yamss/about.hpp
-    yamss/clp.hpp
     yamss/complex.hpp
     yamss/element.hpp
     yamss/eom.hpp
@@ -39,6 +36,13 @@ SET(CONFIGURED_HEADERS
     yamss/config.hpp
     yamss/version.hpp
 )
+SET(EXE_SOURCES
+  clp.cpp
+  yamss.cpp
+)
+SET(EXE_HEADERS
+  yamss/clp.hpp
+)
 
 # Define the Hermes target if the server mode is enabled.
 
@@ -51,7 +55,7 @@ IF(BUILD_SERVER)
       GENERATED_SOURCES HERMES_SOURCES
       GENERATED_HEADERS HERMES_HEADERS
   )
-  SET(SOURCES ${SOURCES}
+  SET(EXE_SOURCES ${EXE_SOURCES}
       server.cpp
       run_server.cpp
       transporter.cpp
@@ -62,7 +66,7 @@ IF(BUILD_SERVER)
       yamss/server/transporter.hpp
   )
 ENDIF(BUILD_SERVER)
-INSTALL(FILES yamss.hid DESTINATION share)
+INSTALL(FILES yamss.hid DESTINATION share/yamss)
 
 # Identify the directories that contain include files.
 
@@ -72,18 +76,39 @@ INCLUDE_DIRECTORIES(BEFORE ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 # Process the header files.
 
+FOREACH(file ${HEADERS})
+  GET_FILENAME_COMPONENT(subdirectory ${file} DIRECTORY)
+  INSTALL(FILES ${file} DESTINATION include/${subdirectory})
+ENDFOREACH(file)
 FOREACH(file ${CONFIGURED_HEADERS})
   GET_FILENAME_COMPONENT(subdirectory ${file} DIRECTORY)
   SET(src ${CMAKE_CURRENT_SOURCE_DIR}/${file}.in)
   SET(dst ${CMAKE_CURRENT_BINARY_DIR}/include/${file})
   CONFIGURE_FILE(${src} ${dst})
+  INSTALL(FILES ${dst} DESTINATION include/${subdirectory})
 ENDFOREACH(file)
 
-# Define the executable target.
+# Set options for the build.
 
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 SET(FEATURES cxx_auto_type cxx_defaulted_functions)
-ADD_EXECUTABLE(yamss ${SOURCES} ${HERMES_SOURCES})
+
+# Define library targets.
+
+ADD_LIBRARY(yamss-static STATIC ${SOURCES})
+TARGET_COMPILE_FEATURES(yamss-static PUBLIC ${FEATURES})
+SET_TARGET_PROPERTIES(yamss-static PROPERTIES OUTPUT_NAME yamss)
+INSTALL(TARGETS yamss-static ARCHIVE DESTINATION lib)
+
+ADD_LIBRARY(yamss-shared SHARED ${SOURCES})
+TARGET_COMPILE_FEATURES(yamss-shared PUBLIC ${FEATURES})
+TARGET_LINK_LIBRARIES(yamss-shared ${EXTRA_LIBS})
+SET_TARGET_PROPERTIES(yamss-shared PROPERTIES OUTPUT_NAME yamss)
+INSTALL(TARGETS yamss-shared LIBRARY DESTINATION lib)
+
+# Define the executable target.
+
+ADD_EXECUTABLE(yamss ${EXE_SOURCES} ${HERMES_SOURCES})
 TARGET_COMPILE_FEATURES(yamss PUBLIC ${FEATURES})
-TARGET_LINK_LIBRARIES(yamss ${EXTRA_LIBS})
+TARGET_LINK_LIBRARIES(yamss yamss-shared)
 INSTALL(TARGETS yamss RUNTIME DESTINATION bin)
