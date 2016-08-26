@@ -1,6 +1,7 @@
-#include "yamss/run_server.hpp"
+#include "yamss/server/run_server.hpp"
 
 namespace yamss {
+namespace server {
 
 void
 run_server(const yamss::clp& a_parser)
@@ -33,4 +34,5 @@ run_server(const yamss::clp& a_parser)
   }
 }
 
+} // server namespace
 } // yamss namespace

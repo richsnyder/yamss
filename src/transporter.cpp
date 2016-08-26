@@ -1,7 +1,6 @@
-#include "yamss/server/transporter.hpp"
+#include "yamss/transporter.hpp"
 
 namespace yamss {
-namespace server {
 
 transport_error::transport_error(const std::string& a_message)
   : std::runtime_error(a_message)
@@ -223,5 +222,4 @@ transporter::put(const path_type& a_local, const url_type& a_remote)
   in.close();
 }
 
-} // server namespace
 } // yamss namespace

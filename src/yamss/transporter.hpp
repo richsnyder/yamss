@@ -5,8 +5,8 @@
  *
  *  @brief Transport files over the network.
  */
-#ifndef YAMSS_SERVER_TRANSPORTER_HPP
-#define YAMSS_SERVER_TRANSPORTER_HPP
+#ifndef YAMSS_TRANSPORTER_HPP
+#define YAMSS_TRANSPORTER_HPP
 
 #include <iostream>
 #include <stdexcept>
@@ -18,7 +18,6 @@
 #include <curl/curl.h>
 
 namespace yamss {
-namespace server {
 
 /** The `transporter` class uses this exception class to report errors that may
  *  occur while transferring a file over the network.
@@ -178,7 +177,6 @@ private:
   CURL* m_curl;
 }; // transporter class
 
-} // server namespace
 } // yamss namespace
 
-#endif // YAMSS_SERVER_TRANSPORTER_HPP
+#endif // YAMSS_TRANSPORTER_HPP

@@ -1,7 +1,7 @@
 #include <complex>
 #include "yamss/clp.hpp"
 #ifdef YAMSS_SUPPORTS_SERVER_MODE
-# include "yamss/run_server.hpp"
+# include "yamss/server/run_server.hpp"
 #endif
 #include "yamss/run_simulation.hpp"
 
@@ -20,7 +20,7 @@ main(int argc, char* argv[])
 
     if (parser.server_mode())
     {
-      yamss::run_server(parser);
+      yamss::server::run_server(parser);
     }
     else if (parser.complex_mode())
     {

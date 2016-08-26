@@ -1,16 +1,7 @@
-#ifndef YAMSS_SERVER_HANDLER_HPP
-#define YAMSS_SERVER_HANDLER_HPP
+#ifndef YAMSS_SERVER_SERVER_HPP
+#define YAMSS_SERVER_SERVER_HPP
 
-#include <iostream>
-#include <string>
-#include <boost/filesystem.hpp>
-#include <boost/format.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/unordered_map.hpp>
-#include "yamss/input_reader.hpp"
-#include "yamss/runner.hpp"
-#include "yamss/evaluator/interface.hpp"
-#include "yamss/server/transporter.hpp"
+#include "yamss/handler.hpp"
 #include "yamss/server/yamss.hpp"
 
 namespace yamss {
@@ -105,24 +96,11 @@ public:
   setInterfaceLoading(const JobKey& a_job,
                       const std::int64_t a_loadKey,
                       const InterfaceLoading& a_loading);
-protected:
-  typedef size_t key_type;
-  typedef size_t size_type;
-  typedef ::yamss::runner<double> runner_type;
-  typedef ::boost::shared_ptr<runner_type> runner_pointer;
-  typedef ::std::pair<runner_pointer, std::string> job_type;
-
-  runner_pointer
-  get_runner(const std::string& a_job);
 private:
-  typedef ::boost::unordered_map<std::string, job_type> jobs_type;
-
-  ::boost::filesystem::path m_directory;
-  ::yamss::server::transporter m_transporter;
-  jobs_type m_jobs;
-}; // handler class
+  handler m_handler;
+}; // server class
 
 } // server namespace
 } // yamss namespace
 
-#endif // YAMSS_SERVER_HANDLER_HPP
+#endif // YAMSS_SERVER_SERVER_HPP
