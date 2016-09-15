@@ -107,8 +107,10 @@ IF(BUILD_WRAPPER)
   FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/classes)
 
   SET_PROPERTY(SOURCE yamss/wrapper/yamss.i PROPERTY CPLUSPLUS ON)
-  SWIG_ADD_MODULE(yamss-jni java yamss/wrapper/yamss.i wrapper.cpp)
+  SWIG_ADD_MODULE(yamss-jni java yamss/wrapper/yamss.i)
   SWIG_LINK_LIBRARIES(yamss-jni yamss-shared ${EXTRA_LIBS})
+  TARGET_SOURCES(yamss-shared PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/wrapper.cpp)
+  TARGET_SOURCES(yamss-shared PUBLIC ${swig_generated_file_fullname})
   SET_TARGET_PROPERTIES(yamss-jni PROPERTIES OUTPUT_NAME yamss)
   INSTALL(TARGETS yamss-jni LIBRARY DESTINATION lib)
 
@@ -117,7 +119,6 @@ IF(BUILD_WRAPPER)
       COMMAND ${Java_JAR_EXECUTABLE} -cfM yamss.jar -C classes .
   )
   INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/yamss.jar DESTINATION lib)
-
 ENDIF(BUILD_WRAPPER)
 INSTALL(FILES yamss/wrapper/yamss.i DESTINATION share/yamss)
 

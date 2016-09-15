@@ -17,6 +17,7 @@ this_handler::get()
   const std::string model = "yamss-%%%%-%%%%-%%%%-%%%%";
   boost::filesystem::path workdir = boost::filesystem::current_path();
   workdir /= boost::filesystem::unique_path(model);
+  boost::filesystem::create_directory(workdir);
   auto new_handler = boost::make_shared<handler>(workdir);
   c_handlers.insert(std::make_pair(id, new_handler));
   return new_handler;
