@@ -109,23 +109,26 @@ handler::finalize(const JobKey& a_job)
     throw ye;
   }
 
-  fs::path local_path;
-  std::string remote_url;
-  std::set<fs::path>::const_iterator fp;
-  try
+  if (url.substr(0, 4) == "file")
   {
-    for (fp = files.begin(); fp != files.end(); ++fp)
+    fs::path local_path;
+    std::string remote_url;
+    std::set<fs::path>::const_iterator fp;
+    try
     {
-      local_path = m_directory / a_job / *fp;
-      remote_url = url + fp->native();
-      m_transporter.put(local_path, remote_url);
+      for (fp = files.begin(); fp != files.end(); ++fp)
+      {
+        local_path = m_directory / a_job / *fp;
+        remote_url = url + fp->native();
+        m_transporter.put(local_path, remote_url);
+      }
     }
-  }
-  catch (transport_error& e)
-  {
-    YamssException ye;
-    ye.what = e.what();
-    throw ye;
+    catch (transport_error& e)
+    {
+      YamssException ye;
+      ye.what = e.what();
+      throw ye;
+    }
   }
 }
 
