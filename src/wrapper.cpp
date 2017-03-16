@@ -132,6 +132,12 @@ setInterfaceLoading(const JobKey& a_job,
 }
 
 void
+setWorkingDirectory(const std::string& a_path)
+{
+  this_handler::working_directory(a_path);
+}
+
+void
 step(const JobKey& a_job) throw(YamssException)
 {
   this_handler::get()->step(a_job);

@@ -58,6 +58,10 @@ clp::initialize()
       po::value<std::string>()->implicit_value(m_default_endpoint),
       "enable server mode"
     )(
+      "directory,d",
+      po::value<std::string>(),
+      "working directory"
+    )(
       "keep,k",
       "keep working files on the server"
     );
@@ -81,6 +85,18 @@ std::string
 clp::input_filename() const
 {
   return m_variables_map["input-filename"].as<std::string>();
+}
+
+bool
+clp::has_working_directory() const
+{
+  return m_variables_map.count("directory") == 1;
+}
+
+std::string
+clp::working_directory() const
+{
+  return m_variables_map["directory"].as<std::string>();
 }
 
 void

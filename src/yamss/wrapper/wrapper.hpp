@@ -6,6 +6,9 @@
 namespace yamss {
 namespace wrapper {
 
+void
+setWorkingDirectory(const std::string& a_path);
+
 JobKey
 create(const std::string& a_url) throw(YamssException);
 

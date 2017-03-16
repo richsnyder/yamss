@@ -609,7 +609,7 @@ and the time step is left at its default value of $\Delta t = 0.01$.
 
 ### Newmark-$\beta$ Method
 
-@Newmark-1959-MCS described an integration method for dynamic systems that
+Newmark (1959) described an integration method for dynamic systems that
 uses the extended mean value theorem to express the first and second time
 derivatives.  The Newmark-$\beta$ method has two parameters:
 
@@ -648,7 +648,7 @@ $$
 
 ### Generalized-$\alpha$ Method
 
-@Chung-1993-TIA introduces a new family of time integration algorithms for
+Chung (1993) introduces a new family of time integration algorithms for
 solving structural dynamics problems.  The new method, denoted as the
 generalized-$\alpha$ method, possesses numerical dissipation that can be
 controlled by the user.  The present implementation has two free parameters:
@@ -858,9 +858,12 @@ ${\left[\Psi\right]}$
 
 # References
 
----
-bibliography: references.bib
-...
+Chung, J., and G. M. Hulbert. 1993. "A Time Integration Algorithm for
+Structural Dynamics with Improved Numerical Dissipation: The Generalized-Alpha
+Method." *Journal of Applied Mechanics* 60 (June): 371–75.
+
+Newmark, Nathan M. 1959. "A Method of Computation for Structural Dynamics."
+*Journal of the Engineering Mechanics Division* 85 (3): 67–94.
 
 [boost_format]: http://www.boost.org/doc/libs/1_57_0/libs/format
 [lua]: http://www.lua.org

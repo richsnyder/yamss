@@ -26,6 +26,12 @@ public:
   std::string
   input_filename() const;
 
+  bool
+  has_working_directory() const;
+
+  std::string
+  working_directory() const;
+
   void
   legal(std::ostream& a_out) const;
 
@@ -60,6 +66,7 @@ protected:
 private:
   std::string m_program_name;
   std::string m_input_filename;
+  std::string m_working_directory;
   std::string m_default_endpoint;
   boost::program_options::options_description m_argument_options;
   boost::program_options::options_description m_visible_options;

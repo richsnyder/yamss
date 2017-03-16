@@ -9,10 +9,18 @@ run_server(const yamss::clp& a_parser)
   using ::boost::shared_ptr;
   using ::yamss::server::server;
 
+  boost::filesystem::path workdir;
   const std::string model = "yamss-%%%%-%%%%-%%%%-%%%%";
-  boost::filesystem::path workdir = boost::filesystem::current_path();
+  if (a_parser.has_working_directory())
+  {
+    workdir = a_parser.working_directory();
+  }
+  else
+  {
+    workdir = boost::filesystem::current_path();
+  }
   workdir /= boost::filesystem::unique_path(model);
-  boost::filesystem::create_directory(workdir);
+  boost::filesystem::create_directories(workdir);
 
   void* context = zmq_ctx_new();
   const std::string endpoint = a_parser.server_endpoint();

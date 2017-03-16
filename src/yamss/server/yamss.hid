@@ -79,8 +79,17 @@ interface Yamss {
 
   // Interface methods
 
-  InterfacePatch getInterface(JobKey job, int64 loadKey) throws(YamssException),
-  InterfaceMovement getInterfaceMovement(JobKey job, int64 loadKey) throws(YamssException),
-  void setInterfaceLoading(JobKey job, int64 loadKey, InterfaceLoading loading) throws(YamssException)
+  InterfacePatch 
+  getInterface(JobKey job,
+               int64 loadKey) throws(YamssException),
+
+  InterfaceMovement
+  getInterfaceMovement(JobKey job,
+                       int64 loadKey) throws(YamssException),
+
+  void
+  setInterfaceLoading(JobKey job,
+                      int64 loadKey,
+                      InterfaceLoading loading) throws(YamssException)
 
 }

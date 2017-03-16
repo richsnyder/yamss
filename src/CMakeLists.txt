@@ -108,7 +108,8 @@ IF(BUILD_WRAPPER)
   SET(CMAKE_SWIG_OUTDIR ${CMAKE_CURRENT_BINARY_DIR}/java)
   FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/classes)
 
-  SET_PROPERTY(SOURCE yamss/wrapper/yamss.i PROPERTY SWIG_FLAGS -package mstc.eng.jni.yamss)
+  SET_PROPERTY(SOURCE yamss/wrapper/yamss.i
+               PROPERTY SWIG_FLAGS -package mstc.eng.jni.yamss)
   SET_PROPERTY(SOURCE yamss/wrapper/yamss.i PROPERTY CPLUSPLUS ON)
   SWIG_ADD_MODULE(yamss-jni java yamss/wrapper/yamss.i)
   SWIG_LINK_LIBRARIES(yamss-jni yamss-shared ${EXTRA_LIBS})
