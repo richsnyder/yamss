@@ -83,13 +83,13 @@ getInterface(const JobKey& a_job,
              const std::int64_t a_loadKey) throw(YamssException);
 
 InterfaceMovement
-getInterfaceMovement(const JobKey& a_job,
+getMovement(const JobKey& a_job,
                      const std::int64_t a_loadKey) throw(YamssException);
 
 void
-setInterfaceLoading(const JobKey& a_job,
-                    const std::int64_t a_loadKey,
-                    const InterfaceLoading& a_loading) throw(YamssException);
+setLoading(const JobKey& a_job,
+           const std::int64_t a_loadKey,
+           const InterfaceLoading& a_loading) throw(YamssException);
 
 } // wrapper namespace
 } // yamss namespace

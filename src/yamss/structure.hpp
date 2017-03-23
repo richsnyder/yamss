@@ -198,6 +198,71 @@ public:
     }
   }
 
+  vector_type
+  get_element_normal(const element_type& a_element)
+  {
+    auto n_vertices = a_element.get_size();
+    vector_type normal = {0.0, 0.0, 1.0};
+
+    if (n_vertices > 2)
+    {
+      const auto& node_0 = get_node(a_element.get_vertex(0));
+      const auto& node_1 = get_node(a_element.get_vertex(1));
+      const auto& node_n = get_node(a_element.get_vertex(n_vertices - 1));
+      const auto& x_0 = node_0.get_position();
+      const auto& x_1 = node_1.get_position();
+      const auto& x_n = node_n.get_position();
+      auto v_0 = x_0.head(3);
+      auto v_1 = x_1.head(3);
+      auto v_n = x_n.head(3);
+
+      normal = ::arma::normalise(::arma::cross(v_1 - v_0, v_n - v_0));
+    }
+
+    return normal;
+  }
+
+  vector_type
+  get_element_normal(key_type a_key)
+  {
+    return get_element_normal(get_element(a_key));
+  }
+
+  value_type
+  get_element_area(const element_type& a_element)
+  {
+    auto n_vertices = a_element.get_size();
+    auto area = 0.0;
+
+    if (n_vertices > 2)
+    {
+      vector_type v_a;
+      vector_type v_b;
+      vector_type summed = ::arma::zeros<vector_type>(3);
+      auto normal = get_element_normal(a_element);
+
+      v_b = get_node(a_element.get_vertex(0)).get_position().head(3);
+      for (auto n = 1; n < n_vertices; ++n)
+      {
+        v_a = v_b;
+        v_b = get_node(a_element.get_vertex(n)).get_position().head(3);
+        summed += ::arma::cross(v_a, v_b);
+      }
+      v_a = v_b;
+      v_b = get_node(a_element.get_vertex(0)).get_position().head(3);
+      summed += ::arma::cross(v_a, v_b);
+      area = 0.5 * ::arma::dot(normal, summed);
+    }
+
+    return area;
+  }
+
+  value_type
+  get_element_area(key_type a_key)
+  {
+    return get_element_area(get_element(a_key));
+  }
+
   const element_type&
   get_element(key_type a_key) const
   {

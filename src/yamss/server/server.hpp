@@ -90,12 +90,12 @@ public:
   getInterface(const JobKey& a_job, const std::int64_t a_loadKey);
 
   InterfaceMovement
-  getInterfaceMovement(const JobKey& a_job, const std::int64_t a_loadKey);
+  getMovement(const JobKey& a_job, const std::int64_t a_loadKey);
 
   void
-  setInterfaceLoading(const JobKey& a_job,
-                      const std::int64_t a_loadKey,
-                      const InterfaceLoading& a_loading);
+  setLoading(const JobKey& a_job,
+             const std::int64_t a_loadKey,
+             const InterfaceLoading& a_loading);
 private:
   handler m_handler;
 }; // server class

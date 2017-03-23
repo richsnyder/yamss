@@ -147,7 +147,7 @@ FUNCTION(HERMES_PYTHON_FILES)
   # Get information about the interface definition.
   GET_FILENAME_COMPONENT(basename "${A_INTERFACE_DEFINITION}" NAME_WE)
 
-  # Build a list of the Thrift-generated files.
+  # Build a list of the Hermes-generated files.
   LIST(APPEND sources ${A_SOURCE_DIRECTORY}/${basename}.py)
 
   # Return the list of the generated source files.
@@ -160,13 +160,21 @@ ENDFUNCTION(HERMES_PYTHON_FILES)
 # ADD_HERMES(<target>
 #            INTERFACE_DEFINITION <file>
 #            SOURCE_DIRECTORY <directory>
+#            [IMPORT_DIRECTORIES <import-dir-1> <import-dir-2> ...]
 #            [GENERATED_HEADERS <headers-variable>]
 #            [GENERATED_SOURCES <sources-variable>]
 #            [GENERATOR <generator>])
 #
 # Adds a target that generates source code from a Hermes IDL file.
 #
-# TBD.
+# Add a custom command that will execute the Hermes compiler to translate an
+# interface definition <file> into code.  Paths to the generated header and
+# source files can be captured in <headers-variable> and <sources-variable> and
+# added to a target to enable RPCs.  If the interface definition file does not
+# reside in the current source directory, <directory> can be used to specify
+# its location.  Imported files will be found in the current source directory
+# or any of the <import-dir-n> directories.  C++ source code will be generated
+# from the interface definition file unless a <generator> is specified.
 #
 # ------------------------------------------------------------------------------
 
@@ -176,7 +184,7 @@ FUNCTION(ADD_HERMES)
   CMAKE_PARSE_ARGUMENTS(A
       ""
       "GENERATED_HEADERS;GENERATED_SOURCES;GENERATOR;INTERFACE_DEFINITION;SOURCE_DIRECTORY"
-      ""
+      "IMPORT_DIRECTORIES"
       ${ARGN})
 
   # Make sure that all of the required arguments are present.
@@ -215,8 +223,13 @@ FUNCTION(ADD_HERMES)
     MESSAGE(FATAL_ERROR ${MSG})
   ENDIF()
 
-  # Add a custom command to run the Thrift compiler.
+  # Define the options to the Hermes compiler.
   SET(hermes_options --${A_GENERATOR} --destination="${A_SOURCE_DIRECTORY}")
+  FOREACH(dir ${A_IMPORT_DIRECTORIES})
+    SET(hermes_options ${hermes_options} --import-path="${dir}")
+  ENDFOREACH()
+
+  # Add a custom command to run the Hermes compiler.
   ADD_CUSTOM_COMMAND(OUTPUT ${generated_headers} ${generated_sources}
       COMMAND ${CMAKE_COMMAND} -E make_directory ${A_SOURCE_DIRECTORY}
       COMMAND ${Hermes_EXECUTABLE} ${hermes_options} ${hermes_file}

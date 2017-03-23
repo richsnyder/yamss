@@ -38,8 +38,9 @@ struct InterfaceMovement
 
 struct InterfacePatch
 {
-  std::vector<bool> activeDofs;
-  std::vector<double> nodeCoordinates;
+  std::vector<double> x;
+  std::vector<double> y;
+  std::vector<double> z;
   std::vector<ElementType> elementTypes;
   std::vector<std::int32_t> elementVertices;
 };
@@ -146,12 +147,12 @@ public:
   getInterface(const JobKey& a_job, const std::int64_t a_loadKey);
 
   InterfaceMovement
-  getInterfaceMovement(const JobKey& a_job, const std::int64_t a_loadKey);
+  getMovement(const JobKey& a_job, const std::int64_t a_loadKey);
 
   void
-  setInterfaceLoading(const JobKey& a_job,
-                      const std::int64_t a_loadKey,
-                      const InterfaceLoading& a_loading);
+  setLoading(const JobKey& a_job,
+             const std::int64_t a_loadKey,
+             const InterfaceLoading& a_loading);
 protected:
   typedef size_t key_type;
   typedef size_t size_type;

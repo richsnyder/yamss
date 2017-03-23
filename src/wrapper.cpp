@@ -40,9 +40,9 @@ getInterface(const JobKey& a_job, const std::int64_t a_loadKey) throw(YamssExcep
 }
 
 InterfaceMovement
-getInterfaceMovement(const JobKey& a_job, const int64_t a_loadKey) throw(YamssException)
+getMovement(const JobKey& a_job, const int64_t a_loadKey) throw(YamssException)
 {
-  return this_handler::get()->getInterfaceMovement(a_job, a_loadKey);
+  return this_handler::get()->getMovement(a_job, a_loadKey);
 }
 
 std::vector<double>
@@ -124,11 +124,11 @@ setFinalTime(const JobKey& a_job, const double a_final_time) throw(YamssExceptio
 }
 
 void
-setInterfaceLoading(const JobKey& a_job,
-                             const int64_t a_load,
-                             const InterfaceLoading& a_loading) throw(YamssException)
+setLoading(const JobKey& a_job,
+           const int64_t a_load,
+           const InterfaceLoading& a_loading) throw(YamssException)
 {
-  this_handler::get()->setInterfaceLoading(a_job, a_load, a_loading);
+  this_handler::get()->setLoading(a_job, a_load, a_loading);
 }
 
 void

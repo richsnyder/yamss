@@ -31,11 +31,13 @@ SET(HEADERS
     yamss/inspector/modes.hpp
     yamss/inspector/motion.hpp
     yamss/inspector/ostream.hpp
+    yamss/inspector/point.hpp
     yamss/inspector/ptree.hpp
     yamss/inspector/summary.hpp
     yamss/integrator/integrator.hpp
     yamss/integrator/generalized_alpha.hpp
     yamss/integrator/newmark_beta.hpp
+    yamss/integrator/steady_state.hpp
 )
 SET(CONFIGURED_HEADERS
     yamss/config.hpp
@@ -55,7 +57,16 @@ IF(BUILD_SERVER)
   INCLUDE(UseHermes)
   ADD_HERMES(
       GENERATOR cpp
+      INTERFACE_DEFINITION yamss/server/fsi.hid
+      IMPORT_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/yamss/server
+      SOURCE_DIRECTORY include/yamss/server
+      GENERATED_SOURCES FSI_SOURCES
+      GENERATED_HEADERS FSI_HEADERS
+  )
+  ADD_HERMES(
+      GENERATOR cpp
       INTERFACE_DEFINITION yamss/server/yamss.hid
+      IMPORT_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/yamss/server
       SOURCE_DIRECTORY include/yamss/server
       GENERATED_SOURCES HERMES_SOURCES
       GENERATED_HEADERS HERMES_HEADERS
@@ -63,6 +74,7 @@ IF(BUILD_SERVER)
   LIST(APPEND EXE_SOURCES server.cpp run_server.cpp)
   LIST(APPEND HEADERS yamss/server/run_server.hpp yamss/server/server.hpp)
 ENDIF(BUILD_SERVER)
+INSTALL(FILES yamss/server/fsi.hid DESTINATION share/yamss)
 INSTALL(FILES yamss/server/yamss.hid DESTINATION share/yamss)
 
 # Identify the directories that contain include files.
@@ -78,15 +90,17 @@ SET(FEATURES cxx_auto_type cxx_defaulted_functions)
 
 # Define library targets.
 
-ADD_LIBRARY(yamss-static STATIC ${SOURCES} ${HERMES_SOURCES})
+ADD_LIBRARY(yamss-static STATIC ${SOURCES} ${FSI_SOURCES} ${HERMES_SOURCES})
 TARGET_COMPILE_FEATURES(yamss-static PUBLIC ${FEATURES})
+SET_TARGET_PROPERTIES(yamss-static PROPERTIES CXX_STANDARD 11)
 SET_TARGET_PROPERTIES(yamss-static PROPERTIES OUTPUT_NAME yamss)
 SET_TARGET_PROPERTIES(yamss-static PROPERTIES MACOSX_RPATH ON)
 INSTALL(TARGETS yamss-static ARCHIVE DESTINATION lib)
 
-ADD_LIBRARY(yamss-shared SHARED ${SOURCES} ${HERMES_SOURCES})
+ADD_LIBRARY(yamss-shared SHARED ${SOURCES} ${FSI_SOURCES} ${HERMES_SOURCES})
 TARGET_COMPILE_FEATURES(yamss-shared PUBLIC ${FEATURES})
 TARGET_LINK_LIBRARIES(yamss-shared ${EXTRA_LIBS})
+SET_TARGET_PROPERTIES(yamss-shared PROPERTIES CXX_STANDARD 11)
 SET_TARGET_PROPERTIES(yamss-shared PROPERTIES OUTPUT_NAME yamss)
 SET_TARGET_PROPERTIES(yamss-shared PROPERTIES MACOSX_RPATH ON)
 INSTALL(TARGETS yamss-shared LIBRARY DESTINATION lib)
@@ -94,6 +108,7 @@ INSTALL(TARGETS yamss-shared LIBRARY DESTINATION lib)
 # Define the executable target.
 
 ADD_EXECUTABLE(yamss ${EXE_SOURCES})
+SET_TARGET_PROPERTIES(yamss PROPERTIES CXX_STANDARD 11)
 TARGET_COMPILE_FEATURES(yamss PUBLIC ${FEATURES})
 TARGET_LINK_LIBRARIES(yamss yamss-shared)
 INSTALL(TARGETS yamss RUNTIME DESTINATION bin)

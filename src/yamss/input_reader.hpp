@@ -18,12 +18,14 @@
 // Inspectors
 #include "yamss/inspector/modes.hpp"
 #include "yamss/inspector/motion.hpp"
+#include "yamss/inspector/point.hpp"
 #include "yamss/inspector/ptree.hpp"
 #include "yamss/inspector/summary.hpp"
 
 // Integrators
 #include "yamss/integrator/generalized_alpha.hpp"
 #include "yamss/integrator/newmark_beta.hpp"
+#include "yamss/integrator/steady_state.hpp"
 
 namespace yamss {
 
@@ -136,6 +138,10 @@ protected:
     else if (type_ == "generalized_alpha")
     {
       assign_integrator<integrator::generalized_alpha<T> >(m_document);
+    }
+    else if (type_ == "steady_state")
+    {
+      assign_integrator<integrator::steady_state<T> >(m_document);
     }
     else
     {
@@ -825,6 +831,10 @@ protected:
       else if (type_ == "motion")
       {
         add_inspector<inspector::motion<T> >(p->second);
+      }
+      else if (type_ == "point")
+      {
+        add_inspector<inspector::point<T> >(p->second);
       }
       else if (type_ == "ptree")
       {

@@ -190,29 +190,15 @@ handler::getInterface(const JobKey& a_job, const std::int64_t a_loadKey)
     throw ye;
   }
 
-  size_type n_dofs = structure_->get_number_of_active_dofs();
   size_type n_nodes = load_->get_number_of_nodes();
   size_type n_elements = load_->get_number_of_elements();
 
   InterfacePatch patch;
-  patch.activeDofs = structure_->get_active_dofs();
-  patch.nodeCoordinates.resize(n_dofs * n_nodes);
+  patch.x.resize(n_nodes);
+  patch.y.resize(n_nodes);
+  patch.z.resize(n_nodes);
   patch.elementTypes.resize(n_elements);
   patch.elementVertices.clear();
-
-  std::vector<int32_t> offsets(6);
-  offsets[0] = 0;
-  for (n = 1; n < 6; ++n)
-  {
-    if (structure_->is_active(n))
-    {
-      offsets[n] = offsets[n - 1] + n_nodes;
-    }
-    else
-    {
-      offsets[n] = offsets[n - 1];
-    }
-  }
 
   try
   {
@@ -223,13 +209,9 @@ handler::getInterface(const JobKey& a_job, const std::int64_t a_loadKey)
       const node_type& node_ = structure_->get_node(*np);
       const typename node_type::vector_type& position = node_.get_position();
       node_order[node_.get_key()] = n;
-      for (size_type dof = 0; dof < 6; ++dof)
-      {
-        if (structure_->is_active(dof))
-        {
-          patch.nodeCoordinates[offsets[dof] + n] = position(n);
-        }
-      }
+      patch.x[n] = position(0);
+      patch.y[n] = position(1);
+      patch.z[n] = position(2);
     }
   }
   catch (std::runtime_error& e)
@@ -264,7 +246,7 @@ handler::getInterface(const JobKey& a_job, const std::int64_t a_loadKey)
       }
       for (size_type m = 0; m < vertices.size(); ++m)
       {
-        patch.elementVertices.push_back(vertices[m]);
+        patch.elementVertices.push_back(node_order[vertices[m]]);
       }
     }
   }
@@ -279,7 +261,7 @@ handler::getInterface(const JobKey& a_job, const std::int64_t a_loadKey)
 }
 
 InterfaceMovement
-handler::getInterfaceMovement(const JobKey& a_job, const int64_t a_loadKey)
+handler::getMovement(const JobKey& a_job, const int64_t a_loadKey)
 {
   typedef typename runner_type::eom_pointer eom_pointer;
   typedef typename runner_type::eom_type eom_type;
@@ -323,7 +305,7 @@ handler::getInterfaceMovement(const JobKey& a_job, const int64_t a_loadKey)
   offsets[0] = 0;
   for (n = 1; n < 6; ++n)
   {
-    if (structure_->is_active(n))
+    if (structure_->is_active(n - 1))
     {
       offsets[n] = offsets[n - 1] + n_nodes;
     }
@@ -504,27 +486,20 @@ handler::setFinalTime(const JobKey& a_job, const double a_final_time)
 }
 
 void
-handler::setInterfaceLoading(const JobKey& a_job,
-                             const int64_t a_load,
-                             const InterfaceLoading& a_loading)
+handler::setLoading(const JobKey& a_job,
+                    const int64_t a_load,
+                    const InterfaceLoading& a_loading)
 {
-  typedef typename runner_type::structure_pointer structure_pointer;
   typedef typename runner_type::structure_type structure_type;
   typedef typename structure_type::load_type load_type;
-  typedef typename structure_type::node_type node_type;
-  typedef typename load_type::const_iterator const_iterator;
   typedef typename evaluator::interface<double> interface_type;
-  typedef boost::shared_ptr<interface_type> interface_pointer;
+  typedef ::arma::Col<double> vector_type;
+  typedef ::arma::Mat<double> matrix_type;
 
-  int32_t n;
   load_type* load_;
-  const_iterator np;
-  const_iterator beg;
-  const_iterator end;
-  runner_pointer runner_ = get_runner(a_job);
-  structure_pointer structure_ = runner_->get_structure();
-
-  key_type key = static_cast<key_type>(a_load);
+  auto runner_ = get_runner(a_job);
+  auto structure_ = runner_->get_structure();
+  auto key = static_cast<key_type>(a_load);
   try
   {
     load_ = &(structure_->get_load(a_load));
@@ -536,46 +511,88 @@ handler::setInterfaceLoading(const JobKey& a_job,
     throw ye;
   }
 
-  std::vector<double> f(6);
-  interface_pointer evaluator_ = boost::dynamic_pointer_cast<interface_type>(
+  auto evaluator_ = boost::dynamic_pointer_cast<interface_type>(
       load_->get_evaluator()
     );
 
-  size_type n_dofs = structure_->get_number_of_active_dofs();
-  size_type n_nodes = load_->get_number_of_nodes();
+  boost::unordered_map<key_type, int32_t> node_order;
 
-  std::vector<int32_t> offsets(6);
-  offsets[0] = 0;
-  for (n = 1; n < 6; ++n)
+  try
   {
-    if (structure_->is_active(n))
+    auto beg = load_->begin_nodes();
+    auto end = load_->end_nodes();
+    auto np = beg;
+    for (auto n = 0; np != end; ++n, ++np)
     {
-      offsets[n] = offsets[n - 1] + n_nodes;
+      node_order[structure_->get_node(*np).get_key()] = n;
     }
-    else
+  }
+  catch (std::runtime_error& e)
+  {
+    YamssException ye;
+    ye.what = e.what();
+    throw ye;
+  }
+
+  auto n_dofs = structure_->get_number_of_active_dofs();
+  auto n_nodes = load_->get_number_of_nodes();
+  auto n_elements = load_->get_number_of_elements();
+  matrix_type forces = arma::zeros<matrix_type>(3, n_nodes);
+
+  try
+  {
+    auto element_end = structure_->end_elements();
+    auto element_begin = structure_->begin_elements();
+    auto element_index = 0;
+    auto element_ptr = element_begin;
+    while (element_ptr != element_end)
     {
-      offsets[n] = offsets[n - 1];
+      const auto& vertices = element_ptr->get_vertices();
+      auto n_vertices = vertices.size();
+
+      auto pressure = 0.0;
+      for (auto vertex_index = 0; vertex_index < n_vertices; ++vertex_index)
+      {
+        auto vertex_key = vertices[vertex_index];
+        auto force_index = node_order[vertex_key];
+        pressure += a_loading.forces[force_index];
+      }
+      pressure /= n_vertices;
+
+      auto area = structure_->get_element_area(*element_ptr);
+      auto normal = structure_->get_element_normal(*element_ptr);
+      auto force = (pressure * area / n_vertices) * normal;
+
+      for (auto vertex_index = 0; vertex_index < n_vertices; ++vertex_index)
+      {
+        auto vertex_key = vertices[vertex_index];
+        auto force_index = node_order[vertex_key];
+        forces.col(force_index) += force;
+      }
+
+      ++element_ptr;
+      ++element_index;
     }
+  }
+  catch (std::runtime_error& e)
+  {
+    YamssException ye;
+    ye.what = e.what();
+    throw ye;
   }
 
   try
   {
-    beg = load_->begin_nodes();
-    end = load_->end_nodes();
-    for (n = 0, np = beg; np != end; ++n, ++np)
+    std::vector<double> f;
+    vector_type ff = ::arma::zeros<vector_type>(6);
+    auto beg = load_->begin_nodes();
+    auto end = load_->end_nodes();
+    auto np = beg;
+    for (auto n = 0; np != end; ++n, ++np)
     {
-      node_type& node_ = structure_->get_node(*np);
-      for (size_type dof = 0; dof < 6; ++dof)
-      {
-        if (structure_->is_active(dof))
-        {
-          f[dof] = a_loading.forces[offsets[dof] + n];
-        }
-        else
-        {
-          f[dof] = 0.0;
-        }
-      }
+      const auto& node_ = structure_->get_node(*np);
+      ff.head(3) = forces.col(n);
+      f = arma::conv_to<std::vector<double>>::from(ff);
       evaluator_->insert(node_.get_key(), f);
     }
   }

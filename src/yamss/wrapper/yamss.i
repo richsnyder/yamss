@@ -26,8 +26,9 @@ struct InterfaceMovement
 
 struct InterfacePatch
 {
-  std::vector<bool> activeDofs;
-  std::vector<double> nodeCoordinates;
+  std::vector<double> x;
+  std::vector<double> y;
+  std::vector<double> z;
   std::vector<ElementType> elementTypes;
   std::vector<std::int32_t> elementVertices;
 };
@@ -93,13 +94,13 @@ getInterface(const JobKey& a_job,
              const std::int64_t a_loadKey) throw(YamssException);
 
 InterfaceMovement
-getInterfaceMovement(const JobKey& a_job,
-                     const std::int64_t a_loadKey) throw(YamssException);
+getMovement(const JobKey& a_job,
+            const std::int64_t a_loadKey) throw(YamssException);
 
 void
-setInterfaceLoading(const JobKey& a_job,
-                    const std::int64_t a_loadKey,
-                    const InterfaceLoading& a_loading) throw(YamssException);
+setLoading(const JobKey& a_job,
+           const std::int64_t a_loadKey,
+           const InterfaceLoading& a_loading) throw(YamssException);
 
 }
 }

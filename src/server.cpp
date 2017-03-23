@@ -51,9 +51,9 @@ server::getInterface(const JobKey& a_job, const std::int64_t a_loadKey)
 }
 
 InterfaceMovement
-server::getInterfaceMovement(const JobKey& a_job, const int64_t a_loadKey)
+server::getMovement(const JobKey& a_job, const int64_t a_loadKey)
 {
-  auto r = m_handler.getInterfaceMovement(a_job, a_loadKey);
+  auto r = m_handler.getMovement(a_job, a_loadKey);
   return *reinterpret_cast<InterfaceMovement*>(&r);
 }
 
@@ -138,12 +138,12 @@ server::setFinalTime(const JobKey& a_job, const double a_final_time)
 }
 
 void
-server::setInterfaceLoading(const JobKey& a_job,
-                             const int64_t a_load,
-                             const InterfaceLoading& a_loading)
+server::setLoading(const JobKey& a_job,
+                   const int64_t a_load,
+                   const InterfaceLoading& a_loading)
 {
   auto loading = *reinterpret_cast<const yamss::InterfaceLoading*>(&a_loading);
-  m_handler.setInterfaceLoading(a_job, a_load, loading);
+  m_handler.setLoading(a_job, a_load, loading);
 }
 
 void

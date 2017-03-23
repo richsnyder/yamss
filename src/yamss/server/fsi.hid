@@ -1,0 +1,24 @@
+enumeration ElementType {
+  POINT,
+  LINE,
+  TRIANGLE,
+  QUADRILATERAL
+}
+
+structure InterfacePatch {
+  vector<real64> x,
+  vector<real64> y,
+  vector<real64> z,
+  vector<ElementType> elementTypes,
+  vector<int32> elementVertices
+}
+
+structure InterfaceLoading {
+  vector<real64> forces
+}
+
+structure InterfaceMovement {
+  vector<real64> displacements,
+  vector<real64> velocities,
+  vector<real64> accelerations
+}

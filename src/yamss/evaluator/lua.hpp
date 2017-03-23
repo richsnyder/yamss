@@ -1,4 +1,4 @@
- #ifndef YAMSS_EVALUATOR_LUA_HPP
+#ifndef YAMSS_EVALUATOR_LUA_HPP
 #define YAMSS_EVALUATOR_LUA_HPP
 
 #include <stdexcept>
